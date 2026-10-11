@@ -1,0 +1,8 @@
+# Run Caddy on the host; replace the example domain with your domain.
+garage.example.com {
+    encode zstd gzip
+    request_body {
+        max_size 201MB
+    }
+    reverse_proxy 127.0.0.1:8000
+}

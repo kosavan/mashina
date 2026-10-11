@@ -1,0 +1,12 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {gzipSync} from 'node:zlib';
+const html=readFileSync('dist/index.html','utf8');
+const paths=[...html.matchAll(/(?:src|href)="(\/assets\/[^\"]+)"/g)].map(m=>m[1]);
+const entry=paths.find(p=>p.endsWith('.js'));
+const size=entry?gzipSync(readFileSync('dist'+entry)).length:0;
+if(size>180*1024)throw new Error(`Entry JS exceeds 180KB gzip: ${size}`);
+let worker=readFileSync('public/sw.js','utf8').replace("'mashina-dev'",`'mashina-${createHash('sha256').update(html).digest('hex').slice(0,12)}'`);
+worker=worker.replace("'/index.html',",`'/index.html',${paths.map(p=>JSON.stringify(p)).join(',')},`);
+writeFileSync('dist/sw.js',worker);
+console.log(`App shell precached. Entry gzip: ${(size/1024).toFixed(1)} KB / 180 KB budget.`);

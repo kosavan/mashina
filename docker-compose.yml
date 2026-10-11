@@ -1,0 +1,23 @@
+services:
+  mashina:
+    build: .
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${MASHINA_BIND:-127.0.0.1}:${MASHINA_PORT:-8000}:8000"
+    environment:
+      MASHINA_ORIGIN: ${MASHINA_ORIGIN:-http://localhost:8000}
+      MASHINA_SECURE_COOKIES: ${MASHINA_SECURE_COOKIES:-0}
+      MASHINA_BACKUP_KEEP: ${MASHINA_BACKUP_KEEP:-7}
+    volumes:
+      - ./data:/app/data
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    mem_limit: 512m
+    cpus: 1.0
+    stop_grace_period: 30s

@@ -1,0 +1,15 @@
+.git
+.agents
+.tools
+.cache
+.venv
+**/node_modules
+**/dist
+**/__pycache__
+**/.pytest_cache
+data
+backups
+.env*
+**/*.db
+**/*.sqlite*
+frontend/test-results

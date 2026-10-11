@@ -1,7 +1,7 @@
 # Feature Specification: MASHINA 1.1 — отчёт для продажи
 **Feature Branch**: codex/mashina-sale-report
 **Created**: 2026-10-11
-**Status**: Implemented; publication checks in progress
+**Status**: Implemented and converged; Linux CI gate before merge
 **Input**: Запланированный релиз 1.1: красивый PDF-отчёт для продажи автомобиля.
 
 ## User Scenarios & Testing

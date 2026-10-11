@@ -9,3 +9,5 @@
 - Privacy sentinel tests prove absent VIN/plate, free descriptions, costs, vendor, private notes and other vehicle data under defaults; XML text escaped, no PDF hyperlinks. Driver denied; no-store response.
 - Ownership baseline regression: readings before acquisition cannot inflate period distance; snapshot matches shared analytics for four start boundaries.
 - Linux CI/container result pending; no manual physical-iPhone verification claimed.
+
+- Spec Kit convergence: 6 FR, 5 SC, 3 user stories and 12 governing principles checked; zero actionable gaps, no new convergence tasks. Source published in PR #3; merge remains gated on green Linux CI. No extension hooks configured.

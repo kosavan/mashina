@@ -425,7 +425,27 @@ export default function App() {
       )
     )
       return;
-    await api("/logout", { method: "POST" }, session!.csrf);
+    if (!navigator.onLine)
+      throw new Error(
+        "Для завершения сеанса и отключения уведомлений подключитесь к серверу.",
+      );
+    const subscription =
+      !session!.demo &&
+      "serviceWorker" in navigator &&
+      typeof PushManager !== "undefined"
+        ? await (
+            await navigator.serviceWorker.ready
+          ).pushManager.getSubscription()
+        : null;
+    await api(
+      "/logout",
+      {
+        method: "POST",
+        body: JSON.stringify({ push_endpoint: subscription?.endpoint || "" }),
+      },
+      session!.csrf,
+    );
+    await subscription?.unsubscribe();
     await clearLocal();
     client.clear();
     setSession(null);

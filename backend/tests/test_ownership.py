@@ -124,7 +124,8 @@ def test_csv_limits_and_reordered_ids():
         csv_rows(b"unexpected\nvalue", "owner", "vehicle")
 
 
-def test_restore_mvp_archive_upgrades_additively(client, tmp_path):
+@pytest.mark.parametrize("revision", ["001", "002", "003"])
+def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
     import hashlib
     import io
     import json
@@ -146,17 +147,30 @@ def test_restore_mvp_archive_upgrades_additively(client, tmp_path):
     snapshot.write_bytes(files["database.sqlite"])
     with sqlite3.connect(snapshot) as connection:
         connection.execute("PRAGMA journal_mode=DELETE")
-        for name in ("tire_sets", "budgets", "recurring_costs", "vehicle_access"):
+        for name in (
+            "notification_deliveries",
+            "telegram_link_codes",
+            "telegram_links",
+            "push_subscriptions",
+            "notification_preferences",
+            "notification_identity",
+            *(("tire_sets", "budgets", "recurring_costs") if revision == "001" else ()),
+            *(("vehicle_access",) if revision in {"001", "002"} else ()),
+        ):
             connection.execute(f"DROP TABLE {name}")
         for table, column in (
-            ("users", "is_admin"),
-            ("users", "disabled"),
-            ("events", "created_by"),
-            ("attachments", "created_by"),
-            ("attachments", "visibility"),
+            (
+                ("users", "is_admin"),
+                ("users", "disabled"),
+                ("events", "created_by"),
+                ("attachments", "created_by"),
+                ("attachments", "visibility"),
+            )
+            if revision in {"001", "002"}
+            else ()
         ):
             connection.execute(f"ALTER TABLE {table} DROP COLUMN {column}")
-        connection.execute("UPDATE alembic_version SET version_num='001'")
+        connection.execute("UPDATE alembic_version SET version_num=?", (revision,))
     connection.close()
     files["database.sqlite"] = snapshot.read_bytes()
     manifest = {
@@ -176,7 +190,7 @@ def test_restore_mvp_archive_upgrades_additively(client, tmp_path):
     assert restored.state(owner)["events"][0]["id"] == event["id"]
     assert restored.state(owner)["events"][0]["created_by"] == owner
     assert restored.query("SELECT is_admin FROM users")[0]["is_admin"] == 1
-    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "003"
+    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "004"
     restored.close()
 
 

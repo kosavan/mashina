@@ -35,6 +35,13 @@ def make_backup(store):
 
 
 def restore_backup(store, blob):
+    from backend.notifications import notification_guard
+
+    with notification_guard(store.path):
+        return _restore_backup(store, blob)
+
+
+def _restore_backup(store, blob):
     if len(blob) > MAX_ARCHIVE:
         raise ValueError("Архив превышает 200 МБ")
     try:
@@ -73,6 +80,7 @@ def restore_backup(store, blob):
                     "001",
                     "002",
                     "003",
+                    "004",
                 }:
                     raise ValueError("Версия архива несовместима")
                 revision = check.execute("SELECT version_num FROM alembic_version").fetchone()[0]
@@ -128,6 +136,16 @@ def restore_backup(store, blob):
                         or hashlib.sha256(target.read_bytes()).hexdigest() != meta["sha256"]
                     ):
                         raise ValueError("Вложение отсутствует или повреждено")
+                if revision == "004":
+                    from backend.notifications import validate_notification_archive
+
+                    validate_notification_archive(check)
+                    check.execute("UPDATE notification_identity SET paused=1")
+                    check.execute("UPDATE notification_preferences SET enabled=0")
+                    check.execute("DELETE FROM telegram_link_codes")
+                    check.execute(
+                        "UPDATE notification_deliveries SET state='uncertain',error_code='restored_pending' WHERE state='sending'"
+                    )
                 check.execute("DELETE FROM sessions")
                 check.commit()
             (stage / "uploads").mkdir(exist_ok=True)
@@ -147,6 +165,9 @@ def restore_backup(store, blob):
                     os.replace(snapshot, live)
                     os.replace(stage / "uploads", store.uploads)
                     store.migrate()
+                    with store.transaction() as c:
+                        c.exec_driver_sql("UPDATE notification_identity SET paused=1")
+                        c.exec_driver_sql("UPDATE notification_preferences SET enabled=0")
                 except Exception:
                     store.engine.dispose()
                     if store.uploads.exists():

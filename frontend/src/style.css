@@ -4123,3 +4123,68 @@ input[type="checkbox"] {
 .sharing-member strong {
   overflow-wrap: anywhere;
 }
+
+.report-intro {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.report-intro h3 {
+  margin: 0 0 8px;
+}
+.report-intro p {
+  margin: 0;
+  font-size: 13px;
+}
+.report-options {
+  display: grid;
+  gap: 12px;
+}
+.record-form .report-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+}
+.report-option > svg {
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.report-option > span {
+  flex: 1;
+  min-width: 0;
+}
+.report-option strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+.report-option small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.report-option input {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.report-form > .info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.report-form > .info-box > svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.page-heading > .settings-actions {
+  min-width: 0;
+  flex-wrap: wrap;
+  max-width: 100%;
+}

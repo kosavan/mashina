@@ -1,0 +1,2 @@
+# Data model
+No persistent entities change. ReportOptions carries the period and four disclosure booleans. ReportSnapshot contains an allowlisted single Vehicle presentation, confirmed mileage/provenance, ordered maintenance rows and optionally currency-specific domain analytics. Cover is optional bytes from the explicitly selected private image, copied under lock. Nothing is persisted by generation.

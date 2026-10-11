@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, lazy, Suspense } from "react";
+const OwnershipTools = lazy(() => import("./OwnershipTools"));
 import {
   ArrowUpRight,
   ArrowRight,
@@ -1114,6 +1115,15 @@ export function FuelPage() {
   );
 }
 export function Maintenance() {
+  return (
+    <Suspense fallback={<p className="muted">Открываем обслуживание…</p>}>
+      <OwnershipTools>
+        <MaintenanceHistory />
+      </OwnershipTools>
+    </Suspense>
+  );
+}
+function MaintenanceHistory() {
   const { open, state, selected } = useApp();
   return (
     <>

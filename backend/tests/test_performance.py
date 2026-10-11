@@ -45,5 +45,5 @@ def test_migration_restart_preserves_history(tmp_path):
     store.close()
     reopened = Store(tmp_path)
     assert reopened.state(owner)["vehicles"][0]["id"] == car["id"]
-    assert reopened.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "001"
+    assert reopened.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "002"
     reopened.close()

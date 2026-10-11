@@ -1,0 +1,2 @@
+# Acceptance
+Run existing checks, migration/restore regression and new ownership tests. Create tires with closed/open usage, inspect parts from a maintenance event, create budget and recurring payment, compare forecast vs unchanged financial totals, preview CSV with good/bad/duplicate rows and import twice. Verify mobile 360px and offline drafts for added record entities. No cloud credentials required.

@@ -1,6 +1,6 @@
 """SQLAlchemy 2 Core storage, serialized WAL transactions and mutation receipts."""
 
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from datetime import datetime, timedelta
 import hashlib
 import json
@@ -31,6 +31,9 @@ TABLES = {
     "event": "events",
     "category": "categories",
     "reminder": "reminders",
+    "tire_set": "tire_sets",
+    "budget": "budgets",
+    "recurring_cost": "recurring_costs",
 }
 
 
@@ -83,6 +86,9 @@ class Store:
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA synchronous=FULL")
 
+        self.migrate()
+
+    def migrate(self):
         with self.lock, self.engine.begin() as connection:
             cfg = Config()
             cfg.set_main_option("script_location", str(Path(__file__).parent / "migrations"))
@@ -111,6 +117,10 @@ class Store:
         return dict(row)
 
     def state(self, owner):
+        with self.lock:
+            return self._state(owner)
+
+    def _state(self, owner):
         result = {}
         for table in TABLES.values():
             result[table] = [
@@ -134,11 +144,11 @@ class Store:
             r.update(reminder_status(r, car.get("current_odometer", 0)))
         return result
 
-    def mutate(self, owner, payload):
+    def mutate(self, owner, payload, connection=None):
         operation_id, record_id = uid(payload["operation_id"]), uid(payload["id"])
         entity, action = payload["entity"], payload["action"]
         digest = hashlib.sha256(dumps(payload).encode()).hexdigest()
-        with self.transaction() as c:
+        with nullcontext(connection) if connection is not None else self.transaction() as c:
             prior = (
                 c.exec_driver_sql(
                     "SELECT * FROM receipts WHERE owner_id=? AND operation_id=?",
@@ -205,7 +215,7 @@ class Store:
                 elif action not in {"create", "update"}:
                     raise ValueError("Неизвестное действие")
                 data.pop("current_odometer", None)
-                if entity in {"event", "reminder"}:
+                if entity in {"event", "reminder", "tire_set", "budget", "recurring_cost"}:
                     vehicle_id = uid(data.get("vehicle_id"))
                     self.owned(c, "vehicles", vehicle_id, owner)
                     if before and vehicle_id != before["vehicle_id"]:
@@ -228,6 +238,10 @@ class Store:
                         self.validate_odometer(c, owner, record_id, data)
                 elif entity == "reminder":
                     data = normalize_reminder(data)
+                elif entity in {"tire_set", "budget", "recurring_cost"}:
+                    from backend.ownership import normalize_ownership
+
+                    data = normalize_ownership(entity, data)
                 else:
                     data["name"] = text(data.get("name"), maximum=80, required=True)
                     if data.get("parent_id"):
@@ -245,7 +259,7 @@ class Store:
                 else:
                     cols = "id,owner_id,version,data,deleted"
                     args = [record_id, owner, version, dumps(data), int(deleted)]
-                    if entity in {"event", "reminder"}:
+                    if entity in {"event", "reminder", "tire_set", "budget", "recurring_cost"}:
                         cols += ",vehicle_id"
                         args.append(vehicle_id)
                     c.exec_driver_sql(

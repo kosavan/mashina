@@ -3854,3 +3854,231 @@ input[type="checkbox"] {
     scroll-behavior: auto !important;
   }
 }
+
+/* Ownership tools keep advanced workflows inside the service space. */
+.ownership-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.ownership-tabs {
+  flex-wrap: wrap;
+  gap: 22px;
+}
+.ownership-tabs button {
+  min-height: 44px;
+}
+.ownership-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  margin: 22px 0 32px;
+}
+.tire-card,
+.budget-card,
+.part-card,
+.recurring-card,
+.ownership-import,
+.forecast-panel {
+  padding: 26px;
+  min-width: 0;
+}
+.tire-card h2,
+.budget-card h2 {
+  font-size: 26px;
+  margin: 12px 0;
+  letter-spacing: -0.8px;
+}
+.tire-distance {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 22px 0;
+  border-block: 1px solid var(--border);
+  margin: 24px 0;
+}
+.tire-distance strong {
+  font-size: 34px;
+  letter-spacing: -1px;
+}
+.tire-distance small {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.tire-distance > span {
+  font-size: 11px;
+  color: var(--muted);
+}
+.tire-history {
+  display: grid;
+  gap: 14px;
+}
+.tire-history > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 12px;
+}
+.tire-history span {
+  color: var(--muted);
+}
+.ownership-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 23px;
+}
+.tire-interval {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+.tire-interval .section-heading {
+  margin: 0 0 12px;
+}
+.ownership-month {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.ownership-month input {
+  max-width: 190px;
+}
+.budget-progress {
+  height: 6px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 25px 0 15px;
+}
+.budget-progress > span {
+  height: 100%;
+  display: block;
+  background: var(--accent);
+}
+.warning-text {
+  color: #e5ad7d;
+}
+.recurring-card > strong {
+  font-size: 23px;
+}
+.forecast-panel {
+  margin-top: 28px;
+}
+.forecast-row {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr) auto;
+  gap: 15px;
+  padding: 15px 0;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+}
+.forecast-row strong {
+  overflow-wrap: anywhere;
+}
+.csv-example {
+  display: block;
+  overflow-wrap: anywhere;
+  white-space: normal;
+  padding: 17px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 20px 0;
+}
+.ownership-import {
+  margin-bottom: 22px;
+}
+.ownership-import .file-picker {
+  margin-top: 20px;
+}
+.csv-rows {
+  max-height: 500px;
+  overflow: auto;
+  margin: 18px 0;
+}
+.csv-row {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+}
+.csv-row > input {
+  width: 20px;
+  min-height: 20px;
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+.csv-row > span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-wrap: anywhere;
+}
+.csv-row strong {
+  font-size: 12px;
+}
+.csv-row small {
+  color: var(--muted);
+  font-size: 11px;
+}
+.csv-row.invalid small {
+  color: #e5ad7d;
+}
+.part-card > .event-row {
+  margin: 15px -10px -10px;
+}
+@media (max-width: 700px) {
+  .ownership-navigation {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ownership-tabs {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+  }
+  .ownership-tabs button {
+    justify-content: center;
+    font-size: 11px;
+  }
+  .ownership-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .tire-card,
+  .budget-card,
+  .part-card,
+  .recurring-card,
+  .ownership-import,
+  .forecast-panel {
+    padding: 20px;
+  }
+  .forecast-row {
+    grid-template-columns: 80px minmax(0, 1fr);
+    gap: 8px;
+  }
+  .forecast-row > span:last-child {
+    grid-column: 2;
+  }
+  .ownership-import .section-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+}

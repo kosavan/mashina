@@ -137,13 +137,16 @@ function project(state: State, operation: Mutation): State {
       event: "events",
       category: "categories",
       reminder: "reminders",
+      tire_set: "tire_sets",
+      budget: "budgets",
+      recurring_cost: "recurring_costs",
     } as const
   )[operation.entity as "vehicle"];
   if (operation.entity === "settings") {
     result.settings = { ...result.settings, ...operation.data };
     return result;
   }
-  const rows = result[table] as any[];
+  const rows = (result[table] ||= []) as any[];
   const index = rows.findIndex((r) => r.id === operation.id);
   const prior = index >= 0 ? rows[index] : {};
   const record = {
@@ -164,6 +167,19 @@ function project(state: State, operation: Mutation): State {
     }
     record.items ||= [];
     record.description ||= "";
+  }
+  if (operation.entity === "tire_set") {
+    record.confirmed_km = (record.intervals || []).reduce(
+      (sum: number, row: any) =>
+        sum +
+        (row.removed_at && row.removed_km !== null
+          ? Math.max(0, Number(row.removed_km) - Number(row.mounted_km))
+          : 0),
+      0,
+    );
+  }
+  if (operation.entity === "budget" || operation.entity === "recurring_cost") {
+    record.amount_minor = pendingMoney({ ...record, kind: "expense" });
   }
   if (operation.entity === "vehicle") {
     record.purchase_odometer = Number(record.purchase_odometer || 0);
@@ -265,6 +281,9 @@ export async function resolveOperation(
         event: "events",
         category: "categories",
         reminder: "reminders",
+        tire_set: "tire_sets",
+        budget: "budgets",
+        recurring_cost: "recurring_costs",
       } as const
     )[operation.entity as "vehicle"];
     const row = (state[table] as any[]).find((r) => r.id === operation.id);
@@ -296,7 +315,10 @@ export async function cachedAPI<T>(session: Session, path: string): Promise<T> {
   } catch (error) {
     if (error instanceof APIError) throw error;
     const prior = await read<T>("cache", key);
-    if (prior === undefined) throw error;
+    if (prior === undefined)
+      throw new Error(
+        "Нет сохранённого отчёта для этих фильтров. Подключитесь к серверу и откройте раздел ещё раз.",
+      );
     return prior;
   }
 }

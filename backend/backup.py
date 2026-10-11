@@ -69,7 +69,10 @@ def restore_backup(store, blob):
                     or check.execute("PRAGMA foreign_key_check").fetchall()
                 ):
                     raise ValueError("Нарушена целостность базы")
-                if check.execute("SELECT version_num FROM alembic_version").fetchone()[0] != "001":
+                if check.execute("SELECT version_num FROM alembic_version").fetchone()[0] not in {
+                    "001",
+                    "002",
+                }:
                     raise ValueError("Версия архива несовместима")
                 if check.execute("SELECT count(*) FROM users").fetchone()[0] != 1:
                     raise ValueError("Ожидается один владелец MVP")
@@ -106,7 +109,15 @@ def restore_backup(store, blob):
                 try:
                     os.replace(snapshot, live)
                     os.replace(stage / "uploads", store.uploads)
-                except OSError:
+                    store.migrate()
+                except Exception:
+                    store.engine.dispose()
+                    if store.uploads.exists():
+                        os.replace(store.uploads, stage / "failed-uploads")
+                    for suffix in ("-wal", "-shm"):
+                        sidecar = Path(str(live) + suffix)
+                        if sidecar.exists():
+                            os.replace(sidecar, stage / ("failed" + suffix))
                     os.replace(previous, live)
                     os.replace(previous_uploads, store.uploads)
                     raise

@@ -3,6 +3,8 @@ export interface RecordBase {
   id: string;
   version: number;
   deleted?: boolean;
+  can_edit?: boolean;
+  created_by?: string;
   [key: string]: any;
 }
 export interface Vehicle extends RecordBase {
@@ -54,6 +56,10 @@ export interface Attachment {
   issued: string;
   expires: string;
   notes: string;
+  created_by?: string;
+  visibility?: "owner" | "shared";
+  can_edit?: boolean;
+  can_share?: boolean;
 }
 export interface TireInterval {
   mounted_at: string;
@@ -104,6 +110,7 @@ export interface Session {
   username: string;
   csrf: string;
   demo: boolean;
+  is_admin?: boolean;
 }
 export interface Mutation {
   operation_id: string;

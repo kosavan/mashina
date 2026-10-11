@@ -26,6 +26,8 @@ from backend.domain import analytics, iso, text
 from backend.backup import make_backup, restore_backup, MAX_ARCHIVE
 from backend.demo import seed
 from backend.ownership import ownership_report, csv_rows, import_row
+from backend.access import vehicle_access, upload_access, attachment_access
+from backend.accounts import install_accounts, require_admin
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -118,7 +120,7 @@ def create_app(data_path=None, bootstrap_token=None):
             result = demo
         else:
             rows = store.query(
-                "SELECT sessions.*,username FROM sessions JOIN users ON users.id=sessions.user_id WHERE token_hash=? AND expires>?",
+                "SELECT sessions.*,username,is_admin FROM sessions JOIN users ON users.id=sessions.user_id WHERE token_hash=? AND expires>? AND users.disabled=0",
                 (token_hash, int(time.time())),
             )
             if not rows:
@@ -150,7 +152,16 @@ def create_app(data_path=None, bootstrap_token=None):
                 c.exec_driver_sql(
                     "INSERT INTO sessions VALUES(?,?,?,?)", (digest, user_id, csrf, expires)
                 )
-        response = JSONResponse({"id": user_id, "username": username, "csrf": csrf, "demo": demo})
+        account = active_store.query("SELECT is_admin FROM users WHERE id=?", (user_id,))
+        response = JSONResponse(
+            {
+                "id": user_id,
+                "username": username,
+                "csrf": csrf,
+                "demo": demo,
+                "is_admin": bool(account and account[0]["is_admin"]) and not demo,
+            }
+        )
         response.set_cookie(
             cookie_name,
             token,
@@ -187,7 +198,7 @@ def create_app(data_path=None, bootstrap_token=None):
                 raise Denied("Нужен одноразовый код установки с вашего сервера")
             owner = str(uuid.uuid4())
             c.exec_driver_sql(
-                "INSERT INTO users(id,username,password_hash) VALUES(?,?,?)",
+                "INSERT INTO users(id,username,password_hash,is_admin) VALUES(?,?,?,1)",
                 (owner, body.username.strip(), HASHER.hash(body.password)),
             )
         if token_path.exists():
@@ -202,7 +213,7 @@ def create_app(data_path=None, bootstrap_token=None):
             HASHER.verify(users[0]["password_hash"] if users else dummy_hash, body.password)
         except (VerificationError, InvalidHashError):
             raise HTTPException(401, "Неверное имя или пароль") from None
-        if not users:
+        if not users or users[0]["disabled"]:
             raise HTTPException(401, "Неверное имя или пароль")
         return login_response(users[0]["id"], users[0]["username"])
 
@@ -224,7 +235,13 @@ def create_app(data_path=None, bootstrap_token=None):
 
     @app.get(PREFIX + "/session")
     def get_session(s=Depends(session)):
-        return {"id": s["user_id"], "username": s["username"], "csrf": s["csrf"], "demo": s["demo"]}
+        return {
+            "id": s["user_id"],
+            "username": s["username"],
+            "csrf": s["csrf"],
+            "demo": s["demo"],
+            "is_admin": bool(s.get("is_admin")) and not s["demo"],
+        }
 
     @app.post(PREFIX + "/logout")
     def logout(request: Request, s=Depends(session)):
@@ -252,6 +269,9 @@ def create_app(data_path=None, bootstrap_token=None):
     def get_analytics(
         vehicle_id="", start="", end="", category="", kind="", currency="RUB", s=Depends(session)
     ):
+        if vehicle_id:
+            with s["store"].transaction() as c:
+                vehicle_access(c, uid(vehicle_id), s["user_id"])
         state = s["store"].state(s["user_id"])
         vehicles = [v for v in state["vehicles"] if not vehicle_id or v["id"] == vehicle_id]
         ids = {v["id"] for v in vehicles}
@@ -275,7 +295,7 @@ def create_app(data_path=None, bootstrap_token=None):
     def get_ownership(vehicle_id: str, month: str, s=Depends(session)):
         active_store = s["store"]
         with active_store.transaction() as c:
-            active_store.owned(c, "vehicles", uid(vehicle_id), s["user_id"])
+            vehicle_access(c, uid(vehicle_id), s["user_id"], write=True)
         return ownership_report(active_store.state(s["user_id"]), vehicle_id, month)
 
     @app.post(PREFIX + "/import/csv/preview")
@@ -284,13 +304,13 @@ def create_app(data_path=None, bootstrap_token=None):
     ):
         active_store = s["store"]
         with active_store.transaction() as c:
-            active_store.owned(c, "vehicles", uid(vehicle_id), s["user_id"])
+            vehicle_access(c, uid(vehicle_id), s["user_id"], write=True)
         rows = csv_rows(await file.read(2 * 1024 * 1024 + 1), s["user_id"], vehicle_id)
         for row in rows:
             if row.get("error"):
                 continue
             existing = active_store.query(
-                "SELECT data FROM events WHERE id=? AND owner_id=?", (row["id"], s["user_id"])
+                "SELECT data FROM events WHERE id=? AND vehicle_id=?", (row["id"], vehicle_id)
             )
             if existing:
                 if (
@@ -318,7 +338,7 @@ def create_app(data_path=None, bootstrap_token=None):
             raise ValueError("Подтвердите исторические показания пробега перед импортом")
         records = []
         with active_store.transaction() as c:
-            active_store.owned(c, "vehicles", vehicle_id, s["user_id"])
+            vehicle_access(c, vehicle_id, s["user_id"], write=True)
             for row in rows:
                 row["data"]["odometer_confirmed"] = row["data"].get("odometer") is not None
                 payload = {
@@ -345,12 +365,9 @@ def create_app(data_path=None, bootstrap_token=None):
     ):
         active_store = s["store"]
         vehicle_id = uid(vehicle_id)
+        event_id = uid(event_id) if event_id else ""
         with active_store.transaction() as c:
-            active_store.owned(c, "vehicles", vehicle_id, s["user_id"])
-            if event_id:
-                ev = active_store.owned(c, "events", uid(event_id), s["user_id"])
-                if ev["vehicle_id"] != vehicle_id:
-                    raise ValueError("Документ относится к другому автомобилю")
+            upload_access(c, vehicle_id, event_id, s["user_id"])
         content = await file.read(MAX_FILE + 1)
         if len(content) > MAX_FILE or not content:
             raise ValueError("Файл должен быть от 1 байта до 20 МБ")
@@ -388,27 +405,37 @@ def create_app(data_path=None, bootstrap_token=None):
             target.write_bytes(content)
             try:
                 with active_store.transaction() as c:
+                    car = upload_access(c, vehicle_id, event_id, s["user_id"])
                     c.exec_driver_sql(
-                        "INSERT INTO attachments VALUES(?,?,?,?,?,?)",
+                        "INSERT INTO attachments(id,owner_id,vehicle_id,event_id,filename,data,created_by,visibility) VALUES(?,?,?,?,?,?,?,'owner')",
                         (
                             attachment_id,
-                            s["user_id"],
+                            car["owner_id"],
                             vehicle_id,
                             event_id or None,
                             filename,
                             dumps(metadata),
+                            s["user_id"],
                         ),
                     )
             except Exception:
                 target.unlink(missing_ok=True)
                 raise
-        return {**metadata, "id": attachment_id, "vehicle_id": vehicle_id, "event_id": event_id}
+        return {
+            **metadata,
+            "id": attachment_id,
+            "vehicle_id": vehicle_id,
+            "event_id": event_id,
+            "created_by": s["user_id"],
+            "visibility": "owner",
+            "can_edit": True,
+        }
 
     @app.get(PREFIX + "/attachments/{attachment_id}")
     def get_file(attachment_id: str, download: bool = False, s=Depends(session)):
         active_store = s["store"]
         with active_store.transaction() as c:
-            row = active_store.owned(c, "attachments", uid(attachment_id), s["user_id"])
+            row, _ = attachment_access(c, uid(attachment_id), s["user_id"])
         meta = json.loads(row["data"])
         inline = not download and meta["media_type"] in {"image/jpeg", "application/pdf"}
         return FileResponse(
@@ -424,7 +451,24 @@ def create_app(data_path=None, bootstrap_token=None):
         body = await request.json()
         active_store = s["store"]
         with active_store.transaction() as c:
-            row = active_store.owned(c, "attachments", uid(attachment_id), s["user_id"])
+            row, role = attachment_access(c, uid(attachment_id), s["user_id"], write=True)
+            if "visibility" in body:
+                if role != "owner":
+                    raise Denied("Доступом к документу управляет владелец")
+                if body["visibility"] not in {"owner", "shared"}:
+                    raise ValueError("Неизвестный доступ к документу")
+                car, _ = vehicle_access(c, row["vehicle_id"], s["user_id"])
+                if (
+                    body["visibility"] == "owner"
+                    and json.loads(car["data"]).get("photo_id") == attachment_id
+                ):
+                    raise ValueError(
+                        "Обложка доступна всем участникам; сначала уберите её из профиля"
+                    )
+                c.exec_driver_sql(
+                    "UPDATE attachments SET visibility=? WHERE id=?",
+                    (body["visibility"], attachment_id),
+                )
             meta = json.loads(row["data"])
             for key in ("title", "document_type", "notes", "issued", "expires"):
                 if key in body:
@@ -446,9 +490,9 @@ def create_app(data_path=None, bootstrap_token=None):
     def delete_file(attachment_id: str, s=Depends(session)):
         active_store = s["store"]
         with active_store.transaction() as c:
-            active_store.owned(c, "attachments", uid(attachment_id), s["user_id"])
+            attachment, _ = attachment_access(c, uid(attachment_id), s["user_id"], write=True)
             for row in c.exec_driver_sql(
-                "SELECT id,data FROM vehicles WHERE owner_id=?", (s["user_id"],)
+                "SELECT id,data FROM vehicles WHERE id=?", (attachment["vehicle_id"],)
             ).mappings():
                 data = json.loads(row["data"])
                 if data.get("photo_id") == attachment_id:
@@ -480,7 +524,16 @@ def create_app(data_path=None, bootstrap_token=None):
         buffer = io.StringIO(newline="")
         writer = csv.writer(buffer)
         writer.writerow(["entity", "id", "vehicle_id", "event_id", "data_json"])
-        for entity in ("vehicles", "events", "categories", "reminders", "attachments"):
+        for entity in (
+            "vehicles",
+            "events",
+            "categories",
+            "reminders",
+            "attachments",
+            "tire_sets",
+            "budgets",
+            "recurring_costs",
+        ):
             for record in state[entity]:
                 writer.writerow(
                     [
@@ -497,9 +550,14 @@ def create_app(data_path=None, bootstrap_token=None):
             headers={"Content-Disposition": "attachment; filename=mashina.csv"},
         )
 
+    def archive_only(s):
+        real_only(s)
+        with s["store"].transaction() as c:
+            require_admin(s, c)
+
     @app.get(PREFIX + "/backup")
     def backup(s=Depends(session)):
-        real_only(s)
+        archive_only(s)
         return Response(
             make_backup(store),
             media_type="application/zip",
@@ -508,10 +566,14 @@ def create_app(data_path=None, bootstrap_token=None):
 
     @app.post(PREFIX + "/restore")
     async def restore(file: UploadFile = File(...), s=Depends(session)):
-        real_only(s)
+        archive_only(s)
         blob = await file.read(MAX_ARCHIVE + 1)
-        restore_backup(store, blob)
+        with store.lock:
+            archive_only(s)
+            restore_backup(store, blob)
         return {"ok": True, "login_required": True}
+
+    install_accounts(app, session, HASHER, login_response, throttle)
 
     frontend = Path(__file__).resolve().parents[1] / "frontend" / "dist"
     if frontend.exists():

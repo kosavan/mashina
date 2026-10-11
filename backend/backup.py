@@ -72,10 +72,47 @@ def restore_backup(store, blob):
                 if check.execute("SELECT version_num FROM alembic_version").fetchone()[0] not in {
                     "001",
                     "002",
+                    "003",
                 }:
                     raise ValueError("Версия архива несовместима")
-                if check.execute("SELECT count(*) FROM users").fetchone()[0] != 1:
-                    raise ValueError("Ожидается один владелец MVP")
+                revision = check.execute("SELECT version_num FROM alembic_version").fetchone()[0]
+                if revision in {"001", "002"}:
+                    if check.execute("SELECT count(*) FROM users").fetchone()[0] != 1:
+                        raise ValueError("Архив прежней версии должен содержать одного владельца")
+                else:
+                    if not check.execute(
+                        "SELECT id FROM users WHERE is_admin=1 AND disabled=0 LIMIT 1"
+                    ).fetchone():
+                        raise ValueError("В архиве нет действующего администратора")
+                    if check.execute(
+                        "SELECT 1 FROM vehicle_access WHERE role NOT IN ('owner','driver') LIMIT 1"
+                    ).fetchone():
+                        raise ValueError("Некорректная роль доступа")
+                    for table in ("events", "attachments"):
+                        if check.execute(
+                            f"SELECT 1 FROM {table} LEFT JOIN users ON users.id={table}.created_by WHERE users.id IS NULL LIMIT 1"
+                        ).fetchone():
+                            raise ValueError("Автор записи отсутствует")
+                    for table in (
+                        "events",
+                        "reminders",
+                        "tire_sets",
+                        "budgets",
+                        "recurring_costs",
+                        "attachments",
+                    ):
+                        if check.execute(
+                            f"SELECT 1 FROM {table} JOIN vehicles ON vehicles.id={table}.vehicle_id WHERE {table}.owner_id<>vehicles.owner_id LIMIT 1"
+                        ).fetchone():
+                            raise ValueError("Несогласованный владелец записи")
+                    if check.execute(
+                        "SELECT 1 FROM attachments WHERE visibility NOT IN ('owner','shared') LIMIT 1"
+                    ).fetchone():
+                        raise ValueError("Некорректный доступ к документу")
+                if check.execute(
+                    "SELECT 1 FROM attachments JOIN events ON events.id=attachments.event_id WHERE events.vehicle_id<>attachments.vehicle_id LIMIT 1"
+                ).fetchone():
+                    raise ValueError("Документ связан с другим автомобилем")
                 for filename, metadata in check.execute("SELECT filename,data FROM attachments"):
                     if (
                         PurePosixPath(filename).name != filename

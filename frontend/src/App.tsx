@@ -56,6 +56,7 @@ import {
   SettingsPage,
 } from "./Views";
 import { RecordForm } from "./Forms";
+import { permissionError, scopeKey } from "./permissions";
 const Analytics = lazy(() => import("./Analytics"));
 const navigation = [
   ["garage", "Мой гараж", LayoutGrid],
@@ -328,7 +329,11 @@ export default function App() {
     };
   }, [sync, refresh]);
   useEffect(() => {
-    if (state && !selected && state.vehicles.length)
+    if (
+      state &&
+      (!selected || !state.vehicles.some((v) => v.id === selected)) &&
+      state.vehicles.length
+    )
       setSelected(
         (state.vehicles.some(
           (v) =>
@@ -336,11 +341,23 @@ export default function App() {
         )
           ? localStorage.getItem(`mashina-selected:${session?.id}`)
           : "") ||
-          state.settings.last_vehicle ||
+          (state.vehicles.some((v) => v.id === state.settings.last_vehicle)
+            ? state.settings.last_vehicle
+            : "") ||
           state.vehicles.find((v) => v.status === "active")?.id ||
           state.vehicles[0].id,
       );
   }, [state, selected]);
+  const accessScope = state ? scopeKey(state) : "";
+  useEffect(() => {
+    if (!accessScope) return;
+    client.removeQueries({ predicate: (q) => q.queryKey[0] !== "state" });
+    setModal(null);
+    if (state && !state.vehicles.length) {
+      setSelected("");
+      setPage("garage");
+    }
+  }, [accessScope, client]);
   async function save(
     entity: Mutation["entity"],
     data: Record<string, any>,
@@ -356,6 +373,8 @@ export default function App() {
       data,
       ...(record ? { expected_version: record.version } : {}),
     };
+    const denied = permissionError(state, operation);
+    if (denied) throw new Error(denied);
     if (navigator.onLine && queue.length === 0) {
       try {
         const result = await api<{ record: RecordBase }>(
@@ -477,6 +496,7 @@ export default function App() {
     queue,
     sync,
     resetDemo,
+    updateSession: setSession,
   };
   const failed = queue.filter((o) => o.error);
   return (
@@ -547,7 +567,11 @@ export default function App() {
               <div>
                 {session.username}
                 <small>
-                  {session.demo ? "Изолированный деморежим" : "Владелец гаража"}
+                  {session.demo
+                    ? "Изолированный деморежим"
+                    : session.is_admin
+                      ? "Администратор"
+                      : "Личный аккаунт"}
                 </small>
               </div>
               <button
@@ -637,6 +661,31 @@ export default function App() {
                 <div key={o.operation_id}>
                   <strong>Не удалось синхронизировать</strong>
                   <p>{o.error}</p>
+                  <p className="tiny muted">
+                    Сохранённый черновик:{" "}
+                    {o.data.description ||
+                      o.data.title ||
+                      o.data.name ||
+                      "запись автомобиля"}
+                  </p>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => {
+                      const url = URL.createObjectURL(
+                        new Blob([JSON.stringify(o.data, null, 2)], {
+                          type: "application/json",
+                        }),
+                      );
+                      const link = document.createElement("a");
+                      link.href = url;
+                      link.download = "mashina-draft.json";
+                      link.click();
+                      setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    }}
+                  >
+                    Скачать черновик
+                  </Button>
                   <Button
                     size="sm"
                     variant="outline"
@@ -656,7 +705,9 @@ export default function App() {
                   >
                     {o.status === 401
                       ? "Войти заново"
-                      : "Повторить с моей версией"}
+                      : o.status === 403
+                        ? "Проверить доступ и повторить"
+                        : "Повторить с моей версией"}
                   </Button>
                   <Button
                     size="sm"
@@ -664,7 +715,7 @@ export default function App() {
                     onClick={async () => {
                       if (
                         confirm(
-                          "Удалить локальное изменение и оставить серверную запись?",
+                          "Удалить локальный черновик? Несохранённые изменения будут потеряны.",
                         )
                       ) {
                         await resolveOperation(session, o, false);
@@ -672,7 +723,9 @@ export default function App() {
                       }
                     }}
                   >
-                    Оставить серверную
+                    {o.status === 403
+                      ? "Удалить черновик"
+                      : "Оставить серверную"}
                   </Button>
                 </div>
               ))}

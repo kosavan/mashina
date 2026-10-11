@@ -61,6 +61,8 @@ def row_data(row):
     result.update(id=row["id"], version=row["version"], deleted=bool(row["deleted"]))
     if "vehicle_id" in row:
         result["vehicle_id"] = row["vehicle_id"]
+    if "created_by" in row:
+        result["created_by"] = row["created_by"]
     return result
 
 
@@ -121,22 +123,79 @@ class Store:
             return self._state(owner)
 
     def _state(self, owner):
+        from backend.access import attachment_access, vehicle_access
+
         result = {}
-        for table in TABLES.values():
-            result[table] = [
-                row_data(r) for r in self.query(f"SELECT * FROM {table} WHERE owner_id=?", (owner,))
+        with self.transaction() as c:
+            cars = [
+                dict(r)
+                for r in c.exec_driver_sql(
+                    "SELECT * FROM vehicles WHERE owner_id=? OR id IN (SELECT vehicle_id FROM vehicle_access WHERE user_id=?)",
+                    (owner, owner),
+                ).mappings()
             ]
-        result["attachments"] = [
-            {
-                **json.loads(r["data"]),
-                "id": r["id"],
-                "vehicle_id": r["vehicle_id"],
-                "event_id": r["event_id"],
-            }
-            for r in self.query("SELECT * FROM attachments WHERE owner_id=?", (owner,))
-        ]
-        users = self.query("SELECT settings FROM users WHERE id=?", (owner,))
-        result["settings"] = json.loads(users[0]["settings"]) if users else {}
+            roles = {r["id"]: vehicle_access(c, r["id"], owner)[1] for r in cars}
+            result["vehicles"] = [
+                {
+                    **row_data(r),
+                    "role": roles[r["id"]],
+                    "can_edit": roles[r["id"]] == "owner",
+                    "is_original_owner": r["owner_id"] == owner,
+                }
+                for r in cars
+            ]
+            for table in TABLES.values():
+                if table == "vehicles":
+                    continue
+                if table == "categories":
+                    rows = c.exec_driver_sql(
+                        "SELECT * FROM categories WHERE owner_id=?", (owner,)
+                    ).mappings()
+                else:
+                    rows = c.exec_driver_sql(
+                        f"SELECT * FROM {table} WHERE vehicle_id IN (SELECT id FROM vehicles WHERE owner_id=? OR id IN (SELECT vehicle_id FROM vehicle_access WHERE user_id=?))",
+                        (owner, owner),
+                    ).mappings()
+                result[table] = []
+                for raw in rows:
+                    row = dict(raw)
+                    role = roles.get(row.get("vehicle_id"))
+                    if table in {"budgets", "recurring_costs"} and role != "owner":
+                        continue
+                    can_edit = (
+                        table == "categories"
+                        or role == "owner"
+                        or (table == "events" and row["created_by"] == owner)
+                    )
+                    result[table].append({**row_data(row), "can_edit": can_edit})
+            result["attachments"] = []
+            for car in cars:
+                for raw in c.exec_driver_sql(
+                    "SELECT * FROM attachments WHERE vehicle_id=?", (car["id"],)
+                ).mappings():
+                    row = dict(raw)
+                    try:
+                        _, role = attachment_access(c, row["id"], owner)
+                    except Denied:
+                        continue
+                    can_edit = role == "owner" or (
+                        row["created_by"] == owner
+                        and json.loads(car["data"]).get("photo_id") != row["id"]
+                    )
+                    result["attachments"].append(
+                        {
+                            **json.loads(row["data"]),
+                            "id": row["id"],
+                            "vehicle_id": row["vehicle_id"],
+                            "event_id": row["event_id"],
+                            "created_by": row["created_by"],
+                            "visibility": row["visibility"],
+                            "can_edit": can_edit,
+                            "can_share": role == "owner",
+                        }
+                    )
+            user = c.exec_driver_sql("SELECT settings FROM users WHERE id=?", (owner,)).first()
+            result["settings"] = json.loads(user[0]) if user else {}
         for v in result["vehicles"]:
             v["current_odometer"] = current_odometer(v, result["events"])
         for r in result["reminders"]:
@@ -148,7 +207,13 @@ class Store:
         operation_id, record_id = uid(payload["operation_id"]), uid(payload["id"])
         entity, action = payload["entity"], payload["action"]
         digest = hashlib.sha256(dumps(payload).encode()).hexdigest()
+        from backend.access import mutation_access, vehicle_access
+
         with nullcontext(connection) if connection is not None else self.transaction() as c:
+            # A receipt must not bypass a revoked grant. Categories/settings remain actor-local.
+            existing, resource_owner = mutation_access(
+                c, owner, entity, action, record_id, payload.get("data") or {}
+            )
             prior = (
                 c.exec_driver_sql(
                     "SELECT * FROM receipts WHERE owner_id=? AND operation_id=?",
@@ -178,7 +243,6 @@ class Store:
                 before = None
                 data = dict(payload.get("data") or {})
                 if action != "create":
-                    existing = self.owned(c, table, record_id, owner)
                     before = row_data(existing)
                     if payload.get("expected_version") != existing["version"]:
                         raise Conflict(
@@ -217,17 +281,20 @@ class Store:
                 data.pop("current_odometer", None)
                 if entity in {"event", "reminder", "tire_set", "budget", "recurring_cost"}:
                     vehicle_id = uid(data.get("vehicle_id"))
-                    self.owned(c, "vehicles", vehicle_id, owner)
+                    vehicle_access(c, vehicle_id, owner, write=entity != "event")
                     if before and vehicle_id != before["vehicle_id"]:
                         raise ValueError("Перенос записи между автомобилями не поддерживается")
                 if entity == "vehicle":
                     data = normalize_vehicle(data)
                     if data.get("photo_id"):
-                        image = self.owned(c, "attachments", data["photo_id"], owner)
+                        image = self.owned(c, "attachments", data["photo_id"], resource_owner)
                         if not json.loads(image["data"]).get("media_type", "").startswith("image/"):
                             raise ValueError("Обложка должна быть изображением")
                         if image["vehicle_id"] != record_id:
                             raise ValueError("Фото относится к другому автомобилю")
+                        c.exec_driver_sql(
+                            "UPDATE attachments SET visibility='shared' WHERE id=?", (image["id"],)
+                        )
                 elif entity == "event":
                     data = normalize_event(data)
                     if (
@@ -250,6 +317,17 @@ class Store:
                         parent = self.owned(c, "categories", data["parent_id"], owner)
                         if json.loads(parent["data"]).get("parent_id"):
                             raise ValueError("Поддерживается один уровень подкатегорий")
+                for field in (
+                    "owner_id",
+                    "created_by",
+                    "can_edit",
+                    "role",
+                    "is_original_owner",
+                    "can_share",
+                ):
+                    data.pop(field, None)
+                if entity == "event":
+                    data["created_by"] = existing["created_by"] if existing else owner
                 data.update(id=record_id, version=version, deleted=deleted)
                 if before:
                     c.exec_driver_sql(
@@ -258,10 +336,13 @@ class Store:
                     )
                 else:
                     cols = "id,owner_id,version,data,deleted"
-                    args = [record_id, owner, version, dumps(data), int(deleted)]
+                    args = [record_id, resource_owner, version, dumps(data), int(deleted)]
                     if entity in {"event", "reminder", "tire_set", "budget", "recurring_cost"}:
                         cols += ",vehicle_id"
                         args.append(vehicle_id)
+                    if entity == "event":
+                        cols += ",created_by"
+                        args.append(owner)
                     c.exec_driver_sql(
                         f"INSERT INTO {table} ({cols}) VALUES ({','.join('?' for _ in args)})",
                         tuple(args),
@@ -277,7 +358,7 @@ class Store:
                         dumps(data),
                     ),
                 )
-                response = {"record": data}
+                response = {"record": {**data, "can_edit": True}}
             c.exec_driver_sql(
                 "INSERT INTO receipts VALUES(?,?,?,?)",
                 (owner, operation_id, digest, dumps(response)),
@@ -285,7 +366,9 @@ class Store:
             return response
 
     def validate_odometer(self, c, owner, record_id, data):
-        car = row_data(self.owned(c, "vehicles", data["vehicle_id"], owner))
+        from backend.access import vehicle_access
+
+        car = row_data(vehicle_access(c, data["vehicle_id"], owner)[0])
         readings = [(car.get("purchase_date") or "0001-01-01", car.get("purchase_odometer", 0))]
         for row in c.exec_driver_sql(
             "SELECT * FROM events WHERE vehicle_id=? AND deleted=0 AND id<>?",

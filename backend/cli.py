@@ -1,8 +1,10 @@
 """Local-only administration; never prints passwords or bootstrap secrets."""
 
 import argparse
+from contextlib import ExitStack
 from datetime import datetime
 import getpass
+import json
 import os
 from pathlib import Path
 import secrets
@@ -13,12 +15,41 @@ from backend.backup import make_backup, restore_backup
 
 def main():
     parser = argparse.ArgumentParser(description="MASHINA administration")
-    parser.add_argument("command", choices=["bootstrap", "create-admin", "backup", "restore"])
+    parser.add_argument(
+        "command",
+        choices=[
+            "bootstrap",
+            "create-admin",
+            "backup",
+            "restore",
+            "notification-keys",
+            "notification-resume",
+            "notifications-dispatch",
+        ],
+    )
     parser.add_argument("--data", default=os.getenv("MASHINA_DATA", "data"))
     parser.add_argument("--file")
     parser.add_argument("--backup-dir", default="backups")
     parser.add_argument("--keep", type=int, default=int(os.getenv("MASHINA_BACKUP_KEEP", "7")))
+    parser.add_argument(
+        "--send", action="store_true", help="Explicitly allow outbound notification requests"
+    )
+    parser.add_argument(
+        "--receive-links",
+        action="store_true",
+        help="Receive private Telegram linking codes; requires --send",
+    )
     args = parser.parse_args()
+    if args.receive_links and (not args.send or args.command != "notifications-dispatch"):
+        parser.error("--receive-links requires notifications-dispatch --send")
+    stack = ExitStack()
+    if args.command == "notifications-dispatch":
+        from backend.notifications import notification_guard
+
+        try:
+            stack.enter_context(notification_guard(args.data))
+        except ValueError as exc:
+            parser.error(str(exc))
     store = Store(args.data)
     try:
         if args.command in {"bootstrap", "create-admin"}:
@@ -57,13 +88,36 @@ def main():
             for old in sorted(directory.glob("mashina-*.zip"), reverse=True)[args.keep :]:
                 old.unlink()
             print(f"Backup saved: {target.resolve()}. Copy to a different physical disk.")
+        elif args.command == "notification-keys":
+            from backend.notifications import initialize_identity
+
+            initialize_identity(store)
+            print(
+                "Web Push identity initialized locally. Public key is available in notification settings."
+            )
+        elif args.command == "notification-resume":
+            with store.transaction() as c:
+                c.exec_driver_sql("UPDATE notification_identity SET paused=0")
+            print("Server notification pause removed. Each user must enable their own channels.")
+        elif args.command == "notifications-dispatch":
+            from backend.notification_delivery import dispatch, receive_telegram_links
+
+            linked = receive_telegram_links(store) if args.receive_links else 0
+            print(
+                json.dumps(
+                    {"linked": linked, "dry_run": not args.send, **dispatch(store, send=args.send)}
+                )
+            )
         else:
             if not args.file:
                 parser.error("--file is required; stop the app before CLI restore")
             restore_backup(store, Path(args.file).read_bytes())
             print("Restore verified and applied. Sessions invalidated.")
+    except ValueError as exc:
+        parser.error(str(exc))
     finally:
         store.close()
+        stack.close()
 
 
 if __name__ == "__main__":

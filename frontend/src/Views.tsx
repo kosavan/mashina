@@ -2,6 +2,7 @@ import { useState, lazy, Suspense } from "react";
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Sharing = lazy(() => import("./Sharing"));
 const SaleReport = lazy(() => import("./SaleReport"));
+const Notifications = lazy(() => import("./Notifications"));
 import {
   ArrowUpRight,
   ArrowRight,
@@ -1703,6 +1704,7 @@ export function SettingsPage() {
           </dl>
           <Suspense fallback={null}>
             <Sharing />
+            <Notifications />
           </Suspense>
           {session.demo && (
             <Button variant="outline" onClick={resetDemo}>

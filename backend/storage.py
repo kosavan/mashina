@@ -72,6 +72,9 @@ class Store:
         self.path.mkdir(parents=True, exist_ok=True)
         self.uploads = self.path / "uploads"
         self.uploads.mkdir(exist_ok=True)
+        if os.name != "nt":
+            self.path.chmod(0o700)
+            self.uploads.chmod(0o700)
         self.lock = RLock()
         if os.getenv("MASHINA_PRODUCTION") == "1" and sqlite3.sqlite_version_info < (3, 51, 3):
             raise RuntimeError("Production WAL requires SQLite 3.51.3+; rebuild the provided image")
@@ -83,6 +86,8 @@ class Store:
 
         @sa_event.listens_for(self.engine, "connect")
         def configure(conn, _):
+            if os.name != "nt":
+                (self.path / "mashina.db").chmod(0o600)
             conn.execute("PRAGMA foreign_keys=ON")
             conn.execute("PRAGMA busy_timeout=5000")
             conn.execute("PRAGMA journal_mode=WAL")

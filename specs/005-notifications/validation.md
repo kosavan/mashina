@@ -1,0 +1,12 @@
+# Validation — optional notifications
+
+Local checks, 2026-10-12:
+- 68 Pytest tests passed, including expired private Telegram codes, interrupted sends without automatic retry, five-attempt rate-limit budget, explicit retry, permission revocation, concurrent claims, pinned HTTPS, real Push encryption through a fake transport, consistent backups and migration from revisions001/002/003.
+- 10 Vitest tests passed, including generic service-worker notification content and same-origin click despite hostile payload URLs.
+- TypeScript, ESLint, Prettier, Ruff and production build passed. App entry gzip128KB against180KB budget; notification UI loads separately.
+- Headless Chromium covers360px consent, local/server disconnect, isolated demo and existing application journeys. Final browser and Linux CI results recorded after the runs complete.
+- npm audit reports zero known vulnerabilities after upgrading Vitest to4.1.11.
+
+All provider HTTP operations in tests are intercepted; no real Push/Telegram messages or workstation timer were created. Physical iPhone installation and actual provider delivery require an owner-configured HTTPS deployment and are not claimed as tested. Provider acceptance is never reported as device delivery.
+
+No existing Proxmox services were changed. Source publication excludes runtime data, credential helpers, rendered QA files and secrets.

@@ -29,6 +29,7 @@ from backend.ownership import ownership_report, csv_rows, import_row
 from backend.access import vehicle_access, upload_access, attachment_access
 from backend.accounts import install_accounts, require_admin
 from backend.reports import ReportOptions, report_snapshot, render_report, RENDER_LOCK
+from backend.notifications import install_notifications
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -39,6 +40,11 @@ class Credentials(BaseModel):
     username: str = Field(min_length=3, max_length=64)
     password: str = Field(min_length=12, max_length=256)
     bootstrap_token: str = Field(default="", max_length=256)
+
+
+class LogoutInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    push_endpoint: str = Field(default="", max_length=4096)
 
 
 class Mutation(BaseModel):
@@ -245,7 +251,7 @@ def create_app(data_path=None, bootstrap_token=None):
         }
 
     @app.post(PREFIX + "/logout")
-    def logout(request: Request, s=Depends(session)):
+    def logout(request: Request, body: LogoutInput | None = None, s=Depends(session)):
         digest = hashlib.sha256(request.cookies.get(cookie_name, "").encode()).hexdigest()
         if s["demo"]:
             s["store"].close()
@@ -253,6 +259,16 @@ def create_app(data_path=None, bootstrap_token=None):
             demos.pop(digest, None)
         else:
             with store.transaction() as c:
+                if body and body.push_endpoint:
+                    endpoint_hash = hashlib.sha256(body.push_endpoint.encode()).hexdigest()
+                    c.exec_driver_sql(
+                        "UPDATE notification_deliveries SET state='cancelled' WHERE user_id=? AND destination_id IN (SELECT id FROM push_subscriptions WHERE user_id=? AND endpoint_hash=?) AND state IN ('ready','delayed')",
+                        (s["user_id"], s["user_id"], endpoint_hash),
+                    )
+                    c.exec_driver_sql(
+                        "DELETE FROM push_subscriptions WHERE user_id=? AND endpoint_hash=?",
+                        (s["user_id"], endpoint_hash),
+                    )
                 c.exec_driver_sql("DELETE FROM sessions WHERE token_hash=?", (digest,))
         response = JSONResponse({"ok": True})
         response.delete_cookie(cookie_name, path="/")
@@ -573,6 +589,8 @@ def create_app(data_path=None, bootstrap_token=None):
             archive_only(s)
             restore_backup(store, blob)
         return {"ok": True, "login_required": True}
+
+    install_notifications(app, session, throttle)
 
     install_accounts(app, session, HASHER, login_response, throttle)
 

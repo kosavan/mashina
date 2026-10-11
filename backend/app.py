@@ -28,6 +28,7 @@ from backend.demo import seed
 from backend.ownership import ownership_report, csv_rows, import_row
 from backend.access import vehicle_access, upload_access, attachment_access
 from backend.accounts import install_accounts, require_admin
+from backend.reports import ReportOptions, report_snapshot, render_report, RENDER_LOCK
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -574,6 +575,24 @@ def create_app(data_path=None, bootstrap_token=None):
         return {"ok": True, "login_required": True}
 
     install_accounts(app, session, HASHER, login_response, throttle)
+
+    @app.post(PREFIX + "/vehicles/{vehicle_id}/sale-report")
+    def sale_report(vehicle_id: str, body: ReportOptions, request: Request, s=Depends(session)):
+        throttle(request, "sale-report", 12)
+        if not RENDER_LOCK.acquire(blocking=False):
+            raise HTTPException(
+                429, "Другой отчёт ещё готовится. Повторите через несколько секунд."
+            )
+        try:
+            snapshot = report_snapshot(s["store"], s["user_id"], uid(vehicle_id), body, s["demo"])
+            blob = render_report(snapshot)
+        finally:
+            RENDER_LOCK.release()
+        return Response(
+            blob,
+            media_type="application/pdf",
+            headers={"Content-Disposition": "attachment; filename=mashina-sale-report.pdf"},
+        )
 
     frontend = Path(__file__).resolve().parents[1] / "frontend" / "dist"
     if frontend.exists():

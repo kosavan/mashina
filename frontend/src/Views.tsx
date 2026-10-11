@@ -1,6 +1,7 @@
 import { useState, lazy, Suspense } from "react";
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Sharing = lazy(() => import("./Sharing"));
+const SaleReport = lazy(() => import("./SaleReport"));
 import {
   ArrowUpRight,
   ArrowRight,
@@ -779,6 +780,7 @@ export function VehiclePage() {
               </Button>
               <Suspense fallback={null}>
                 <Sharing vehicleId={v.id} />
+                <SaleReport vehicleId={v.id} />
               </Suspense>
             </div>
           )

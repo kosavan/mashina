@@ -314,7 +314,12 @@ def analytics(vehicles, events, start="", end="", category="", kind="", currency
             if e.get("vehicle_id") == v["id"] and e.get("odometer") is not None
         ]
         readings.sort()
-        before = [r for r in readings if not start or r[0] <= start]
+        ownership_start = v.get("purchase_date") or "0001-01-01"
+        before = [
+            r
+            for r in readings
+            if r[0] >= ownership_start and (not start or r[0] <= max(start, ownership_start))
+        ]
         within = [
             r
             for r in readings
@@ -362,7 +367,12 @@ def analytics(vehicles, events, start="", end="", category="", kind="", currency
                 for e in active
                 if e.get("vehicle_id") == vehicle["id"] and e.get("odometer") is not None
             ]
-            baseline_rows = sorted(r for r in readings if not start or r[0] <= start)
+            ownership_start = vehicle.get("purchase_date") or "0001-01-01"
+            baseline_rows = sorted(
+                r
+                for r in readings
+                if r[0] >= ownership_start and (not start or r[0] <= max(start, ownership_start))
+            )
             end_rows = [
                 r
                 for r in readings

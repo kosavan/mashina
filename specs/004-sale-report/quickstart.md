@@ -1,0 +1,2 @@
+# Acceptance
+Generate default/explicit-disclosure reports from real and demo garages. Extract PDF text to assert privacy, currency-specific exact totals, chronology, exclusion of deleted/other-car events and no markup injection. Render title, long-history and final pages with bundled Poppler; inspect spacing, glyphs and pagination. Verify 200-work render <3 s / <5 MiB. Download on 360px browser; driver action absent, API direct request denied.

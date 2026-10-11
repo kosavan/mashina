@@ -1,5 +1,11 @@
 name: MASHINA checks
-on: [push, pull_request]
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+concurrency:
+  group: mashina-${{ github.event.pull_request.head.ref || github.ref_name }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:

@@ -15,7 +15,7 @@
 ## Phase 5: Verification
 - [x] T010 Extend offline projections/types and isolated demo in frontend/src/offline.ts, types.ts and backend/demo.py.
 - [x] T011 Verify mobile journeys, duplicate CSV, migration/restore and unchanged financial totals; run convergence.
-- [ ] T012 Document usage, update validation and publish reviewed feature to GitHub.
+- [x] T012 Document usage, update validation and publish reviewed feature to GitHub.
 
 Dependencies: tests → migration/validators → per-story UI/API → offline/demo → regression/convergence/publication.
 Each story has its independent acceptance in spec.md. Shared files edited sequentially.

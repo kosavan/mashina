@@ -164,7 +164,8 @@ def create_app(data_path=None, bootstrap_token=None):
 
     @app.get(PREFIX + "/health")
     def health():
-        return {"status": "ok", "schema": "001"}
+        revision = store.query("SELECT version_num FROM alembic_version")[0]["version_num"]
+        return {"status": "ok", "schema": revision}
 
     @app.get(PREFIX + "/setup")
     def setup_status():

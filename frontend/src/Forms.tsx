@@ -71,8 +71,14 @@ export function RecordForm({
   onClose: () => void;
 }) {
   const { state, selected, save, upload, notify, refresh } = useApp();
+  const allowedVehicles = state.vehicles.filter(
+    (v) => !["reminder", "document"].includes(type) || v.can_edit !== false,
+  );
   const [vehicleId, setVehicleId] = useState(
-    record?.vehicle_id || selected || state.vehicles[0]?.id || "",
+    record?.vehicle_id ||
+      allowedVehicles.find((v) => v.id === selected)?.id ||
+      allowedVehicles[0]?.id ||
+      "",
   );
   const vehicle = state.vehicles.find((v) => v.id === vehicleId);
   const [busy, setBusy] = useState(false);
@@ -230,7 +236,7 @@ export function RecordForm({
               onChange={(e) => setVehicleId(e.target.value)}
               required
             >
-              {state.vehicles.map((v) => (
+              {allowedVehicles.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.name}
                   {v.status !== "active" ? " · архив" : ""}
@@ -302,6 +308,9 @@ export function RecordForm({
                 {files.length ? files[0].name : "Фотография вашего автомобиля"}
               </strong>
               <span>JPEG, PNG, WebP · до 20 МБ</span>
+              <small>
+                Обложка будет видна всем участникам этого автомобиля.
+              </small>
               <input
                 name="file"
                 type="file"
@@ -573,7 +582,7 @@ export function RecordForm({
               </>
             ) : type === "expense" || type === "maintenance" ? (
               <>
-                {type === "maintenance" && (
+                {type === "maintenance" && vehicle?.can_edit !== false && (
                   <label>
                     Готовый шаблон
                     <select
@@ -768,7 +777,7 @@ export function RecordForm({
                   нарушает хронологию
                 </span>
               </label>
-              {type === "maintenance" && (
+              {type === "maintenance" && vehicle?.can_edit !== false && (
                 <Field
                   label="Выполнить и обновить напоминание"
                   name="next_reminder"
@@ -776,7 +785,12 @@ export function RecordForm({
                   <select name="next_reminder">
                     <option value="">Не изменять</option>
                     {state.reminders
-                      .filter((r) => r.vehicle_id === vehicleId && r.enabled)
+                      .filter(
+                        (r) =>
+                          r.vehicle_id === vehicleId &&
+                          r.enabled &&
+                          r.can_edit !== false,
+                      )
                       .map((r) => (
                         <option key={r.id} value={r.id}>
                           {r.title}

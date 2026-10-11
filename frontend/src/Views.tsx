@@ -1,5 +1,6 @@
 import { useState, lazy, Suspense } from "react";
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
+const Sharing = lazy(() => import("./Sharing"));
 import {
   ArrowUpRight,
   ArrowRight,
@@ -362,7 +363,10 @@ export function Garage() {
                     className={`vehicle-next ${next?.status === "overdue" ? "danger" : ""}`}
                   >
                     <span className="status-dot" />
-                    <span>{next ? next.title : "Всё под контролем"}</span>
+                    <span>
+                      {next ? next.title : "Всё под контролем"}
+                      {v.role === "driver" && <em> · Водитель</em>}
+                    </span>
                     <small>
                       {next
                         ? next.remaining_km != null
@@ -375,13 +379,15 @@ export function Garage() {
                   </div>
                 </div>
               </button>
-              <button
-                className="vehicle-more icon-button"
-                aria-label={`Редактировать ${v.name}`}
-                onClick={() => open("vehicle", v)}
-              >
-                <MoreHorizontal size={20} />
-              </button>
+              {v.can_edit !== false && (
+                <button
+                  className="vehicle-more icon-button"
+                  aria-label={`Редактировать ${v.name}`}
+                  onClick={() => open("vehicle", v)}
+                >
+                  <MoreHorizontal size={20} />
+                </button>
+              )}
             </article>
           );
         })}
@@ -478,7 +484,11 @@ export function Garage() {
             <div className="calm-state">
               <ShieldCheck size={32} />
               <p>Можно просто наслаждаться дорогой.</p>
-              <button className="text-link" onClick={() => open("reminder")}>
+              <button
+                hidden={!state.vehicles.some((v) => v.can_edit !== false)}
+                className="text-link"
+                onClick={() => open("reminder")}
+              >
                 Создать напоминание
                 <Plus size={14} />
               </button>
@@ -589,13 +599,15 @@ export function EventRow({ entry }: { entry: Entry }) {
           </div>
           <ChevronRight className="event-chevron" size={16} />
         </button>
-        <button
-          className="icon-button row-edit"
-          aria-label={`Редактировать ${entry.description || kindNames[entry.kind]}`}
-          onClick={() => open(entry.kind, entry)}
-        >
-          <Pencil size={15} />
-        </button>
+        {entry.can_edit !== false && (
+          <button
+            className="icon-button row-edit"
+            aria-label={`Редактировать ${entry.description || kindNames[entry.kind]}`}
+            onClick={() => open(entry.kind, entry)}
+          >
+            <Pencil size={15} />
+          </button>
+        )}
       </div>
       <Sheet
         open={view}
@@ -671,52 +683,56 @@ export function EventRow({ entry }: { entry: Entry }) {
               ))}
             </div>
           )}
-          <label className="file-attach">
-            <Upload size={17} />
-            Добавить вложение
-            <input
-              type="file"
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                if (f) {
-                  try {
-                    const body = new FormData();
-                    body.append("file", f);
-                    body.append("vehicle_id", entry.vehicle_id);
-                    body.append("event_id", entry.id);
-                    await api(
-                      "/attachments",
-                      { method: "POST", body },
-                      (await api<{ csrf: string }>("/session")).csrf,
-                    );
-                    await refresh();
-                    notify("Файл добавлен");
-                  } catch (error) {
-                    notify((error as Error).message);
+          {entry.can_edit !== false && (
+            <label className="file-attach">
+              <Upload size={17} />
+              Добавить вложение
+              <input
+                type="file"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (f) {
+                    try {
+                      const body = new FormData();
+                      body.append("file", f);
+                      body.append("vehicle_id", entry.vehicle_id);
+                      body.append("event_id", entry.id);
+                      await api(
+                        "/attachments",
+                        { method: "POST", body },
+                        (await api<{ csrf: string }>("/session")).csrf,
+                      );
+                      await refresh();
+                      notify("Файл добавлен");
+                    } catch (error) {
+                      notify((error as Error).message);
+                    }
                   }
-                }
-              }}
-            />
-          </label>
-          <div className="detail-actions">
-            <Button
-              variant="outline"
-              onClick={() => {
-                setView(false);
-                open(entry.kind, entry);
-              }}
-            >
-              <Pencil size={16} />
-              Редактировать
-            </Button>
-            <Button variant="destructive" onClick={remove}>
-              <Trash2 size={16} />
-              Удалить
-            </Button>
-          </div>
+                }}
+              />
+            </label>
+          )}
+          {entry.can_edit !== false && (
+            <div className="detail-actions">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setView(false);
+                  open(entry.kind, entry);
+                }}
+              >
+                <Pencil size={16} />
+                Редактировать
+              </Button>
+              <Button variant="destructive" onClick={remove}>
+                <Trash2 size={16} />
+                Удалить
+              </Button>
+            </div>
+          )}
         </div>
       </Sheet>
-      {preview && (
+      {preview && state.attachments.some((a) => a.id === preview.id) && (
         <Preview attachment={preview} onClose={() => setPreview(null)} />
       )}
     </>
@@ -754,10 +770,18 @@ export function VehiclePage() {
           "Вся история вашего автомобиля"
         }
         action={
-          <Button variant="outline" onClick={() => open("vehicle", v)}>
-            <Pencil size={16} />
-            Редактировать
-          </Button>
+          v.can_edit !== false && (
+            <div className="settings-actions">
+              {" "}
+              <Button variant="outline" onClick={() => open("vehicle", v)}>
+                <Pencil size={16} />
+                Редактировать
+              </Button>
+              <Suspense fallback={null}>
+                <Sharing vehicleId={v.id} />
+              </Suspense>
+            </div>
+          )
         }
       />
       <section className="vehicle-hero panel">
@@ -838,7 +862,11 @@ export function VehiclePage() {
       </div>
       <div className="section-heading">
         <h3>Ближайшие работы</h3>
-        <button className="text-link" onClick={() => open("reminder")}>
+        <button
+          hidden={!state.vehicles.some((v) => v.can_edit !== false)}
+          className="text-link"
+          onClick={() => open("reminder")}
+        >
           Добавить
           <Plus size={16} />
         </button>
@@ -850,37 +878,39 @@ export function VehiclePage() {
             <ReminderCard key={r.id} reminder={r} />
           ))}
       </div>
-      <div className="vehicle-archive">
-        <p className="muted">
-          История сохраняется даже после продажи автомобиля.
-        </p>
-        <Button
-          variant="outline"
-          onClick={async () => {
-            try {
-              await save(
-                "vehicle",
-                { status: v.status === "active" ? "archived" : "active" },
-                v,
-              );
-              notify(
-                v.status === "active"
-                  ? "Автомобиль перенесён в архив"
-                  : "Автомобиль возвращён в гараж",
-              );
-            } catch (error) {
-              notify((error as Error).message);
-            }
-          }}
-        >
-          {v.status === "active" ? (
-            <Archive size={17} />
-          ) : (
-            <RotateCcw size={17} />
-          )}{" "}
-          {v.status === "active" ? "Архивировать" : "Вернуть в гараж"}
-        </Button>
-      </div>
+      {v.can_edit !== false && (
+        <div className="vehicle-archive">
+          <p className="muted">
+            История сохраняется даже после продажи автомобиля.
+          </p>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                await save(
+                  "vehicle",
+                  { status: v.status === "active" ? "archived" : "active" },
+                  v,
+                );
+                notify(
+                  v.status === "active"
+                    ? "Автомобиль перенесён в архив"
+                    : "Автомобиль возвращён в гараж",
+                );
+              } catch (error) {
+                notify((error as Error).message);
+              }
+            }}
+          >
+            {v.status === "active" ? (
+              <Archive size={17} />
+            ) : (
+              <RotateCcw size={17} />
+            )}{" "}
+            {v.status === "active" ? "Архивировать" : "Вернуть в гараж"}
+          </Button>
+        </div>
+      )}
     </>
   );
 }
@@ -1154,7 +1184,11 @@ function MaintenanceHistory() {
       </div>
       <div className="section-heading">
         <h3>История работ</h3>
-        <button className="text-link" onClick={() => open("reminder")}>
+        <button
+          hidden={!state.vehicles.some((v) => v.can_edit !== false)}
+          className="text-link"
+          onClick={() => open("reminder")}
+        >
           Настроить интервал
           <Plus size={16} />
         </button>
@@ -1199,13 +1233,15 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
         <span className={`status-pill ${r.status}`}>
           {names[r.status] || names.normal}
         </span>
-        <button
-          className="icon-button"
-          aria-label={`Редактировать ${r.title}`}
-          onClick={() => open("reminder", r)}
-        >
-          <Pencil size={15} />
-        </button>
+        {r.can_edit !== false && (
+          <button
+            className="icon-button"
+            aria-label={`Редактировать ${r.title}`}
+            onClick={() => open("reminder", r)}
+          >
+            <Pencil size={15} />
+          </button>
+        )}
       </div>
       <h3>{r.title}</h3>
       <p className="muted tiny">{car?.name}</p>
@@ -1237,32 +1273,34 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
           </span>
         )}
       </div>
-      <div className="reminder-actions">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setComplete(true)}
-          disabled={r.status === "completed"}
-        >
-          <Check size={15} />
-          Выполнено
-        </Button>
-        <button
-          className="text-link"
-          onClick={async () => {
-            try {
-              await save("reminder", { enabled: !r.enabled }, r);
-              notify(
-                r.enabled ? "Напоминание отключено" : "Напоминание включено",
-              );
-            } catch (e) {
-              notify((e as Error).message);
-            }
-          }}
-        >
-          {r.enabled ? "Отключить" : "Включить"}
-        </button>
-      </div>
+      {r.can_edit !== false && (
+        <div className="reminder-actions">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setComplete(true)}
+            disabled={r.status === "completed"}
+          >
+            <Check size={15} />
+            Выполнено
+          </Button>
+          <button
+            className="text-link"
+            onClick={async () => {
+              try {
+                await save("reminder", { enabled: !r.enabled }, r);
+                notify(
+                  r.enabled ? "Напоминание отключено" : "Напоминание включено",
+                );
+              } catch (e) {
+                notify((e as Error).message);
+              }
+            }}
+          >
+            {r.enabled ? "Отключить" : "Включить"}
+          </button>
+        </div>
+      )}
       <Sheet
         open={complete}
         onClose={() => setComplete(false)}
@@ -1326,7 +1364,10 @@ export function Reminders() {
         title="Напоминания"
         description="Меньше держать в голове. Больше наслаждаться дорогой."
         action={
-          <Button onClick={() => open("reminder")}>
+          <Button
+            hidden={!state.vehicles.some((v) => v.can_edit !== false)}
+            onClick={() => open("reminder")}
+          >
             <Plus size={17} />
             Новое напоминание
           </Button>
@@ -1362,7 +1403,11 @@ export function Reminders() {
             icon={Bell}
             title="Важное не забудется"
             description="Настройте замену масла, страховку или другую регулярную заботу."
-            onClick={() => open("reminder")}
+            onClick={
+              state.vehicles.some((v) => v.can_edit !== false)
+                ? () => open("reminder")
+                : undefined
+            }
           />
         </div>
       )}
@@ -1428,10 +1473,12 @@ export function Documents() {
         title="Документы"
         description="От первого договора до последнего чека. Только для вас."
         action={
-          <Button onClick={() => open("document")}>
-            <Upload size={17} />
-            Добавить документ
-          </Button>
+          state.vehicles.some((v) => v.can_edit !== false) && (
+            <Button onClick={() => open("document")}>
+              <Upload size={17} />
+              Добавить документ
+            </Button>
+          )
         }
       />
       <div className="filters">
@@ -1481,10 +1528,12 @@ export function Documents() {
               </div>
             </button>
             <div className="document-actions">
-              <button className="text-link" onClick={() => setEdit(a)}>
-                <Pencil size={14} />
-                Изменить
-              </button>
+              {a.can_edit !== false && (
+                <button className="text-link" onClick={() => setEdit(a)}>
+                  <Pencil size={14} />
+                  Изменить
+                </button>
+              )}
               <button
                 className="icon-button"
                 aria-label={`Скачать ${a.title}`}
@@ -1492,31 +1541,33 @@ export function Documents() {
               >
                 <Download size={17} />
               </button>
-              <button
-                className="icon-button"
-                aria-label={`Удалить ${a.title}`}
-                onClick={async () => {
-                  if (
-                    confirm(
-                      "Удалить документ? Копия останется только в ваших резервных архивах.",
-                    )
-                  ) {
-                    try {
-                      await api(
-                        "/attachments/" + a.id,
-                        { method: "DELETE" },
-                        session.csrf,
-                      );
-                      await refresh();
-                      notify("Документ удалён");
-                    } catch (e) {
-                      notify((e as Error).message);
+              {a.can_edit !== false && (
+                <button
+                  className="icon-button"
+                  aria-label={`Удалить ${a.title}`}
+                  onClick={async () => {
+                    if (
+                      confirm(
+                        "Удалить документ? Копия останется только в ваших резервных архивах.",
+                      )
+                    ) {
+                      try {
+                        await api(
+                          "/attachments/" + a.id,
+                          { method: "DELETE" },
+                          session.csrf,
+                        );
+                        await refresh();
+                        notify("Документ удалён");
+                      } catch (e) {
+                        notify((e as Error).message);
+                      }
                     }
-                  }
-                }}
-              >
-                <Trash2 size={16} />
-              </button>
+                  }}
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </div>
           </article>
         ))}
@@ -1527,16 +1578,25 @@ export function Documents() {
             icon={FolderOpen}
             title="Важные бумаги — всегда рядом"
             description="Загрузите страховку, заказ-наряд или фото. Файлы хранятся на вашем сервере."
-            onClick={() => open("document")}
+            onClick={
+              state.vehicles.some((v) => v.can_edit !== false)
+                ? () => open("document")
+                : undefined
+            }
             label="Добавить документ"
           />
         </div>
       )}
-      {preview && (
+      {preview && state.attachments.some((a) => a.id === preview.id) && (
         <Preview attachment={preview} onClose={() => setPreview(null)} />
       )}
       <Sheet
-        open={!!edit}
+        open={
+          !!edit &&
+          state.attachments.some(
+            (a) => a.id === edit.id && a.can_edit !== false,
+          )
+        }
         onClose={() => setEdit(null)}
         title="Данные документа"
       >
@@ -1581,6 +1641,21 @@ export function Documents() {
                 />
               </label>
             ))}
+            {edit.can_share && (
+              <label>
+                Доступ к документу
+                <select
+                  name="visibility"
+                  defaultValue={edit.visibility || "owner"}
+                >
+                  <option value="owner">Личный — владельцы и автор</option>
+                  <option value="shared">Общий — участники автомобиля</option>
+                </select>
+                <small>
+                  Обложка автомобиля всегда доступна его участникам.
+                </small>
+              </label>
+            )}
             <Button>Сохранить</Button>
           </form>
         )}
@@ -1610,7 +1685,7 @@ export function SettingsPage() {
           </p>
           <dl>
             <div>
-              <dt>Владелец</dt>
+              <dt>Аккаунт</dt>
               <dd>{session.username}</dd>
             </div>
             <div>
@@ -1624,6 +1699,9 @@ export function SettingsPage() {
               <dd>Русский · ₽ · км · л</dd>
             </div>
           </dl>
+          <Suspense fallback={null}>
+            <Sharing />
+          </Suspense>
           {session.demo && (
             <Button variant="outline" onClick={resetDemo}>
               <RotateCcw size={16} />
@@ -1638,64 +1716,73 @@ export function SettingsPage() {
             Выйти из гаража
           </Button>
         </section>
-        <section className="panel settings-panel">
-          <HardDrive size={27} />
-          <h3>Резервная копия</h3>
-          <p>
-            Полный архив содержит базу и все загруженные файлы. Он позволяет
-            восстановить весь гараж.
-          </p>
-          <div className="info-box">
-            Скачайте архив на другой физический диск. Копия рядом с базой не
-            защитит от поломки накопителя.
-          </div>
-          <Button
-            disabled={session.demo}
-            onClick={() => download("/api/v1/backup")}
-          >
-            <Download size={17} />
-            Скачать полный архив
-          </Button>
-          <label className={`restore-file ${session.demo ? "disabled" : ""}`}>
-            <Upload size={16} />
-            Восстановить из архива
-            <input
-              type="file"
-              accept=".zip"
-              disabled={session.demo || busy}
-              onChange={async (e) => {
-                const f = e.target.files?.[0];
-                if (!f) return;
-                if (
-                  !confirm(
-                    "Восстановление заменит текущие данные архивом. Скачайте текущий бэкап перед продолжением. Продолжить?",
-                  )
-                )
-                  return;
-                setBusy(true);
-                try {
-                  const body = new FormData();
-                  body.append("file", f);
-                  await api("/restore", { method: "POST", body }, session.csrf);
-                  notify("Архив восстановлен. Войдите заново.");
-                  location.reload();
-                } catch (error) {
-                  notify((error as Error).message);
-                } finally {
-                  setBusy(false);
-                  e.target.value = "";
-                }
-              }}
-            />
-          </label>
-          {busy && <p role="status">Проверяем и восстанавливаем архив…</p>}
-          {session.demo && (
-            <small className="muted">
-              Архивы доступны в личном гараже. Реальные данные недоступны из
-              демо.
-            </small>
-          )}
-        </section>
+        {session.is_admin ||
+          (session.demo && (
+            <section className="panel settings-panel">
+              <HardDrive size={27} />
+              <h3>Резервная копия</h3>
+              <p>
+                Полный архив содержит базу и все загруженные файлы. Он позволяет
+                восстановить весь гараж.
+              </p>
+              <div className="info-box">
+                Скачайте архив на другой физический диск. Копия рядом с базой не
+                защитит от поломки накопителя.
+              </div>
+              <Button
+                disabled={session.demo}
+                onClick={() => download("/api/v1/backup")}
+              >
+                <Download size={17} />
+                Скачать полный архив
+              </Button>
+              <label
+                className={`restore-file ${session.demo ? "disabled" : ""}`}
+              >
+                <Upload size={16} />
+                Восстановить из архива
+                <input
+                  type="file"
+                  accept=".zip"
+                  disabled={session.demo || busy}
+                  onChange={async (e) => {
+                    const f = e.target.files?.[0];
+                    if (!f) return;
+                    if (
+                      !confirm(
+                        "Восстановление заменит текущие данные архивом. Скачайте текущий бэкап перед продолжением. Продолжить?",
+                      )
+                    )
+                      return;
+                    setBusy(true);
+                    try {
+                      const body = new FormData();
+                      body.append("file", f);
+                      await api(
+                        "/restore",
+                        { method: "POST", body },
+                        session.csrf,
+                      );
+                      notify("Архив восстановлен. Войдите заново.");
+                      location.reload();
+                    } catch (error) {
+                      notify((error as Error).message);
+                    } finally {
+                      setBusy(false);
+                      e.target.value = "";
+                    }
+                  }}
+                />
+              </label>
+              {busy && <p role="status">Проверяем и восстанавливаем архив…</p>}
+              {session.demo && (
+                <small className="muted">
+                  Архивы доступны в личном гараже. Реальные данные недоступны из
+                  демо.
+                </small>
+              )}
+            </section>
+          ))}
         <section className="panel settings-panel">
           <FileText size={27} />
           <h3>Экспорт истории</h3>

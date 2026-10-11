@@ -42,7 +42,7 @@ def main():
                     parser.error("Passwords differ")
                 with store.transaction() as c:
                     c.exec_driver_sql(
-                        "INSERT INTO users(id,username,password_hash) VALUES(?,?,?)",
+                        "INSERT INTO users(id,username,password_hash,is_admin) VALUES(?,?,?,1)",
                         (str(uuid.uuid4()), username, HASHER.hash(password)),
                     )
                 print("Administrator created.")

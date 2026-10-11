@@ -32,6 +32,7 @@ export interface AppModel {
   queue: Mutation[];
   sync: () => Promise<void>;
   resetDemo: () => Promise<void>;
+  updateSession: (session: Session) => void;
 }
 export const AppContext = createContext<AppModel | null>(null);
 export function useApp() {

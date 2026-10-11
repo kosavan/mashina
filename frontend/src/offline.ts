@@ -1,6 +1,7 @@
 import type { Cached, Mutation, Session, State } from "./types";
 import { currentKm } from "./utils";
 import { pendingMoney } from "./calculations";
+import { permissionError, scopeKey } from "./permissions";
 
 export class APIError extends Error {
   constructor(
@@ -130,6 +131,8 @@ export async function clearLocal() {
   });
 }
 function project(state: State, operation: Mutation): State {
+  if (operation.status === 403 || permissionError(state, operation))
+    return state;
   const result = structuredClone(state);
   const table = (
     {
@@ -196,6 +199,8 @@ export async function loadState(session: Session) {
   const prior = await read<Cached>("cache", session.id);
   try {
     let state = await api<State>("/state");
+    if (prior && scopeKey(prior.state) !== scopeKey(state))
+      await purgeReports(session.id);
     for (const operation of await queueFor(session.id))
       state = project(state, operation);
     await commit(session, state);
@@ -210,6 +215,8 @@ export async function enqueue(
   state: State,
   operation: Mutation,
 ) {
+  const denied = permissionError(state, operation);
+  if (denied) throw new Error(denied);
   const next = project(state, operation);
   await commit(session, next, operation);
   navigator.storage?.persist?.().catch(() => {});
@@ -224,6 +231,9 @@ export async function synchronize(
   syncing = true;
   try {
     const run = async () => {
+      // Refresh authorization before projecting or sending previously queued drafts.
+      const fresh = await loadState(session);
+      onChange(fresh, await queueFor(session.id));
       const blocked = new Set<string>();
       for (const operation of await queueFor(session.id)) {
         const key = operation.entity + operation.id;
@@ -255,7 +265,9 @@ export async function synchronize(
                 status: error.status,
               };
               await commit(session, prior.state, failed);
-              onChange(prior.state, await queueFor(session.id));
+              const safe =
+                error.status === 403 ? await loadState(session) : prior.state;
+              onChange(safe, await queueFor(session.id));
             }
             if (error.status === 401) break;
           } else break;
@@ -264,6 +276,10 @@ export async function synchronize(
     };
     if (navigator.locks) await navigator.locks.request("mashina-sync", run);
     else await run();
+  } catch (error) {
+    // Network errors leave the durable queue untouched. API errors are surfaced on refresh.
+    if (!(error instanceof APIError) && navigator.onLine)
+      console.debug("MASHINA sync deferred");
   } finally {
     syncing = false;
   }
@@ -275,6 +291,8 @@ export async function resolveOperation(
 ) {
   let state = await api<State>("/state");
   if (retry) {
+    const denied = permissionError(state, operation);
+    if (denied) throw new Error(denied);
     const table = (
       {
         vehicle: "vehicles",
@@ -321,4 +339,25 @@ export async function cachedAPI<T>(session: Session, path: string): Promise<T> {
       );
     return prior;
   }
+}
+
+async function purgeReports(owner: string) {
+  const database = await db();
+  await new Promise<void>((resolve, reject) => {
+    const tx = database.transaction("cache", "readwrite");
+    const store = tx.objectStore("cache");
+    const cursor = store.openCursor();
+    cursor.onsuccess = () => {
+      const row = cursor.result;
+      if (!row) return;
+      if (
+        typeof row.key === "string" &&
+        row.key.startsWith(`response:${owner}:`)
+      )
+        row.delete();
+      row.continue();
+    };
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
 }

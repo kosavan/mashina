@@ -1,0 +1,2 @@
+# Acceptance
+Create admin and member accounts; share one of two cars. Verify assigned-only state/analytics/files/export, own-event editing and spoof/replay denial. Mark a document shared then revoke grant. Check account switch cache, blocked offline queue and private previews. Restore old single-owner and new multi-user archives; compare grants/authors/files, sessions invalidated. Run full regression and mobile 360px checks.

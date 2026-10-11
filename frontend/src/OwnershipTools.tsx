@@ -565,6 +565,11 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
   const { state, selected, setSelected, session, save, notify, setPage } =
     useApp();
   const [tab, setTab] = useState("work");
+  const visibleTab =
+    state.vehicles.find((v) => v.id === selected)?.can_edit === false &&
+    ["budget", "import"].includes(tab)
+      ? "work"
+      : tab;
   const [month, setMonth] = useState(today().slice(0, 7));
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<{ entity: Entity; record?: RecordBase }>();
@@ -583,7 +588,11 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
         session,
         `/ownership?vehicle_id=${selected}&month=${month}`,
       ),
-    enabled: !!selected && tab !== "work" && tab !== "import",
+    enabled:
+      !!selected &&
+      state.vehicles.find((v) => v.id === selected)?.can_edit !== false &&
+      visibleTab !== "work" &&
+      visibleTab !== "import",
   });
   const tires = (state.tire_sets || []).filter(
     (row) => row.vehicle_id === selected && !row.deleted,
@@ -654,19 +663,25 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
             ["parts", "Запчасти"],
             ["budget", "Бюджет"],
             ["import", "Импорт"],
-          ].map(([key, label]) => (
-            <button
-              role="tab"
-              aria-selected={tab === key}
-              className={tab === key ? "active" : ""}
-              key={key}
-              onClick={() => setTab(key)}
-            >
-              {label}
-            </button>
-          ))}
+          ]
+            .filter(
+              ([key]) =>
+                state.vehicles.find((v) => v.id === selected)?.can_edit !==
+                  false || !["budget", "import"].includes(key),
+            )
+            .map(([key, label]) => (
+              <button
+                role="tab"
+                aria-selected={visibleTab === key}
+                className={visibleTab === key ? "active" : ""}
+                key={key}
+                onClick={() => setTab(key)}
+              >
+                {label}
+              </button>
+            ))}
         </div>
-        {tab !== "work" && (
+        {visibleTab !== "work" && (
           <label className="filter-select">
             Автомобиль
             <select
@@ -686,23 +701,29 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
           </label>
         )}
       </div>
-      {tab === "work" ? (
+      {visibleTab === "work" ? (
         children
       ) : !selected ? (
         <Empty
           title="Сначала добавьте автомобиль"
           description="Инструменты владения привязаны к вашему автомобилю."
         />
-      ) : tab === "import" ? (
+      ) : visibleTab === "import" ? (
         <CSVImport key={selected} />
-      ) : tab === "tires" ? (
+      ) : visibleTab === "tires" ? (
         <>
           <PageHeading
             eyebrow="СЕЗОНЫ МЕНЯЮТСЯ. ИСТОРИЯ ОСТАЁТСЯ."
             title="Комплекты шин"
             description="Размеры, установки и подтверждённый пробег — в одном месте."
             action={
-              <Button onClick={() => setModal({ entity: "tire_set" })}>
+              <Button
+                hidden={
+                  state.vehicles.find((v) => v.id === selected)?.can_edit ===
+                  false
+                }
+                onClick={() => setModal({ entity: "tire_set" })}
+              >
                 <Plus size={16} />
                 Добавить комплект
               </Button>
@@ -713,7 +734,12 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
               icon={CircleDot}
               title="У каждого сезона свой комплект"
               description="Добавьте марку, размер и историю использования. Мы не будем выдавать пробег за техническое состояние."
-              onClick={() => setModal({ entity: "tire_set" })}
+              onClick={
+                state.vehicles.find((v) => v.id === selected)?.can_edit ===
+                false
+                  ? undefined
+                  : () => setModal({ entity: "tire_set" })
+              }
               label="Добавить комплект"
             />
           ) : (
@@ -759,7 +785,10 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
                     )}
                   </div>
                   {tire.notes && <p className="muted">{tire.notes}</p>}
-                  <div className="ownership-actions">
+                  <div
+                    className="ownership-actions"
+                    hidden={tire.can_edit === false}
+                  >
                     <Button
                       variant="outline"
                       onClick={() =>
@@ -782,7 +811,7 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
             </div>
           )}
         </>
-      ) : tab === "parts" ? (
+      ) : visibleTab === "parts" ? (
         <>
           <PageHeading
             eyebrow="ПОМНИТЬ КАЖДУЮ ДЕТАЛЬ"

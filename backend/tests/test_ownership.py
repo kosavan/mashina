@@ -134,15 +134,30 @@ def test_restore_mvp_archive_upgrades_additively(client, tmp_path):
     from backend.storage import Store
 
     car = mutate(client, "vehicle", {"name": "MVP preserved"}).json()["record"]
+    event = mutate(
+        client,
+        "event",
+        {"vehicle_id": car["id"], "kind": "expense", "amount": "1.23", "occurred_at": "2026-10-01"},
+    ).json()["record"]
     archive = make_backup(client.app.state.store)
     with zipfile.ZipFile(io.BytesIO(archive)) as source:
         files = {name: source.read(name) for name in source.namelist() if name != "manifest.json"}
     snapshot = tmp_path / "old.sqlite"
     snapshot.write_bytes(files["database.sqlite"])
     with sqlite3.connect(snapshot) as connection:
-        for name in ("tire_sets", "budgets", "recurring_costs"):
+        connection.execute("PRAGMA journal_mode=DELETE")
+        for name in ("tire_sets", "budgets", "recurring_costs", "vehicle_access"):
             connection.execute(f"DROP TABLE {name}")
+        for table, column in (
+            ("users", "is_admin"),
+            ("users", "disabled"),
+            ("events", "created_by"),
+            ("attachments", "created_by"),
+            ("attachments", "visibility"),
+        ):
+            connection.execute(f"ALTER TABLE {table} DROP COLUMN {column}")
         connection.execute("UPDATE alembic_version SET version_num='001'")
+    connection.close()
     files["database.sqlite"] = snapshot.read_bytes()
     manifest = {
         "format": 1,
@@ -158,7 +173,10 @@ def test_restore_mvp_archive_upgrades_additively(client, tmp_path):
     owner = restored.query("SELECT id FROM users")[0]["id"]
     assert restored.state(owner)["vehicles"][0]["id"] == car["id"]
     assert restored.state(owner)["tire_sets"] == []
-    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "002"
+    assert restored.state(owner)["events"][0]["id"] == event["id"]
+    assert restored.state(owner)["events"][0]["created_by"] == owner
+    assert restored.query("SELECT is_admin FROM users")[0]["is_admin"] == 1
+    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "003"
     restored.close()
 
 

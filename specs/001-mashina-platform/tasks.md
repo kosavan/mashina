@@ -46,7 +46,7 @@
 - [x] T022 Supply persistent nonroot single-service container, HTTPS example and CI in Dockerfile, docker-compose.yml, Caddyfile.example and .github/workflows/ci.yml.
 - [x] T023 Document installation/security/backup/limitations in README.md and verify checks in specs/001-mashina-platform/validation.md.
 - [x] T024 Verify desktop/mobile UI, required automated scenarios and production build; review requirement convergence against spec.md.
-- [ ] T025 Inspect tracked files for secrets/runtime data and publish source to user's public GitHub repository.
+- [x] T025 Inspect tracked files for secrets/runtime data and publish source to user's public GitHub repository.
 
 ## Dependencies & Execution Order
 T001–T004 → US1 → US2 → US3/US4 → US5 → delivery.
@@ -73,4 +73,4 @@ runtime and timing measurements must be reported separately if unavailable.
 ## Phase 10: Convergence
 - [x] T031 CRITICAL Implement exact pending item/fuel totals in frontend/src/offline.ts and test arithmetic per FR-014, Constitution I (partial).
 - [x] T032 Add confirmed-mileage cost trend to backend/domain.py and frontend/src/Analytics.tsx per FR-008 (missing).
-- [ ] T033 Verify 360px layouts across all screens, explicit sync conflicts and additional fuel/maintenance journeys in frontend/tests/app.spec.ts per US2/AC3, US5/AC3, SC-005 (partial).
+- [x] T033 Verify 360px layouts across all screens, explicit sync conflicts and additional fuel/maintenance journeys in frontend/tests/app.spec.ts per US2/AC3, US5/AC3, SC-005 (partial).

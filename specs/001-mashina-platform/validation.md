@@ -2,7 +2,7 @@
 
 Date: 2026-10-11. Environment: Windows, Python 3.14, Node 20.18, Chromium headless.
 
-- pytest: 15 passed. Exact financial items, fuel derivation/full/partial/gap cycles,
+- pytest: 19 passed. Exact financial items, fuel derivation/full/partial/gap cycles,
   currency separation, ownership mileage, reminders, controlled setup, CSRF,
   idempotency/version conflicts, historical mileage, isolated demo, ZIP restore
   with byte-identical images, corrupt/traversal rejection, migration restart,
@@ -14,16 +14,20 @@ Date: 2026-10-11. Environment: Windows, Python 3.14, Node 20.18, Chromium headle
 - Playwright: mobile expense/edit/delete/undo; offline persisted reload and
   exactly-once delivery; offline create then edit; visible version conflict with
   explicit server-version choice; vehicle/document/reminder flow; demo charts;
-  all primary screens at 360 px and light theme.
+  all primary screens at 360 px and light theme; fuel and maintenance item entry.
+  Eight browser scenarios pass.
 - Visual review: desktop garage and analytics, mobile garage, generated demo
   vehicle photographs. Screenshots remain local in `.cache/screenshots`.
 
 No physical iPhone was available: installation, safe-area/keyboard behavior and
 the 10–20 second human-entry target require device acceptance. Desktop browser
 automation is not evidence of those measurements. Docker is not installed on
-this workstation; the Linux container build and health check run in GitHub CI.
+this workstation; the Linux container build and health check passed in GitHub CI
+(run 38169798136). The final fuel form fix is also covered locally.
 Performance budget tests are measured on this workstation, not the user's home server.
 
 Spec Kit convergence identified pending-money accuracy, cost-per-km trend and
-additional mobile/conflict tests; the remediation tasks are T031–T033.
+additional mobile/conflict tests; remediation tasks T031–T033 are completed.
+Production npm audit: zero known vulnerabilities at verification time.
+
 Future release features are deliberately not presented as MVP functionality.

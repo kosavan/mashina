@@ -528,7 +528,7 @@ export function RecordForm({
                       {label}
                       <input
                         type="number"
-                        min="0.001"
+                        min={key === "liters" ? "0.001" : "0.01"}
                         step={key === "liters" ? "0.001" : "0.01"}
                         inputMode="decimal"
                         value={fuelValues[key]}

@@ -1,4 +1,5 @@
 """Check tracked source for high-confidence credentials; never print secret values."""
+
 from pathlib import Path
 import re
 import subprocess
@@ -17,7 +18,9 @@ files = subprocess.check_output(["git", "ls-files", "-z"]).decode().split("\0")
 failed = []
 for name in filter(None, files):
     path = Path(name)
-    if path.name in forbidden or any(p in {"data", "backups", ".cache", ".venv", "node_modules"} for p in path.parts):
+    if path.name in forbidden or any(
+        p in {"data", "backups", ".cache", ".venv", "node_modules"} for p in path.parts
+    ):
         failed.append(name)
         continue
     if path.is_file() and any(re.search(pattern, path.read_bytes()) for pattern in PATTERNS):

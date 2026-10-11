@@ -337,3 +337,50 @@ test("queued conflict is visible and server version is preserved explicitly", as
     state.events.find((e: any) => e.id === fixture.record.id).amount_minor,
   ).toBe(50000);
 });
+
+test("fuel derives total and maintenance items count only once", async ({
+  page,
+}) => {
+  await demo(page);
+  await page
+    .getByRole("button", { name: "Добавить запись", exact: true })
+    .click();
+  await page.getByRole("button", { name: /^Заправка/ }).click();
+  await page.getByLabel("Литры", { exact: true }).fill("42.13");
+  await page.getByLabel("Цена за литр, ₽", { exact: true }).fill("61.27");
+  await page.getByLabel("Описание", { exact: true }).fill("Проверка топлива");
+  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Добавить запись", exact: true })
+    .click();
+  await page.getByRole("button", { name: /^ТО \/ ремонт/ }).click();
+  await page
+    .getByLabel("Описание", { exact: true })
+    .fill("Проверка позиций ТО");
+  await page
+    .getByRole("button", { name: "Добавить позицию", exact: true })
+    .click();
+  await page
+    .locator(".item-editor")
+    .getByLabel("Название", { exact: true })
+    .fill("Масло");
+  await page.getByLabel("Артикул", { exact: true }).fill("TEST-123");
+  await page.getByLabel("Кол-во", { exact: true }).fill("4");
+  await page.getByLabel("Цена, ₽", { exact: true }).fill("1000.01");
+  await page.getByLabel("Скидка, ₽", { exact: true }).fill("100");
+  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const state = await (await page.request.get("/api/v1/state")).json();
+  const fuel = state.events.filter(
+    (e: any) => e.description === "Проверка топлива",
+  );
+  const service = state.events.filter(
+    (e: any) => e.description === "Проверка позиций ТО",
+  );
+  expect(fuel).toHaveLength(1);
+  expect(fuel[0].amount_minor).toBe(258131);
+  expect(service).toHaveLength(1);
+  expect(service[0].amount_minor).toBe(390004);
+  expect(service[0].items[0].part_number).toBe("TEST-123");
+});

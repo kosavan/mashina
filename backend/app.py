@@ -385,6 +385,16 @@ def create_app(data_path=None, bootstrap_token=None):
         active_store = s["store"]
         with active_store.transaction() as c:
             active_store.owned(c, "attachments", uid(attachment_id), s["user_id"])
+            for row in c.exec_driver_sql(
+                "SELECT id,data FROM vehicles WHERE owner_id=?", (s["user_id"],)
+            ).mappings():
+                data = json.loads(row["data"])
+                if data.get("photo_id") == attachment_id:
+                    data["photo_id"] = ""
+                    c.exec_driver_sql(
+                        "UPDATE vehicles SET data=?,version=version+1 WHERE id=?",
+                        (dumps(data), row["id"]),
+                    )
             c.exec_driver_sql("DELETE FROM attachments WHERE id=?", (attachment_id,))
         return {"ok": True}
 

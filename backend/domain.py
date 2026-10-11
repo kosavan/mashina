@@ -96,7 +96,8 @@ def normalize_vehicle(data):
     for key in ("purchase", "sale"):
         if key + "_amount" in r:
             r[key + "_minor"] = minor(r[key + "_amount"] or 0)
-        if r.get(key + "_minor", 0) < 0:
+        r[key + "_minor"] = integer(r.get(key + "_minor", 0), "Цена", 10**12)
+        if r[key + "_minor"] < 0:
             raise ValueError("Цена не может быть отрицательной")
         r[key + "_date"] = iso(r.get(key + "_date"), True)[:10]
     r["status"] = r.get("status", "active")
@@ -119,7 +120,14 @@ def normalize_event(data):
     if r["kind"] in {"fuel", "odometer"} and r["odometer"] is None:
         raise ValueError("Для этой записи нужен пробег")
     items = []
-    for item in r.get("items", []):
+    raw_items = r.get("items", [])
+    if (
+        not isinstance(raw_items, list)
+        or len(raw_items) > 100
+        or any(not isinstance(item, dict) for item in raw_items)
+    ):
+        raise ValueError("Позиции: список до 100 объектов")
+    for item in raw_items:
         qty = decimal(item.get("quantity", "1"), "Количество", True)
         price = decimal(item.get("unit_price", "0"), "Цена")
         discount = decimal(item.get("discount", "0"), "Скидка")

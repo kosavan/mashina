@@ -330,7 +330,13 @@ export default function App() {
   useEffect(() => {
     if (state && !selected && state.vehicles.length)
       setSelected(
-        state.settings.last_vehicle ||
+        (state.vehicles.some(
+          (v) =>
+            v.id === localStorage.getItem(`mashina-selected:${session?.id}`),
+        )
+          ? localStorage.getItem(`mashina-selected:${session?.id}`)
+          : "") ||
+          state.settings.last_vehicle ||
           state.vehicles.find((v) => v.status === "active")?.id ||
           state.vehicles[0].id,
       );
@@ -408,6 +414,10 @@ export default function App() {
     setSelected("");
     setPage("garage");
   }
+  useEffect(() => {
+    if (session && selected)
+      localStorage.setItem(`mashina-selected:${session.id}`, selected);
+  }, [session, selected]);
   async function resetDemo() {
     if (!confirm("Сбросить изменения демонстрационного гаража?")) return;
     const next = await api<Session>("/demo", { method: "POST" });

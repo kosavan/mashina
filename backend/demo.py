@@ -134,4 +134,45 @@ def seed(store):
                     },
                 },
             )
+        for entity, data in [
+            (
+                "tire_set",
+                {
+                    "brand": "Michelin",
+                    "model": "Pilot Alpin",
+                    "size": "235/55 R19",
+                    "season": "winter",
+                    "intervals": [
+                        {
+                            "mounted_at": (today - timedelta(days=200)).isoformat(),
+                            "mounted_km": current - 6000,
+                            "removed_at": (today - timedelta(days=110)).isoformat(),
+                            "removed_km": current - 1800,
+                        }
+                    ],
+                },
+            ),
+            ("budget", {"month": today.isoformat()[:7], "amount": "20000", "currency": "RUB"}),
+            (
+                "recurring_cost",
+                {
+                    "title": "Парковка · демо",
+                    "amount": "3500",
+                    "currency": "RUB",
+                    "next_date": (today + timedelta(days=14)).isoformat(),
+                    "interval_months": 1,
+                    "category": "Парковки и дороги",
+                },
+            ),
+        ]:
+            store.mutate(
+                owner,
+                {
+                    "operation_id": str(uuid.uuid4()),
+                    "entity": entity,
+                    "action": "create",
+                    "id": str(uuid.uuid4()),
+                    "data": {**data, "vehicle_id": vehicle_id},
+                },
+            )
     return owner

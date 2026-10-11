@@ -55,12 +55,48 @@ export interface Attachment {
   expires: string;
   notes: string;
 }
+export interface TireInterval {
+  mounted_at: string;
+  mounted_km: number;
+  removed_at: string;
+  removed_km: number | null;
+}
+export interface TireSet extends RecordBase {
+  vehicle_id: string;
+  brand: string;
+  model: string;
+  size: string;
+  season: "summer" | "winter" | "all";
+  intervals: TireInterval[];
+  confirmed_km: number;
+  notes: string;
+}
+export interface Budget extends RecordBase {
+  vehicle_id: string;
+  month: string;
+  amount_minor: number;
+  currency: string;
+  category: string;
+}
+export interface RecurringCost extends RecordBase {
+  vehicle_id: string;
+  title: string;
+  amount_minor: number;
+  currency: string;
+  category: string;
+  next_date: string;
+  interval_months: number;
+  enabled: boolean;
+}
 export interface State {
   vehicles: Vehicle[];
   events: Entry[];
   categories: RecordBase[];
   reminders: Reminder[];
   attachments: Attachment[];
+  tire_sets?: TireSet[];
+  budgets?: Budget[];
+  recurring_costs?: RecurringCost[];
   settings: Record<string, any>;
 }
 export interface Session {
@@ -72,7 +108,15 @@ export interface Session {
 export interface Mutation {
   operation_id: string;
   id: string;
-  entity: "vehicle" | "event" | "category" | "reminder" | "settings";
+  entity:
+    | "vehicle"
+    | "event"
+    | "category"
+    | "reminder"
+    | "settings"
+    | "tire_set"
+    | "budget"
+    | "recurring_cost";
   action: "create" | "update" | "delete" | "restore" | "complete";
   expected_version?: number;
   data: Record<string, any>;

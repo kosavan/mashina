@@ -384,3 +384,151 @@ test("fuel derives total and maintenance items count only once", async ({
   expect(service[0].amount_minor).toBe(390004);
   expect(service[0].items[0].part_number).toBe("TEST-123");
 });
+
+test("ownership tools: confirmed tire history, budget and reviewed CSV repeat", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await demo(page);
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Обслуживание", exact: true })
+    .evaluate((button: HTMLButtonElement) => button.click());
+  await page.getByRole("tab", { name: "Шины", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Комплекты шин", exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Добавить комплект", exact: true })
+    .click();
+  await page.getByLabel("Марка шин", { exact: true }).fill("Nokian");
+  await page.getByLabel("Модель шин", { exact: true }).fill("Hakka");
+  await page.getByLabel("Размер", { exact: true }).fill("235/55 R19");
+  await page
+    .getByRole("button", { name: "Добавить установку", exact: true })
+    .click();
+  await page.getByLabel("Установлены", { exact: true }).fill("2026-01-01");
+  await page.getByLabel("Пробег установки", { exact: true }).fill("100000");
+  await page.getByLabel("Сняты", { exact: true }).fill("2026-03-01");
+  await page.getByLabel("Пробег снятия", { exact: true }).fill("105000");
+  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Nokian Hakka", exact: true }),
+  ).toBeVisible();
+  await page.screenshot({
+    path: "../.cache/screenshots/tires-mobile.png",
+    fullPage: true,
+  });
+  await page.getByRole("tab", { name: "Бюджет", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "Бюджет и будущие расходы",
+      exact: true,
+    }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByRole("tab", { name: "Импорт", exact: true }).click();
+  const content =
+    "external_id,occurred_at,kind,amount,description\nweb-1,2026-01-01,expense,123.45,CSV browser test\nweb-2,2026-01-02,expense,-5,Invalid row\n";
+  await page.locator("input[type=file]").setInputFiles({
+    name: "history.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(content),
+  });
+  await expect(
+    page.getByText("Строка 2 · CSV browser test", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Подтвердить импорт · 1", exact: true })
+    .click();
+  await expect(
+    page.getByText(
+      "История импортирована. Повторные операции защищены от дублирования.",
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await page.locator("input[type=file]").setInputFiles({
+    name: "history.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(content),
+  });
+  await expect(
+    page.getByText("Уже импортирована / повтор в файле", { exact: true }),
+  ).toBeVisible();
+  const state = await (await page.request.get("/api/v1/state")).json();
+  expect(
+    state.events.filter((e: any) => e.description === "CSV browser test"),
+  ).toHaveLength(1);
+  expect(
+    state.tire_sets.find((t: any) => t.brand === "Nokian").confirmed_km,
+  ).toBe(5000);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
+
+test("offline tire draft survives reload and synchronizes once", async ({
+  page,
+  context,
+}) => {
+  await demo(page);
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Обслуживание", exact: true })
+    .click();
+  await page.getByRole("tab", { name: "Шины", exact: true }).click();
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await context.setOffline(true);
+  await page
+    .getByRole("button", { name: "Добавить комплект", exact: true })
+    .click();
+  await page.getByLabel("Марка шин", { exact: true }).fill("Offline tires");
+  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByRole("heading", { name: "Offline tires", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("tab", { name: "Бюджет", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Задать бюджет", exact: true })
+    .click();
+  await page.getByLabel("Сумма", { exact: true }).fill("100");
+  await page
+    .getByLabel("Категория (пусто — все расходы)", { exact: true })
+    .fill("Offline category");
+  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await expect(
+    page.getByText("Offline category · RUB", { exact: true }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("heading", { name: "Мой гараж", exact: true }),
+  ).toBeVisible();
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Обслуживание", exact: true })
+    .click();
+  await page.getByRole("tab", { name: "Шины", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "Offline tires", exact: true }),
+  ).toBeVisible();
+  await context.setOffline(false);
+  await expect(page.getByText("Всё сохранено", { exact: true })).toBeVisible();
+  const state = await (await page.request.get("/api/v1/state")).json();
+  expect(
+    state.budgets.filter((b: any) => b.category === "Offline category"),
+  ).toHaveLength(1);
+  expect(
+    state.tire_sets.filter((t: any) => t.brand === "Offline tires"),
+  ).toHaveLength(1);
+});

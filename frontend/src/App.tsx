@@ -377,7 +377,7 @@ export default function App() {
     return {
       ...data,
       id: operation.id,
-      version: 1,
+      version: (record?.version || 0) + 1,
       pending: true,
     } as RecordBase;
   }

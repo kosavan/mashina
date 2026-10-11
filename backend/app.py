@@ -25,6 +25,7 @@ from backend.storage import Store, Conflict, Denied, dumps, uid
 from backend.domain import analytics, iso, text
 from backend.backup import make_backup, restore_backup, MAX_ARCHIVE
 from backend.demo import seed
+from backend.ownership import ownership_report, csv_rows, import_row
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -163,7 +164,8 @@ def create_app(data_path=None, bootstrap_token=None):
 
     @app.get(PREFIX + "/health")
     def health():
-        return {"status": "ok", "schema": "001"}
+        revision = store.query("SELECT version_num FROM alembic_version")[0]["version_num"]
+        return {"status": "ok", "schema": revision}
 
     @app.get(PREFIX + "/setup")
     def setup_status():
@@ -268,6 +270,66 @@ def create_app(data_path=None, bootstrap_token=None):
             kind,
             currency,
         )
+
+    @app.get(PREFIX + "/ownership")
+    def get_ownership(vehicle_id: str, month: str, s=Depends(session)):
+        active_store = s["store"]
+        with active_store.transaction() as c:
+            active_store.owned(c, "vehicles", uid(vehicle_id), s["user_id"])
+        return ownership_report(active_store.state(s["user_id"]), vehicle_id, month)
+
+    @app.post(PREFIX + "/import/csv/preview")
+    async def preview_csv(
+        file: UploadFile = File(...), vehicle_id: str = Form(...), s=Depends(session)
+    ):
+        active_store = s["store"]
+        with active_store.transaction() as c:
+            active_store.owned(c, "vehicles", uid(vehicle_id), s["user_id"])
+        rows = csv_rows(await file.read(2 * 1024 * 1024 + 1), s["user_id"], vehicle_id)
+        for row in rows:
+            if row.get("error"):
+                continue
+            existing = active_store.query(
+                "SELECT data FROM events WHERE id=? AND owner_id=?", (row["id"], s["user_id"])
+            )
+            if existing:
+                if (
+                    json.loads(existing[0]["data"]).get("import_fingerprint")
+                    == row["data"]["import_fingerprint"]
+                ):
+                    row["duplicate"] = True
+                else:
+                    row["error"] = "Внешний ID уже существует с другими данными"
+        return {"rows": rows}
+
+    class ImportCommit(BaseModel):
+        vehicle_id: uuid.UUID
+        rows: list[dict] = Field(min_length=1, max_length=1000)
+        confirm_odometer: bool = False
+
+    @app.post(PREFIX + "/import/csv/commit")
+    def commit_csv(body: ImportCommit, s=Depends(session)):
+        vehicle_id, active_store = str(body.vehicle_id), s["store"]
+        rows = [import_row(source, s["user_id"], vehicle_id) for source in body.rows]
+        if (
+            any(row["data"].get("odometer") is not None for row in rows)
+            and not body.confirm_odometer
+        ):
+            raise ValueError("Подтвердите исторические показания пробега перед импортом")
+        records = []
+        with active_store.transaction() as c:
+            active_store.owned(c, "vehicles", vehicle_id, s["user_id"])
+            for row in rows:
+                row["data"]["odometer_confirmed"] = row["data"].get("odometer") is not None
+                payload = {
+                    "operation_id": row["operation_id"],
+                    "id": row["id"],
+                    "entity": "event",
+                    "action": "create",
+                    "data": row["data"],
+                }
+                records.append(active_store.mutate(s["user_id"], payload, connection=c)["record"])
+        return {"records": records}
 
     @app.post(PREFIX + "/attachments")
     async def upload(

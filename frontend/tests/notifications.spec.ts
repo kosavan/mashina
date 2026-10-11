@@ -57,3 +57,28 @@ test("demonstration notification settings remain isolated", async ({ page }) => 
   await expect(page.getByRole("dialog").getByText(/Демогараж изолирован/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Подключить устройство" })).toHaveCount(0);
 });
+
+test("missing setup and unsupported browsers explain notification availability", async ({ page }) => {
+  await page.addInitScript(() => Object.defineProperty(window, "PushManager", { value: undefined }));
+  let configured = false;
+  await page.route("**/api/v1/notifications", async route => {
+    if (route.request().method() !== "GET") return route.continue();
+    const response = await route.fetch();
+    const status = await response.json();
+    await route.fulfill({ response, json: { ...status, push_configured: configured } });
+  });
+  await page.goto("/");
+  await page.getByLabel("Имя пользователя", { exact: true }).fill("browser-owner");
+  await page.getByLabel("Пароль", { exact: true }).fill("browser-test-password");
+  await page.getByRole("button", { name: "Войти в гараж", exact: true }).click();
+  await page.locator(".sidebar").getByRole("button", { name: "Настройки", exact: true }).click();
+  await page.getByRole("button", { name: "Уведомления", exact: true }).click();
+  const sheet = page.getByRole("dialog");
+  await expect(sheet.getByText(/Остальное приложение работает без уведомлений/)).toBeVisible();
+  await expect(sheet.getByRole("button", { name: "Подключить устройство" })).toHaveCount(0);
+  configured = true;
+  await sheet.getByRole("button", { name: "Обновить", exact: true }).click();
+  await expect(sheet.getByText(/Этот браузер не предоставляет Web Push/)).toBeVisible();
+  await expect(sheet.getByText(/добавьте MASHINA на экран/)).toBeVisible();
+  await expect(sheet.getByRole("button", { name: "Подключить устройство" })).toHaveCount(0);
+});

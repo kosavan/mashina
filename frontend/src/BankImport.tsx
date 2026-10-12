@@ -146,8 +146,10 @@ export default function BankImport() {
     if (busy) return;
     if (
       !result &&
-      count &&
-      !confirm("Закрыть проверку и потерять неподтверждённые решения?")
+      (file || count) &&
+      !confirm(
+        "Закрыть проверку? Файл, сопоставление и неподтверждённые решения не будут сохранены.",
+      )
     )
       return;
     setOpen(false);
@@ -745,7 +747,8 @@ export default function BankImport() {
               {totals}
               <p className="field-help">
                 Без выбора: {summary.unresolved}. Уже подтверждено:{" "}
-                {summary.processed}. Ничего не запишется до следующего шага.
+                {summary.processed}. Заблокировано из-за ошибок или конфликтов:{" "}
+                {summary.blocked}. Ничего не запишется до следующего шага.
               </p>
               {needsAck && (
                 <p className="form-error">
@@ -799,6 +802,7 @@ export default function BankImport() {
               </div>
               <p className="muted">
                 Строки без выбора ({summary.unresolved}) останутся нетронутыми.
+                Заблокированные строки ({summary.blocked}) не включены.
                 Связанные заправки и ремонты сохранятся как есть. При ошибке
                 одной операции весь выбранный набор будет отменён.
               </p>

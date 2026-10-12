@@ -50,11 +50,12 @@ describe("deliberate bank review", () => {
     const summary = reviewSummary(
       [
         { ...row(1), processed: true },
-        { ...row(2), conflict: true },
+        { ...row(2), conflict: true, processed: true },
       ],
       {},
     );
     expect(summary.processed).toBe(1);
+    expect(summary.blocked).toBe(1);
     expect(summary.unresolved).toBe(0);
   });
 });

@@ -31,4 +31,6 @@ and production deployment remain owner-environment checks; no unsupported claim 
 
 ## Publication
 
-Source-only secret/runtime scan and draft PR CI pending. This slice does not constitute all of release 2.0.
+Source-only secret/runtime scan passed for 203 tracked files. [PR 7](https://github.com/kosavan/mashina/pull/7), code commit d405ca4, passed [Linux CI 38192547172](https://github.com/kosavan/mashina/actions/runs/38192547172), including all 20 browser journeys, Docker build and container health/persistent initialization.
+
+Final review makes blocked/invalid rows explicit in both review and confirmation totals and warns before closing any selected file, including mapping-only drafts. Vitest/static/build and both affected mobile journeys passed again, including cancelling the close warning without losing choices. Final head CI and convergence required before merge. This slice does not constitute all of release 2.0.

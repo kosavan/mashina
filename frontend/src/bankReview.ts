@@ -44,13 +44,17 @@ export function reviewSummary(rows: BankRow[], choices: Choices) {
     linked = 0,
     ignored = 0,
     unresolved = 0,
-    processed = 0;
+    processed = 0,
+    blocked = 0;
   for (const row of rows) {
+    if (row.conflict || !row.data) {
+      blocked++;
+      continue;
+    }
     if (row.processed) {
       processed++;
       continue;
     }
-    if (row.conflict || !row.data) continue;
     const choice = choices[row.row_id];
     if (!choice) {
       unresolved++;
@@ -69,6 +73,7 @@ export function reviewSummary(rows: BankRow[], choices: Choices) {
     ignored,
     unresolved,
     processed,
+    blocked,
     totals: Object.fromEntries(
       Object.entries(totals).map(([key, value]) => [key, value.toString()]),
     ),

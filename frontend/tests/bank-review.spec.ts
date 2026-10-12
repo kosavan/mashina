@@ -69,13 +69,11 @@ async function openImport(page: Page, car: string) {
 async function mapFile(page: Page, content: string, sourceName: string) {
   const sheet = page.getByRole("dialog");
   await sheet.getByLabel("Разделитель", { exact: true }).selectOption("comma");
-  await sheet
-    .getByLabel("Банковский CSV", { exact: true })
-    .setInputFiles({
-      name: "synthetic.csv",
-      mimeType: "text/csv",
-      buffer: Buffer.from(content),
-    });
+  await sheet.getByLabel("Банковский CSV", { exact: true }).setInputFiles({
+    name: "synthetic.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(content),
+  });
   await sheet.getByRole("button", { name: "Прочитать столбцы" }).click();
   await sheet.getByLabel("Дата операции", { exact: true }).selectOption("date");
   await sheet
@@ -132,6 +130,11 @@ test("mobile bank mapping links fuel, creates once, and retries a lost response 
     .getByLabel("Решение для операции 2", { exact: true })
     .selectOption("create");
   await sheet.getByLabel("Категория операции 2", { exact: true }).fill("Мойка");
+  page.once("dialog", (dialog) => dialog.dismiss());
+  await sheet.getByRole("button", { name: "Закрыть", exact: true }).click();
+  await expect(
+    sheet.getByLabel("Решение для операции 2", { exact: true }),
+  ).toHaveValue("create");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

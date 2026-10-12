@@ -124,7 +124,7 @@ def test_csv_limits_and_reordered_ids():
         csv_rows(b"unexpected\nvalue", "owner", "vehicle")
 
 
-@pytest.mark.parametrize("revision", ["001", "002", "003", "004"])
+@pytest.mark.parametrize("revision", ["001", "002", "003", "004", "005"])
 def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
     import hashlib
     import io
@@ -148,10 +148,14 @@ def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
     with sqlite3.connect(snapshot) as connection:
         connection.execute("PRAGMA journal_mode=DELETE")
         for name in (
-            "bank_commit_receipts",
-            "bank_preview_batches",
-            "bank_ledger",
-            "bank_sources",
+            "machine_receipts",
+            "machine_vehicle_grants",
+            "machine_credentials",
+            *(
+                ("bank_commit_receipts", "bank_preview_batches", "bank_ledger", "bank_sources")
+                if revision != "005"
+                else ()
+            ),
             *(
                 (
                     "notification_deliveries",
@@ -161,13 +165,14 @@ def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
                     "notification_preferences",
                     "notification_identity",
                 )
-                if revision != "004"
+                if revision not in {"004", "005"}
                 else ()
             ),
             *(("tire_sets", "budgets", "recurring_costs") if revision == "001" else ()),
             *(("vehicle_access",) if revision in {"001", "002"} else ()),
         ):
             connection.execute(f"DROP TABLE {name}")
+        connection.execute("DROP INDEX ix_machine_history")
         for table, column in (
             (
                 ("users", "is_admin"),
@@ -200,7 +205,7 @@ def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
     assert restored.state(owner)["events"][0]["id"] == event["id"]
     assert restored.state(owner)["events"][0]["created_by"] == owner
     assert restored.query("SELECT is_admin FROM users")[0]["is_admin"] == 1
-    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "005"
+    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "006"
     restored.close()
 
 

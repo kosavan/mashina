@@ -10,6 +10,7 @@ from sqlalchemy.exc import IntegrityError
 from backend.access import vehicle_access
 from backend.storage import Denied, Conflict, uid, dumps
 from backend.domain import text
+from backend.machine_access import revoke_user
 
 
 def require_admin(s, c):
@@ -103,6 +104,8 @@ def install_accounts(app, session, hasher, login_response, throttle):
                     (hasher.hash(body.password), user_id),
                 )
             c.exec_driver_sql("DELETE FROM sessions WHERE user_id=?", (user_id,))
+            if body.password is not None or body.disabled is True:
+                revoke_user(c, user_id)
             audit(
                 c,
                 s["user_id"],
@@ -132,6 +135,7 @@ def install_accounts(app, session, hasher, login_response, throttle):
                 (hasher.hash(body.password), s["user_id"]),
             )
             c.exec_driver_sql("DELETE FROM sessions WHERE user_id=?", (s["user_id"],))
+            revoke_user(c, s["user_id"])
             audit(c, s["user_id"], s["user_id"], "password_change", {})
         return login_response(s["user_id"], s["username"])
 

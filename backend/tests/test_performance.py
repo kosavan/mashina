@@ -45,7 +45,7 @@ def test_migration_restart_preserves_history(tmp_path):
     store.close()
     reopened = Store(tmp_path)
     assert reopened.state(owner)["vehicles"][0]["id"] == car["id"]
-    assert reopened.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "005"
+    assert reopened.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "006"
     reopened.close()
 
 
@@ -85,3 +85,44 @@ def test_bank_1000_rows_against_10000_equal_amount_events(client):
         r["candidate_count"] == 10000 and len(r["candidates"]) == 5 for r in response.json()["rows"]
     )
     assert elapsed < 2.0, f"Bank review 1000×10000: {elapsed:.3f}s exceeds budget"
+
+
+def test_machine_first_page_10000_events_budget(client):
+    import json
+    from backend.tests.test_api import mutate
+    from backend.tests.test_machine_access import issue, machine, MACHINE
+
+    client.app.state.machine_enabled = True
+    car = mutate(client, "vehicle", {"name": "Performance"}).json()["record"]["id"]
+    actor = client.app.state.store.query("SELECT id FROM users WHERE username='owner'")[0]["id"]
+    data = json.dumps(
+        {
+            "kind": "expense",
+            "amount_minor": 123,
+            "currency": "RUB",
+            "occurred_at": "2026-10-01",
+            "description": "Synthetic",
+            "items": [],
+        }
+    )
+    with client.app.state.store.transaction() as c:
+        c.exec_driver_sql(
+            "INSERT INTO events(id,owner_id,version,data,vehicle_id,created_by) VALUES(?,?,1,?,?,?)",
+            [(str(uuid.uuid4()), actor, data, car, actor) for _ in range(10000)],
+        )
+    bearer = machine(client, issue(client, [car]).json()["secret"])
+    started = time.perf_counter()
+    response = bearer.get(MACHINE + f"/vehicles/{car}/history")
+    elapsed = time.perf_counter() - started
+    assert response.status_code == 200, response.text
+    assert len(response.json()["items"]) == 25
+    assert response.json()["next_cursor"]
+    assert elapsed < 1.0, f"Machine first page 10K: {elapsed:.3f}s exceeds budget"
+    with client.app.state.store.transaction() as c:
+        c.exec_driver_sql(
+            "INSERT INTO events(id,owner_id,version,data,vehicle_id,created_by) VALUES(?,?,1,?,?,?)",
+            [(str(uuid.uuid4()), actor, data, car, actor) for _ in range(10001)],
+        )
+    capped = bearer.get(MACHINE + f"/vehicles/{car}/analytics")
+    assert capped.status_code == 422
+    assert "20 000" in capped.json()["detail"]

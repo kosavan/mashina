@@ -4618,3 +4618,106 @@ input[type="checkbox"] {
   font-size: 12px;
   color: var(--muted);
 }
+.machine-access {
+  padding: 24px;
+  display: grid;
+  gap: 24px;
+}
+.machine-intro {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+}
+.machine-intro h3 {
+  margin: 8px 0;
+}
+.machine-symbol {
+  display: grid;
+  place-items: center;
+  flex: 0 0 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--bg);
+}
+.machine-form {
+  display: grid;
+  gap: 12px;
+}
+.machine-form fieldset {
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  margin: 8px 0;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.machine-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 0;
+  cursor: pointer;
+}
+.machine-option input {
+  width: 22px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0;
+  flex: 0 0 22px;
+  margin-top: 1px;
+  accent-color: var(--accent);
+}
+.machine-option span {
+  flex: 1;
+  min-width: 0;
+}
+.machine-option small {
+  display: block;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.machine-secret {
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--accent);
+  border-radius: 20px;
+}
+.machine-secret textarea {
+  width: 100%;
+  resize: none;
+  font: 16px/1.5 monospace;
+  overflow-wrap: anywhere;
+}
+.machine-key {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.machine-key > div {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.machine-key button {
+  flex-shrink: 0;
+}
+.machine-access code {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 420px) {
+  .machine-access {
+    padding: 20px;
+  }
+  .machine-intro {
+    flex-direction: column;
+  }
+  .machine-secret {
+    padding: 16px;
+  }
+}

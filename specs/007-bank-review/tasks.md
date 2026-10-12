@@ -33,6 +33,6 @@ Independent: 360 px mapping→link/create→confirm→repeat, visible failure/of
 
 ## Phase 7 — Cross-cutting
 - [x] T014 Measure 1000×10000 matching under two seconds in backend/tests/test_performance.py; full regression/static/build/container CI evidence in specs/007-bank-review/validation.md.
-- [ ] T015 Document formats/privacy/restore in README.md and docs/, tools/check_secrets.py, Spec Kit converge, source-only PR and verified final CI.
+- [x] T015 Document formats/privacy/restore in README.md and docs/, tools/check_secrets.py, Spec Kit converge, source-only PR and verified final CI.
 
 Dependencies: T001→T002→US1→US2→US3→US4→validation. Tests before corresponding code; shared modules edited sequentially. Independent parser checks and frontend helper checks can run together after stabilization, as can backend and frontend regression. No parallel-agent implementation required. Deliver only all four stories after convergence; current CSV importer retained.

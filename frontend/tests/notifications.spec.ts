@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 
-test("device notifications require consent and disconnect locally without any provider request", async ({ page, request }) => {
+test("device notifications require consent and disconnect locally without any provider request", async ({ page, context, request }) => {
   const credentials = { username: "browser-owner", password: "browser-test-password", bootstrap_token: "browser-test-bootstrap-only" };
   const setup = await request.get("/api/v1/setup");
   const login = await request.post((await setup.json()).required ? "/api/v1/setup" : "/api/v1/login", { data: credentials });
@@ -26,10 +26,9 @@ test("device notifications require consent and disconnect locally without any pr
       return subscription;
     };
   }, { endpoint });
+  await context.addCookies((await request.storageState()).cookies);
   await page.goto("/");
-  await page.getByLabel("Имя пользователя", { exact: true }).fill(credentials.username);
-  await page.getByLabel("Пароль", { exact: true }).fill(credentials.password);
-  await page.getByRole("button", { name: "Войти в гараж", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Мой гараж", exact: true })).toBeVisible();
   await page.locator(".sidebar").getByRole("button", { name: "Настройки", exact: true }).click();
   await page.setViewportSize({ width: 360, height: 800 });
   await page.getByRole("button", { name: "Уведомления", exact: true }).click();

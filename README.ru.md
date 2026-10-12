@@ -64,4 +64,4 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · локальные вло�
 
 Распознавание чеков, поиск по истории обычным языком, бот внесения расходов и OBD-II пока не реализованы. Незавершённые функции не выдаются за готовые.
 
-[Лицензия MIT](LICENSE). Разработка через [Spec Kit](https://github.com/github/spec-kit); логотип — с [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), инфографика — с [Hyperframes](https://github.com/heygen-com/hyperframes).
+Разработка через [Spec Kit](https://github.com/github/spec-kit); логотип — с [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), инфографика — с [Hyperframes](https://github.com/heygen-com/hyperframes).

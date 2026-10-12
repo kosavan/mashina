@@ -65,4 +65,4 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · local attachments. A modul
 
 Receipt recognition, natural-language history search, an expense-entry bot and OBD-II are still future work. They are not hidden behind working-looking controls.
 
-[MIT licensed](LICENSE). Built with [Spec Kit](https://github.com/github/spec-kit); identity developed with [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), infographic authored with [Hyperframes](https://github.com/heygen-com/hyperframes).
+Built with [Spec Kit](https://github.com/github/spec-kit); identity developed with [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), infographic authored with [Hyperframes](https://github.com/heygen-com/hyperframes).

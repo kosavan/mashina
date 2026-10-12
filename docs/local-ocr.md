@@ -51,3 +51,15 @@ review behavior and is never wired into production or demo results.
 
 References: [Tesseract CLI](https://tesseract-ocr.github.io/tessdoc/Command-Line-Usage.html),
 [installation/language data](https://tesseract-ocr.github.io/tessdoc/Installation.html).
+
+## API contract
+
+`POST /api/v1/ocr` uses an authenticated session and `X-CSRF-Token`, with multipart
+`file`, `vehicle_id`, `mode` (`receipt`, `service`, `odometer`, `screenshot`) and
+`page` (default 1). Only users with access to the active vehicle may call it.
+A successful response contains inert `text`, optional string fields `amount`,
+`liters`, `price`, `odometer`, `occurred_at`, and `engine: tesseract-local`.
+Decimal strings use a dot; dates use ISO format. Missing or ambiguous facts are omitted.
+The endpoint has no database writes and never returns a proposed record identifier.
+Validation/recognition failures use the application's normal error envelope. Access
+is checked again after processing; revoked access cannot receive the result.

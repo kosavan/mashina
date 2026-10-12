@@ -73,11 +73,16 @@ No `llms.txt` is required for this implementation.
 2. Verify in Bing Webmaster Tools or use its supported Search Console import.
    Submit the sitemap in both consoles; inspect indexing and canonical selection.
    These actions need the owner's accounts.
-3. Use the current suggestion route at [selfh.st/apps](https://selfh.st/apps/).
-   Submission is not acceptance. No external messages were sent by this work.
+3. The [selfh.st submission form](https://selfh.st/submit/) currently excludes
+   newly launched projects from its app directory. Its suggested route is
+   **Self-Host Weekly > Project Launch** instead. Request owner authorization
+   before sending a newsletter pitch; disclose AI-assisted development honestly.
+   Directory submission should wait until eligible. Submission is not acceptance.
 4. Check [Awesome Selfhosted's rules](https://github.com/awesome-selfhosted/awesome-selfhosted-data/blob/master/CONTRIBUTING.md)
    when submitting. The first published release must be more than four months
-   old; repository creation is not the starting date. MIT alone is insufficient.
+   old; repository creation is not the starting date. MASHINA's first published
+   release was v0.1.0 on 2026-10-11; submit no earlier than 2027-02-12 and recheck
+   the rules then. MIT alone is insufficient.
 5. Adapt your existing promotion kit to community rules.
    Ask real users for installation feedback; do not invent reviews or post in bulk.
 

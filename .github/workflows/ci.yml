@@ -35,6 +35,14 @@ jobs:
         working-directory: frontend
       - run: npx playwright install --with-deps chromium && npm run test:e2e
         working-directory: frontend
+      - name: Preserve browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failures
+          path: frontend/test-results/
+          retention-days: 7
+          if-no-files-found: ignore
       - run: docker build -t mashina:verify .
       - name: Container health and persistent initialization
         run: |

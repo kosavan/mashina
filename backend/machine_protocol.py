@@ -23,7 +23,7 @@ VERSION_KEY = "io.modelcontextprotocol/protocolVersion"
 CAPABILITIES_KEY = "io.modelcontextprotocol/clientCapabilities"
 LIMIT = 1024 * 1024
 DEADLINE = 10
-INFO = {"name": "MASHINA", "version": "1.1.0"}
+INFO = {"name": "MASHINA", "version": "1.2.0"}
 
 
 def valid_id(value):

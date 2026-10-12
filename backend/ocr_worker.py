@@ -62,7 +62,7 @@ def run(folder):
     except Exception:
         raise ValueError("Нужен неповреждённый JPEG, PNG, WebP или PDF до 25 мегапикселей") from None
     result = subprocess.run(
-        [engine, str(folder / "input.png"), str(folder / "ocr"), "-l", "rus+eng",
+        [engine, str(folder / "input.png"), str(folder / "ocr"), "-l", "eng+rus",
          "--psm", "6" if request["mode"] in {"receipt", "odometer"} else "3"],
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=25,
         creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,

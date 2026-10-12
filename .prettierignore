@@ -1,0 +1,8 @@
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.venv/
+package-lock.json
+frontend/package-lock.json

@@ -146,7 +146,14 @@ def seed(store):
                     "season": "winter",
                     "manufacture_code": f"34{(today.year - 3) % 100:02d}",
                     "tread_threshold_mm": "4",
-                    "tread_measurements": [{"id": str(uuid.uuid4()), "measured_at": (today - timedelta(days=30)).isoformat(), "depth_mm": "6.4", "notes": "Вымышленный замер демогаража"}],
+                    "tread_measurements": [
+                        {
+                            "id": str(uuid.uuid4()),
+                            "measured_at": (today - timedelta(days=30)).isoformat(),
+                            "depth_mm": "6.4",
+                            "notes": "Вымышленный замер демогаража",
+                        }
+                    ],
                     "intervals": [
                         {
                             "mounted_at": (today - timedelta(days=200)).isoformat(),
@@ -178,6 +185,40 @@ def seed(store):
                     "action": "create",
                     "id": str(uuid.uuid4()),
                     "data": {**data, "vehicle_id": vehicle_id},
+                },
+            )
+        for title, view, panel, x, y, status in [
+            ("Царапина на двери · демо", "left", "left_front_door", 0.43, 0.55, "needs_repair"),
+            ("Скол бампера · демо", "front", "front_bumper", 0.58, 0.77, "planned"),
+            ("Устранённая вмятина · демо", "top", "hood", 0.5, 0.2, "repaired"),
+        ]:
+            store.mutate(
+                owner,
+                {
+                    "operation_id": str(uuid.uuid4()),
+                    "id": str(uuid.uuid4()),
+                    "entity": "body_damage",
+                    "action": "create",
+                    "data": {
+                        "vehicle_id": vehicle_id,
+                        "title": title,
+                        "view": view,
+                        "panel": panel,
+                        "x": x,
+                        "y": y,
+                        "status": status,
+                        "damage_type": "dent"
+                        if status == "repaired"
+                        else "chip"
+                        if view == "front"
+                        else "scratch",
+                        "discovered_on": (today - timedelta(days=40)).isoformat(),
+                        "repaired_on": (today - timedelta(days=10)).isoformat()
+                        if status == "repaired"
+                        else None,
+                        "estimate": "8500" if status != "repaired" else None,
+                        "notes": "Вымышленное повреждение демогаража",
+                    },
                 },
             )
     return owner

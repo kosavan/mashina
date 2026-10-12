@@ -39,6 +39,7 @@ import type {
   Kind,
   Page,
   RecordBase,
+  State,
   Session,
   Mutation,
   Attachment,
@@ -413,7 +414,8 @@ export default function App() {
       data,
       ...(record ? { expected_version: record.version } : {}),
     };
-    const denied = permissionError(state, operation);
+    const latest = client.getQueryData<State>(["state", session.id]) || state;
+    const denied = permissionError(latest, operation);
     if (denied) throw new Error(denied);
     if (navigator.onLine && queue.length === 0) {
       try {
@@ -428,7 +430,7 @@ export default function App() {
         if (error instanceof APIError) throw error;
       }
     }
-    const next = await enqueue(session, state, operation);
+    const next = await enqueue(session, latest, operation);
     client.setQueryData(["state", session.id], next);
     setQueue(await queueFor(session.id));
     notify(tr("Сохранено на устройстве · ожидает синхронизации"));

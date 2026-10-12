@@ -5,5 +5,6 @@
   "backend/migrations/versions/004_notifications.py": "2424f3ab2eafdf8cfa91f976853e5ce217a973ab5b9a8c8938be4b56304c607b",
   "backend/migrations/versions/005_bank_review.py": "9dc39b3b38b7484b243dc61cdcae0234d771d9515b2df877b59b82162eeaf17b",
   "backend/migrations/versions/006_machine_access.py": "042feb9c9b0852bf93e5a95484a45b99c42b403a0b8ea80be7de15f920710d45",
-  "backend/schema.py": "9490d46806a2ddf93344ec072b9883479aa0c516d9a34f944307f37eb8795229"
+  "backend/schema.py": "9490d46806a2ddf93344ec072b9883479aa0c516d9a34f944307f37eb8795229",
+  "backend/migrations/versions/007_body_damage.py": "ec7e525f8fdb707482de4bfe136a10ba4969692a20954a8ba88b39e6edd78fa0"
 }

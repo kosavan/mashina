@@ -7,6 +7,16 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.6.0: body damage schema
+
+This release adds revision 007 without changing released migrations. First startup
+upgrades schemas 001-006 after retaining a complete recovery ZIP. Existing records,
+files, IDs, settings and offline operations are preserved. Verify the new Body and
+damage section in a vehicle profile and your previous expenses/documents after
+updating. Keep the pre-upgrade ZIP and cold copy: images from 1.5.1 and earlier
+cannot open schema 007. Roll back the previous image **and** its pre-upgrade data
+using the procedure below; never relabel or delete the schema version.
+
 ## 1. Synchronize, stop and back up
 
 Read the target [release notes](https://github.com/kosavan/mashina/releases).
@@ -83,7 +93,7 @@ PDF. Save/edit/delete a fictional entry and test one device's offline sync witho
 duplicates. Reopen the PWA online to install its new worker, then test offline.
 Do not clear storage containing pending entries. Resume optional timers after checks.
 
-Real Alembic paths 001–006 are tested for preservation of files, settings, stable
+Real Alembic paths 001–007 are tested for preservation of files, settings, stable
 IDs and receipts. Shipped migrations stay immutable. Unknown/newer or unversioned
 existing databases are refused, not reset. Before an installed schema changes,
 a private full snapshot is retained in `data/upgrades/`; unchanged-schema restarts

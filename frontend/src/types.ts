@@ -104,6 +104,37 @@ export interface RecurringCost extends RecordBase {
   interval_months: number;
   enabled: boolean;
 }
+export type BodyView = "front" | "rear" | "left" | "right" | "top";
+export type DamageStatus =
+  "observed" | "needs_repair" | "planned" | "repaired" | "monitoring";
+export interface DamagePhoto {
+  attachment_id: string;
+  phase: "before" | "after";
+}
+export interface BodyDamage extends RecordBase {
+  vehicle_id: string;
+  title: string;
+  view: BodyView;
+  panel: string;
+  x: number;
+  y: number;
+  damage_type: "scratch" | "dent" | "chip" | "corrosion" | "crack" | "other";
+  severity: "minor" | "moderate" | "major";
+  status: DamageStatus;
+  discovered_on: string;
+  repaired_on: string;
+  odometer: number | null;
+  notes: string;
+  estimate_minor: number | null;
+  currency: string;
+  maintenance_event_id: string;
+  photos: DamagePhoto[];
+  status_history: {
+    status: DamageStatus;
+    changed_at: string;
+    repaired_on: string;
+  }[];
+}
 export interface State {
   vehicles: Vehicle[];
   events: Entry[];
@@ -113,6 +144,7 @@ export interface State {
   tire_sets?: TireSet[];
   budgets?: Budget[];
   recurring_costs?: RecurringCost[];
+  body_damages?: BodyDamage[];
   settings: Record<string, any>;
 }
 export interface Session {
@@ -133,7 +165,8 @@ export interface Mutation {
     | "settings"
     | "tire_set"
     | "budget"
-    | "recurring_cost";
+    | "recurring_cost"
+    | "body_damage";
   action: "create" | "update" | "delete" | "restore" | "complete";
   expected_version?: number;
   data: Record<string, any>;

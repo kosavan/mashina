@@ -73,6 +73,7 @@ def mutation_access(c, actor, entity, action, record_id, data):
         "tire_set": "tire_sets",
         "budget": "budgets",
         "recurring_cost": "recurring_costs",
+        "body_damage": "body_damages",
     }.get(entity)
     if not table:
         raise ValueError("Неизвестная сущность")

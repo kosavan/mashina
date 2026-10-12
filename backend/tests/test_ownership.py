@@ -148,6 +148,7 @@ def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
     with sqlite3.connect(snapshot) as connection:
         connection.execute("PRAGMA journal_mode=DELETE")
         for name in (
+            "body_damages",
             "machine_receipts",
             "machine_vehicle_grants",
             "machine_credentials",
@@ -205,7 +206,7 @@ def test_restore_legacy_archive_upgrades_additively(client, tmp_path, revision):
     assert restored.state(owner)["events"][0]["id"] == event["id"]
     assert restored.state(owner)["events"][0]["created_by"] == owner
     assert restored.query("SELECT is_admin FROM users")[0]["is_admin"] == 1
-    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "006"
+    assert restored.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "007"
     restored.close()
 
 

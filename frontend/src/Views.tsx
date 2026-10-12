@@ -4,6 +4,7 @@ import { LanguagePicker } from "./LanguagePicker";
 import { getLocale } from "./i18n";
 import { tr } from "./i18n";
 import { useState, lazy, Suspense } from "react";
+const BodyDamage = lazy(() => import("./BodyDamage"));
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Sharing = lazy(() => import("./Sharing"));
 const SaleReport = lazy(() => import("./SaleReport"));
@@ -871,6 +872,15 @@ export function VehiclePage() {
           unit={tr("км")}
         />
       </section>
+      <Suspense
+        fallback={
+          <div className="skeleton-panel" role="status">
+            {tr("Открываем схему кузова…")}
+          </div>
+        }
+      >
+        <BodyDamage key={v.id} vehicleId={v.id} />
+      </Suspense>
       <div className="section-heading">
         <h3>{tr("Последние события")}</h3>
         <Button size="sm" onClick={() => open("quick")}>

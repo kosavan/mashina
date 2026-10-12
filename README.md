@@ -23,6 +23,7 @@
 - **Every vehicle, one history.** Photos, ownership, mileage, service, parts and private documents.
 - **Quick fuel and expense entry.** Exact money, itemized costs, receipts and vehicle-specific defaults.
 - **Analytics you can trust.** Full-to-full fuel consumption, separate purchase/sale values and clear missing-data states.
+- **Bodywork with a memory.** [Interactive damage map](docs/body-damage.md), before/after photos, repair status and linked service history.
 - **Tires deserve their own space.** Mounting history, manufacture codes, dated tread measurements and care guidance.
 - **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. English and Russian UI, selectable at setup and in Settings.
 - **Local by default.** Durable offline entries, safe synchronization, SQLite + local files and complete backup/restore.

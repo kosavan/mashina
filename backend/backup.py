@@ -86,6 +86,7 @@ def _restore_backup(store, blob):
                     "004",
                     "005",
                     "006",
+                    "007",
                 }:
                     raise ValueError("Версия архива несовместима")
                 revision = check.execute("SELECT version_num FROM alembic_version").fetchone()[0]
@@ -145,12 +146,12 @@ def _restore_backup(store, blob):
 
                 for (data,) in check.execute("SELECT data FROM reminders"):
                     normalize_reminder(json.loads(data))
-                if revision in {"005", "006"}:
+                if revision in {"005", "006", "007"}:
                     from backend.bank_archive import validate_bank_archive
 
                     validate_bank_archive(check)
                     check.execute("DELETE FROM bank_preview_batches")
-                if revision == "006":
+                if revision in {"006", "007"}:
                     from backend.machine_archive import validate_machine_archive
 
                     validate_machine_archive(check)
@@ -158,7 +159,7 @@ def _restore_backup(store, blob):
                         "UPDATE machine_credentials SET revoked=? WHERE revoked IS NULL",
                         (int(time.time()),),
                     )
-                if revision in {"004", "005", "006"}:
+                if revision in {"004", "005", "006", "007"}:
                     from backend.notifications import validate_notification_archive
 
                     validate_notification_archive(check)
@@ -168,6 +169,10 @@ def _restore_backup(store, blob):
                     check.execute(
                         "UPDATE notification_deliveries SET state='uncertain',error_code='restored_pending' WHERE state='sending'"
                     )
+                if revision == "007":
+                    from backend.body_damage import validate_body_archive
+
+                    validate_body_archive(check)
                 check.execute("DELETE FROM sessions")
                 check.commit()
             (stage / "uploads").mkdir(exist_ok=True)

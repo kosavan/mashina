@@ -36,6 +36,7 @@ TABLES = {
     "tire_set": "tire_sets",
     "budget": "budgets",
     "recurring_cost": "recurring_costs",
+    "body_damage": "body_damages",
 }
 
 
@@ -342,7 +343,14 @@ class Store:
                 elif action not in {"create", "update"}:
                     raise ValueError("Неизвестное действие")
                 data.pop("current_odometer", None)
-                if entity in {"event", "reminder", "tire_set", "budget", "recurring_cost"}:
+                if entity in {
+                    "event",
+                    "reminder",
+                    "tire_set",
+                    "budget",
+                    "recurring_cost",
+                    "body_damage",
+                }:
                     vehicle_id = uid(data.get("vehicle_id"))
                     vehicle_access(c, vehicle_id, owner, write=entity != "event")
                     if before and vehicle_id != before["vehicle_id"]:
@@ -366,6 +374,26 @@ class Store:
                         and not deleted
                     ):
                         self.validate_odometer(c, owner, record_id, data)
+                elif entity == "body_damage":
+                    from backend.body_damage import normalize_damage, validate_damage_links
+                    from datetime import timezone
+
+                    data = normalize_damage(data)
+                    validate_damage_links(c, data, owner, before)
+                    history = list((before or {}).get("status_history", []))
+                    if not history or history[-1]["status"] != data["status"]:
+                        if len(history) >= 10000:
+                            raise ValueError("Достигнут предел истории статусов повреждения")
+                        history.append(
+                            {
+                                "status": data["status"],
+                                "changed_at": datetime.now(timezone.utc).isoformat(
+                                    timespec="seconds"
+                                ),
+                                "repaired_on": data["repaired_on"],
+                            }
+                        )
+                    data["status_history"] = history
                 elif entity == "reminder":
                     data = normalize_reminder(data)
                 elif entity in {"tire_set", "budget", "recurring_cost"}:
@@ -400,7 +428,14 @@ class Store:
                 else:
                     cols = "id,owner_id,version,data,deleted"
                     args = [record_id, resource_owner, version, dumps(data), int(deleted)]
-                    if entity in {"event", "reminder", "tire_set", "budget", "recurring_cost"}:
+                    if entity in {
+                        "event",
+                        "reminder",
+                        "tire_set",
+                        "budget",
+                        "recurring_cost",
+                        "body_damage",
+                    }:
                         cols += ",vehicle_id"
                         args.append(vehicle_id)
                     if entity == "event":

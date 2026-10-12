@@ -9,6 +9,7 @@ validation and future work are separate. Dates are not delivery promises.
 
 | Area | Available | Limits / evidence |
 |---|---|---|
+| Body condition 1.6 | Five-view panel/point map, before/after images, repair statuses/history, service links | [Guide](body-damage.md); offline text/markers, online photo upload |
 | Garage | Multiple cars, profiles/photos, ownership, archive/sale, manual VIN | Profile/history tests; automatic VIN lookup is planned |
 | Daily records | Exact expenses, service items/parts, fuel, mileage, notes | Financial invariants, edit/delete/replay tests |
 | Analytics | Period/category/car filters, full-to-full fuel cycles | Missing measurements stay unknown; purchase/sale separate |
@@ -41,7 +42,6 @@ Maintenance changes and their automated coverage; see Releases/Actions for verif
 | Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |
 | Next | Output localization | English/Russian PDF/export labels and notifications, unchanged user content |
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
-| Planned | Interactive body damage map | Panel/point markers, photos, repair status and linked service history; details below |
 | Planned | Larger backup archives | Bounded-memory streaming and verified restore beyond the current 200 MiB limit |
 | Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |
 | Later | Natural-language search | Local processing, permissions, measured resource budget |
@@ -49,13 +49,13 @@ Maintenance changes and their automated coverage; see Releases/Actions for verif
 | Later | Passkeys and more languages | Preserve existing login/data |
 | Research | VIN / compatible parts | Licensed sources and proven fitment; details below |
 
-## Planned: interactive body damage map
+## Available in 1.6: interactive body damage map
 
 An optional visual condition record in each vehicle profile, designed for mobile use.
-This is planned work, not an available feature.
+Available in vehicle profiles. See the [usage and limits guide](body-damage.md).
 
 - Select a body panel or place a marker on front, rear, left, right and top views;
-  support multiple damage records on the same panel. Start with a clear generic
+  support multiple damage records on the same panel. Use a contemporary, curved generic
   vehicle outline rather than requiring model-specific illustrations.
 - Record scratches, dents, paint chips, corrosion, cracks and other exterior damage,
   with date, optional mileage, notes, photos and owner-assessed severity.
@@ -68,11 +68,11 @@ This is planned work, not an available feature.
   distinguish current unresolved issues from past repairs.
 - Store records and images locally with vehicle access controls, complete export,
   backup/restore and compatibility-preserving migrations. Support offline text/marker
-  edits with idempotent sync; clearly show photos awaiting an online upload.
+  edits with idempotent sync; explain that selected new photo files require an online upload and are not durably queued.
 
 Acceptance: on a 360 px screen, mark two separate issues on one panel, attach photos,
 filter unresolved issues, link one confirmed repair and retain its original history.
-Automated checks must cover authorization, offline replay without duplicates,
+Automated checks cover authorization, offline replay without duplicates,
 financial linkage, backup/restore and upgrades preserving existing garages.
 
 ## Roadmap maintenance

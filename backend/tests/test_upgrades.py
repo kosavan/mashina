@@ -17,7 +17,7 @@ from backend.backup import make_backup, restore_backup
 from backend.tests.test_api import mutate
 
 
-@pytest.mark.parametrize("revision", ["001", "002", "003", "004", "005", "006"])
+@pytest.mark.parametrize("revision", ["001", "002", "003", "004", "005", "006", "007"])
 def test_upgrade_each_released_schema_preserves_history_settings_files_and_receipts(
     tmp_path, revision
 ):
@@ -88,7 +88,7 @@ def test_upgrade_each_released_schema_preserves_history_settings_files_and_recei
     (path / "uploads" / filename).write_bytes(image)
 
     store = Store(path)
-    assert store.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "006"
+    assert store.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "007"
     assert store.state(owner)["settings"] == json.loads(settings)
     assert store.state(owner)["events"][0]["amount_minor"] == 123456
     assert store.state(owner)["events"][0]["created_by"] == owner
@@ -103,7 +103,7 @@ def test_upgrade_each_released_schema_preserves_history_settings_files_and_recei
         "response": '{"record":{"kept":true}}',
     }
     snapshots = list((path / "upgrades").glob("*.zip"))
-    assert len(snapshots) == (0 if revision == "006" else 1)
+    assert len(snapshots) == (0 if revision == "007" else 1)
     if snapshots:
         with zipfile.ZipFile(snapshots[0]) as archive:
             assert archive.read("uploads/" + filename) == image

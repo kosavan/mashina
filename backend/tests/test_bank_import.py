@@ -62,7 +62,7 @@ def commit(client, batch, decisions, operation=None):
 
 def test_bank_migration_is_additive_and_enforces_foreign_keys(tmp_path):
     store = Store(tmp_path / "bank")
-    assert store.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "006"
+    assert store.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "007"
     tables = {r["name"] for r in store.query("SELECT name FROM sqlite_master WHERE type='table'")}
     assert {"bank_sources", "bank_preview_batches", "bank_ledger", "bank_commit_receipts"} <= tables
     assert store.query("PRAGMA foreign_key_check") == []

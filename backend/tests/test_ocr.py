@@ -31,7 +31,8 @@ def test_only_unambiguous_printed_facts(text, mode, expected):
 
 
 def test_limits_and_busy_before_native_processing():
-    for content, mode, page in [(b"", "receipt", 1), (b"x", "other", 1), (b"x", "receipt", 21)]:
+    for content, mode, page in [(b"", "receipt", 1), (b"x", "other", 1), (b"x", "receipt", 21),
+                                (b"x" * (20 * 1024 * 1024 + 1), "receipt", 1)]:
         with pytest.raises(ValueError):
             recognize(content, mode, page)
     with LOCK:
@@ -86,8 +87,13 @@ def test_real_local_engine_image_and_pdf(pdf, russian):
     printed = "ИТОГО: 1234.56\nОдометр: 123456 км\n12.10.2026" if russian else "TOTAL 1234.56\nODO 123456 km\n2026-10-12"
     ImageDraw.Draw(image).multiline_text((60, 40), printed, fill="black", font=font, spacing=24)
     output = io.BytesIO()
-    image.save(output, format="PDF" if pdf else "PNG", resolution=150)
-    result = recognize(output.getvalue(), "receipt", 1)
+    if pdf:
+        first_page = Image.new("RGB", image.size, "white")
+        ImageDraw.Draw(first_page).text((60, 40), "TOTAL 9.99", fill="black", font=font)
+        first_page.save(output, format="PDF", save_all=True, append_images=[image], resolution=150)
+    else:
+        image.save(output, format="PNG")
+    result = recognize(output.getvalue(), "receipt", 2 if pdf else 1)
     assert result["engine"] == "tesseract-local"
     assert result["fields"].get("amount") == "1234.56", result
     assert result["fields"].get("odometer") == "123456", result

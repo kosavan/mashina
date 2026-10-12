@@ -1,3 +1,19 @@
+# MASHINA 1.5.0
+
+Fully local text OCR for receipts, workshop invoices/work orders, dashboard photographs and arbitrary screenshots.
+
+- Read JPEG/PNG/WebP or a selected PDF page on the owner's server using bundled Tesseract rus+eng and Poppler. No external provider, paid API, cloud fallback or runtime model download.
+- Inspect text, edit suggestions and explicitly select fields to apply to fuel, expense, maintenance or odometer drafts. All checkboxes start unchecked. Original attachment is opt-in.
+- Recognition never saves a financial/mileage record. Normal Save preserves exact validation, historical mileage warnings and idempotency. Full tank, currency, trip/range/miles and ambiguous numbers are not guessed.
+- Bounded on-demand processing, one job/CPU thread, private temporary files, time/resource limits, authorization and post-processing revocation checks.
+- Updated roadmap includes general screenshots, workshop line-item extraction, crop/rotation and local-only future improvements.
+
+[Local OCR guide and limits](docs/local-ocr.md) · [Roadmap](docs/roadmap.md)
+
+First local text-recognition slice, not universal document understanding. One PDF page per request; workshop line items remain manual from extracted text. Seven-segment/unlabelled/glare-heavy dashboards may require manual input. Offline OCR needs the local server; ordinary manual offline entry continues. No schema migration or infrastructure change. Real-engine Linux CI is mandatory before publication; Windows local native OCR is not installed.
+
+---
+
 # MASHINA 1.4.0
 
 English and Russian, from the first setup to daily use.

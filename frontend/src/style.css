@@ -4842,3 +4842,44 @@ input[type="checkbox"] {
   min-width: 0;
   font-size: 16px;
 }
+.ocr-review {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 20px;
+  min-width: 0;
+}
+.ocr-content {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+.ocr-content h3 {
+  margin: 0;
+}
+.ocr-content textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+.ocr-fields {
+  display: grid;
+  gap: 12px;
+}
+.ocr-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.ocr-content input[type="file"] {
+  max-width: 100%;
+  width: 100%;
+}
+
+.ocr-content .field-help {
+  font-size: 12px !important;
+  color: var(--muted);
+}
+.ocr-content .check-field {
+  min-height: 44px;
+  align-items: center;
+}

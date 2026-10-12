@@ -1,4 +1,4 @@
-# Как проверить MASHINA 1.4
+# Как проверить MASHINA 1.5
 
 ## Выбор языка
 
@@ -29,7 +29,7 @@
 ```sh
 docker version
 docker compose version
-git clone --branch v1.4.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 cd mashina-test
 cp .env.example .env
 mkdir -p data
@@ -72,7 +72,7 @@ Set-Location "$env:USERPROFILE\mashina-testing"
 docker version
 docker compose version
 git --version
-git clone --branch v1.4.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 Set-Location mashina-test
 Copy-Item .env.example .env
 New-Item -ItemType Directory -Force data | Out-Null
@@ -151,7 +151,7 @@ http://localhost:8000 в браузере ноутбука. `Ctrl+C` закры�
 Нужны Git, Docker Engine и Docker Compose на Linux. Команды выполняются на сервере:
 
 ```sh
-git clone --branch v1.4.0 --depth 1 https://github.com/kosavan/mashina.git
+git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git
 cd mashina
 cp .env.example .env
 mkdir -p data
@@ -282,8 +282,7 @@ iPhone и доставки внешних уведомлений.
 
 ## Что пока не готово
 
-- Распознавание чеков/заказ-нарядов и подтверждение AI-черновика: внутренние модули
-  сохранены отдельно в ветке `codex/mashina-document-review`, в релиз не включены.
+- Универсальное AI-понимание документов, многостраничные позиции заказ-нарядов и специализированное чтение семисегментной приборки. Локальный текстовый OCR уже доступен; [инструкция](local-ocr.md).
 - Поиск по истории естественным языком.
 - Telegram-бот для внесения расходов; уже имеющиеся Telegram-напоминания — отдельная функция.
 - OBD-II-компонент и получение показаний с оборудования.

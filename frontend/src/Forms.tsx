@@ -15,6 +15,7 @@ import type { Item, Kind, RecordBase } from "./types";
 import { categories, kindNames, money, today } from "./utils";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
+import { OcrReview, type OcrFields } from "./OcrReview";
 
 const maintenanceTemplates = [
   "Замена моторного масла",
@@ -247,6 +248,31 @@ export function RecordForm({
     ...categories,
     ...state.categories.filter((c) => !c.deleted).map((c) => c.name),
   ];
+  function applyOcr(fields: OcrFields, source?: File) {
+    if (fields.amount && items.length)
+      throw new Error(
+        tr(
+          "В записи уже есть позиции. Проверьте их итог перед переносом суммы.",
+        ),
+      );
+    for (const [name, value] of Object.entries(fields)) {
+      if (type === "fuel" && ["amount", "liters", "price"].includes(name))
+        continue;
+      const input = form.current?.elements.namedItem(name) as
+        HTMLInputElement | HTMLTextAreaElement | null;
+      if (input)
+        input.value = name === "occurred_at" ? value + "T12:00" : value;
+    }
+    if (type === "fuel")
+      setFuelValues((current) => ({
+        ...current,
+        ...(fields.amount === undefined ? {} : { amount: fields.amount }),
+        ...(fields.liters === undefined ? {} : { liters: fields.liters }),
+        ...(fields.price === undefined ? {} : { price: fields.price }),
+      }));
+    if (source) setFiles((current) => [...current, source]);
+    setDirty(true);
+  }
   return (
     <Sheet open onClose={close} title={tr(title)} wide={type === "vehicle"}>
       <form
@@ -577,6 +603,9 @@ export function RecordForm({
           </>
         ) : (
           <>
+            {["fuel", "expense", "maintenance", "odometer"].includes(type) && (
+              <OcrReview kind={type} vehicleId={vehicleId} onApply={applyOcr} />
+            )}
             <div className="field-grid">
               <Field
                 label={tr("Дата и время")}

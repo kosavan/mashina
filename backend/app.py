@@ -33,6 +33,8 @@ from backend.reports import ReportOptions, report_snapshot, render_report, RENDE
 from backend.notifications import install_notifications
 from backend.bank_api import install_bank
 from backend.machine_api import install_machine
+from backend.ocr import recognize, MAX_SOURCE
+from starlette.concurrency import run_in_threadpool
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -77,7 +79,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.4.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.5.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -390,6 +392,30 @@ def create_app(data_path=None, bootstrap_token=None):
                 }
                 records.append(active_store.mutate(s["user_id"], payload, connection=c)["record"])
         return {"records": records}
+
+    @app.post(PREFIX + "/ocr")
+    async def ocr_file(
+        request: Request,
+        file: UploadFile = File(...),
+        vehicle_id: str = Form(...),
+        mode: Literal["receipt", "service", "odometer", "screenshot"] = Form(...),
+        page: int = Form(1, ge=1, le=20),
+        s=Depends(session),
+    ):
+        vehicle_id = uid(vehicle_id)
+        with s["store"].transaction() as c:
+            car, role = vehicle_access(c, vehicle_id, s["user_id"])
+            if car["deleted"]:
+                raise Denied("Автомобиль недоступен")
+        throttle(request, bucket="ocr:" + s["user_id"], limit=10)
+        content = await file.read(MAX_SOURCE + 1)
+        result = await run_in_threadpool(recognize, content, mode, page)
+        # A revoked driver must not receive extracted private content after processing.
+        with s["store"].transaction() as c:
+            car, _ = vehicle_access(c, vehicle_id, s["user_id"])
+            if car["deleted"]:
+                raise Denied("Автомобиль недоступен")
+        return result
 
     @app.post(PREFIX + "/attachments")
     async def upload(

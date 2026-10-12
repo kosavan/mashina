@@ -80,8 +80,8 @@ def require_engine():
 @pytest.mark.parametrize("russian", [False, True])
 def test_real_local_engine_image_and_pdf(pdf, russian):
     require_engine()
-    font_path = Path("backend/assets/fonts/Manrope-Bold.ttf")
-    font = ImageFont.truetype(str(font_path), 52)
+    font_path = Path("backend/assets/fonts/Manrope-Regular.ttf")
+    font = ImageFont.truetype(str(font_path), 40)
     image = Image.new("RGB", (1400, 500), "white")
     printed = "ИТОГО: 1234.56\nОдометр: 123456 км\n12.10.2026" if russian else "TOTAL 1234.56\nODO 123456 km\n2026-10-12"
     ImageDraw.Draw(image).multiline_text((60, 40), printed, fill="black", font=font, spacing=24)
@@ -89,9 +89,9 @@ def test_real_local_engine_image_and_pdf(pdf, russian):
     image.save(output, format="PDF" if pdf else "PNG", resolution=150)
     result = recognize(output.getvalue(), "receipt", 1)
     assert result["engine"] == "tesseract-local"
-    assert result["fields"]["amount"] == "1234.56"
-    assert result["fields"]["odometer"] == "123456"
-    assert result["fields"]["occurred_at"] == "2026-10-12"
+    assert result["fields"].get("amount") == "1234.56", result
+    assert result["fields"].get("odometer") == "123456", result
+    assert result["fields"].get("occurred_at") == "2026-10-12", result
     assert ("ИТОГО" if russian else "TOTAL") in result["text"]
 
 

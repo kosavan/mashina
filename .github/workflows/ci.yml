@@ -52,7 +52,7 @@ jobs:
           from PIL import Image, ImageDraw, ImageFont
           from backend.ocr import recognize
           image = Image.new('RGB', (1400, 500), 'white')
-          font = ImageFont.truetype('backend/assets/fonts/Manrope-Bold.ttf', 52)
+          font = ImageFont.truetype('backend/assets/fonts/Manrope-Regular.ttf', 40)
           ImageDraw.Draw(image).text((60, 40), 'TOTAL 1234.56', fill='black', font=font)
           for format in ('PNG', 'PDF'):
               buffer = io.BytesIO()

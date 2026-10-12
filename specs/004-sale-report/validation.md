@@ -8,6 +8,6 @@
 - 200-work generation test <3 seconds and output <5 MiB; 500-work overflow denied. Render semaphore busy/error cleanup checked.
 - Privacy sentinel tests prove absent VIN/plate, free descriptions, costs, vendor, private notes and other vehicle data under defaults; XML text escaped, no PDF hyperlinks. Driver denied; no-store response.
 - Ownership baseline regression: readings before acquisition cannot inflate period distance; snapshot matches shared analytics for four start boundaries.
-- Linux CI/container result pending; no manual physical-iPhone verification claimed.
+- Linux CI38175064341 and container health passed; PR3 merged as7e0c5fee293d8cf08eed3e47784f4d782272d743. No manual physical-iPhone verification claimed.
 
-- Spec Kit convergence: 6 FR, 5 SC, 3 user stories and 12 governing principles checked; zero actionable gaps, no new convergence tasks. Source published in PR #3; merge remains gated on green Linux CI. No extension hooks configured.
+- Spec Kit convergence: 6 FR, 5 SC, 3 user stories and 12 governing principles checked; zero actionable gaps, no new convergence tasks. Source published in PR #3; merged after green Linux CI. No extension hooks configured.

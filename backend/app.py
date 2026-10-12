@@ -31,6 +31,7 @@ from backend.accounts import install_accounts, require_admin
 from backend.reports import ReportOptions, report_snapshot, render_report, RENDER_LOCK
 from backend.notifications import install_notifications
 from backend.bank_api import install_bank
+from backend.machine_api import install_machine
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -89,8 +90,22 @@ def create_app(data_path=None, bootstrap_token=None):
             if request.headers.get("origin") and request.headers["origin"].rstrip("/") != allowed:
                 return JSONResponse({"detail": "Недопустимый источник запроса"}, status_code=403)
             size = request.headers.get("content-length")
-            if size and (not size.isdigit() or int(size) > MAX_ARCHIVE + 1024 * 1024):
+            body_limit = (
+                256 * 1024
+                if request.url.path.startswith("/api/machine/")
+                else MAX_ARCHIVE + 1024 * 1024
+            )
+            if size and (not size.isdigit() or int(size) > body_limit):
                 return JSONResponse({"detail": "Запрос слишком большой"}, status_code=413)
+            if request.url.path.startswith("/api/machine/"):
+                chunks, received = [], 0
+                async for chunk in request.stream():
+                    received += len(chunk)
+                    if received > body_limit:
+                        return JSONResponse({"detail": "Запрос слишком большой"}, status_code=413)
+                    chunks.append(chunk)
+                # Replay the bounded body through Starlette's cached downstream receive.
+                request._body = b"".join(chunks)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["Referrer-Policy"] = "same-origin"
@@ -99,7 +114,7 @@ def create_app(data_path=None, bootstrap_token=None):
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
         )
-        if request.url.path.startswith(PREFIX):
+        if request.url.path.startswith((PREFIX, "/api/machine/")):
             response.headers["Cache-Control"] = "no-store"
         if request.url.path == "/sw.js":
             response.headers["Cache-Control"] = "no-cache"
@@ -593,6 +608,7 @@ def create_app(data_path=None, bootstrap_token=None):
 
     install_notifications(app, session, throttle)
     install_bank(app, session, throttle)
+    install_machine(app, session)
 
     install_accounts(app, session, HASHER, login_response, throttle)
 

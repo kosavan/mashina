@@ -3,6 +3,7 @@ const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Sharing = lazy(() => import("./Sharing"));
 const SaleReport = lazy(() => import("./SaleReport"));
 const Notifications = lazy(() => import("./Notifications"));
+const MachineAccess = lazy(() => import("./MachineAccess"));
 import {
   ArrowUpRight,
   ArrowRight,
@@ -1707,6 +1708,7 @@ export function SettingsPage() {
           <Suspense fallback={null}>
             <Sharing />
             <Notifications />
+            <MachineAccess />
           </Suspense>
           {session.demo && (
             <Button variant="outline" onClick={resetDemo}>

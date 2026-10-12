@@ -8,6 +8,7 @@ import os
 from pathlib import Path, PurePosixPath
 import sqlite3
 import tempfile
+import time
 import zipfile
 
 MAX_ARCHIVE = 200 * 1024 * 1024
@@ -82,6 +83,7 @@ def _restore_backup(store, blob):
                     "003",
                     "004",
                     "005",
+                    "006",
                 }:
                     raise ValueError("Версия архива несовместима")
                 revision = check.execute("SELECT version_num FROM alembic_version").fetchone()[0]
@@ -141,12 +143,20 @@ def _restore_backup(store, blob):
 
                 for (data,) in check.execute("SELECT data FROM reminders"):
                     normalize_reminder(json.loads(data))
-                if revision == "005":
+                if revision in {"005", "006"}:
                     from backend.bank_archive import validate_bank_archive
 
                     validate_bank_archive(check)
                     check.execute("DELETE FROM bank_preview_batches")
-                if revision in {"004", "005"}:
+                if revision == "006":
+                    from backend.machine_archive import validate_machine_archive
+
+                    validate_machine_archive(check)
+                    check.execute(
+                        "UPDATE machine_credentials SET revoked=? WHERE revoked IS NULL",
+                        (int(time.time()),),
+                    )
+                if revision in {"004", "005", "006"}:
                     from backend.notifications import validate_notification_archive
 
                     validate_notification_archive(check)
@@ -178,6 +188,10 @@ def _restore_backup(store, blob):
                     with store.transaction() as c:
                         c.exec_driver_sql("UPDATE notification_identity SET paused=1")
                         c.exec_driver_sql("UPDATE notification_preferences SET enabled=0")
+                        c.exec_driver_sql(
+                            "UPDATE machine_credentials SET revoked=? WHERE revoked IS NULL",
+                            (int(time.time()),),
+                        )
                 except Exception:
                     store.engine.dispose()
                     if store.uploads.exists():

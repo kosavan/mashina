@@ -14,7 +14,7 @@
   <a href="docs/testing-release.md">macOS &amp; Windows testing</a>
 </p>
 
-![MASHINA: capture, understand and maintain your vehicles. Actual product with isolated synthetic demo data.](docs/assets/mashina-overview.png)
+![MASHINA: capture, understand and maintain your vehicles. Actual product with isolated synthetic demo data.](docs/assets/en/mashina-overview.png)
 
 ## A garage worth keeping up to date
 
@@ -22,7 +22,7 @@
 - **Quick fuel and expense entry.** Exact money, itemized costs, receipts and vehicle-specific defaults.
 - **Analytics you can trust.** Full-to-full fuel consumption, separate purchase/sale values and clear missing-data states.
 - **Tires deserve their own space.** Mounting history, manufacture codes, dated tread measurements and care guidance.
-- **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. Russian-first interface.
+- **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. English and Russian UI, selectable at setup and in Settings.
 - **Local by default.** Durable offline entries, safe synchronization, SQLite + local files and complete backup/restore.
 
 Sharing, budgets, sale-history PDFs and reviewed CSV imports are included. Notifications and a scoped API/local MCP are optional. Service addresses stay local; external maps load only when you choose. No required cloud, paid API or telemetry.
@@ -34,8 +34,8 @@ Start MASHINA and choose **«Посмотреть демогараж»** on the 
 <details>
 <summary>See the actual garage and analytics</summary>
 
-![Garage with fictional demo cars](docs/assets/garage.png)
-![Analytics calculated from isolated demo history](docs/assets/analytics.png)
+![Garage with fictional demo cars](docs/assets/en/garage.png)
+![Analytics calculated from isolated demo history](docs/assets/en/analytics.png)
 
 </details>
 
@@ -66,3 +66,5 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · local attachments. A modul
 Receipt recognition, natural-language history search, an expense-entry bot and OBD-II are still future work. They are not hidden behind working-looking controls.
 
 Built with [Spec Kit](https://github.com/github/spec-kit); identity developed with [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), infographic authored with [Hyperframes](https://github.com/heygen-com/hyperframes).
+
+Vibecoded with love ❤️

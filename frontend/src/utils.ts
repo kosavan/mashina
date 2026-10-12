@@ -1,4 +1,5 @@
 import type { Entry, State, Vehicle } from "./types";
+import { intlLocale, tr } from "./i18n";
 export const categories = [
   "Топливо",
   "Плановое ТО",
@@ -14,27 +15,39 @@ export const categories = [
   "Прочее",
 ];
 export const kindNames: Record<string, string> = {
-  expense: "Расход",
-  fuel: "Заправка",
-  maintenance: "ТО / ремонт",
-  odometer: "Пробег",
-  note: "Заметка",
+  get expense() {
+    return tr("Расход");
+  },
+  get fuel() {
+    return tr("Заправка");
+  },
+  get maintenance() {
+    return tr("ТО / ремонт");
+  },
+  get odometer() {
+    return tr("Пробег");
+  },
+  get note() {
+    return tr("Заметка");
+  },
 };
+export const categoryLabel = (name: string) =>
+  categories.includes(name) ? tr(name) : name;
 export const number = (
   n: number | null | undefined,
   maximumFractionDigits = 0,
 ) =>
   n == null
     ? "—"
-    : new Intl.NumberFormat("ru-RU", { maximumFractionDigits }).format(n);
+    : new Intl.NumberFormat(intlLocale(), { maximumFractionDigits }).format(n);
 export const money = (minor: number, currency = "RUB") =>
-  new Intl.NumberFormat("ru-RU", {
+  new Intl.NumberFormat(intlLocale(), {
     style: "currency",
     currency,
     maximumFractionDigits: minor % 100 ? 2 : 0,
   }).format(minor / 100);
 export const dateLabel = (d: string) =>
-  new Intl.DateTimeFormat("ru-RU", {
+  new Intl.DateTimeFormat(intlLocale(), {
     day: "numeric",
     month: "short",
     year: "numeric",

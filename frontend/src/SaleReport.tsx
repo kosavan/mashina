@@ -1,3 +1,4 @@
+import { tr } from "./i18n";
 import { useState } from "react";
 import {
   FileDown,
@@ -26,26 +27,34 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
   const disclosures = [
     [
       "include_cover",
-      "Обложка автомобиля",
-      "Фото не анонимизируется: на нём могут быть номер и окружающая обстановка.",
+      tr("Обложка автомобиля"),
+      tr(
+        "Фото не анонимизируется: на нём могут быть номер и окружающая обстановка.",
+      ),
       Image,
     ],
     [
       "include_costs",
-      "Финансовые суммы",
-      "Эксплуатационные расходы и отдельно цена покупки/продажи. Валюты не смешиваются.",
+      tr("Финансовые суммы"),
+      tr(
+        "Эксплуатационные расходы и отдельно цена покупки/продажи. Валюты не смешиваются.",
+      ),
       Receipt,
     ],
     [
       "include_identifiers",
-      "VIN и государственный номер",
-      "Включайте только если готовы передать эти сведения получателю отчёта.",
+      tr("VIN и государственный номер"),
+      tr(
+        "Включайте только если готовы передать эти сведения получателю отчёта.",
+      ),
       Fingerprint,
     ],
     [
       "include_descriptions",
-      "Названия выполненных работ",
-      "Свободный текст ваших записей. Проверьте, нет ли там личных сведений.",
+      tr("Названия выполненных работ"),
+      tr(
+        "Свободный текст ваших записей. Проверьте, нет ли там личных сведений.",
+      ),
       Wrench,
     ],
   ] as const;
@@ -60,14 +69,14 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
         }}
       >
         <FileDown size={16} />
-        Отчёт для продажи
+        {tr("Отчёт для продажи")}
       </Button>
       <Sheet
         open={open}
         onClose={() => {
           if (!busy) setOpen(false);
         }}
-        title="История, которой можно поделиться"
+        title={tr("История, которой можно поделиться")}
       >
         <form
           className="record-form report-form"
@@ -78,7 +87,7 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
             try {
               if (!navigator.onLine)
                 throw new Error(
-                  "Для подготовки PDF нужно подключиться к вашему серверу.",
+                  tr("Для подготовки PDF нужно подключиться к вашему серверу."),
                 );
               const dates = Object.fromEntries(
                 new FormData(event.currentTarget),
@@ -104,7 +113,9 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
                 throw new Error(
                   typeof result.detail === "string"
                     ? result.detail
-                    : "Не удалось подготовить отчёт. Проверьте даты и попробуйте снова.",
+                    : tr(
+                        "Не удалось подготовить отчёт. Проверьте даты и попробуйте снова.",
+                      ),
                 );
               }
               if (
@@ -113,7 +124,7 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
                   ?.startsWith("application/pdf")
               )
                 throw new Error(
-                  "Сервер вернул неподходящий файл. Повторите запрос.",
+                  tr("Сервер вернул неподходящий файл. Повторите запрос."),
                 );
               const blob = await response.blob();
               const url = URL.createObjectURL(blob);
@@ -136,37 +147,39 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
             <div>
               <h3>{vehicle.name}</h3>
               <p className="muted">
-                Законченный PDF с характеристиками, пробегом и историей
-                обслуживания.
+                {tr(
+                  "Законченный PDF с характеристиками, пробегом и историей обслуживания.",
+                )}
               </p>
             </div>
           </div>
           {session.demo && (
             <div className="info-box">
-              Это демонстрационный отчёт с вымышленными данными.
+              {tr("Это демонстрационный отчёт с вымышленными данными.")}
             </div>
           )}
           <div className="field-grid">
             <label>
-              Начало периода
+              {tr("Начало периода")}
               <input name="start" type="date" />
             </label>
             <label>
-              Конец периода
+              {tr("Конец периода")}
               <input name="end" type="date" />
             </label>
           </div>
           <small className="muted">
-            Оставьте даты пустыми, чтобы включить всю историю. До 500 работ и 5
-            000 событий за период.
+            {tr(
+              "Оставьте даты пустыми, чтобы включить всю историю. До 500 работ и 5 000 событий за период.",
+            )}
           </small>
-          <h3>Что раскрыть получателю</h3>
+          <h3>{tr("Что раскрыть получателю")}</h3>
           <div className="report-options">
             {disclosures.map(([key, label, explanation, Icon]) => (
               <label className="report-option" key={key}>
                 <Icon size={20} />
                 <span>
-                  <strong>{label}</strong>
+                  <strong>{tr(label)}</strong>
                   <small>{explanation}</small>
                 </span>
                 <input
@@ -182,24 +195,24 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
           <div className="info-box">
             <ShieldCheck size={17} />
             <div>
-              В PDF войдут характеристики автомобиля, внесённые показания
-              пробега, даты обслуживания, детали и артикулы. Личные документы,
-              заметки, названия сервисов и аккаунты не включаются. Выбранные
-              выше сведения добавятся отдельно.
+              {tr(
+                "В PDF войдут характеристики автомобиля, внесённые показания пробега, даты обслуживания, детали и артикулы. Личные документы, заметки, названия сервисов и аккаунты не включаются. Выбранные выше сведения добавятся отдельно.",
+              )}
             </div>
           </div>
           <p className="tiny muted">
-            Файл готовится на вашем сервере и скачивается на это устройство.
-            Публичная ссылка не создаётся; никому ничего не отправляется.
+            {tr(
+              "Файл готовится на вашем сервере и скачивается на это устройство. Публичная ссылка не создаётся; никому ничего не отправляется.",
+            )}
           </p>
           {error && (
             <div className="error-box" role="alert">
-              {error}
+              {tr(error)}
             </div>
           )}
           <Button disabled={busy}>
             <FileDown size={17} />
-            {busy ? "Готовим ваш отчёт…" : "Скачать PDF"}
+            {busy ? tr("Готовим ваш отчёт…") : tr("Скачать PDF")}
           </Button>
         </form>
       </Sheet>

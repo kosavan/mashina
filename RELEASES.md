@@ -1,3 +1,20 @@
+# MASHINA 1.4.0
+
+English and Russian, from the first setup to daily use.
+
+- Choose the interface language before setup/sign-in/demo and change it in Settings.
+- Local UI resources cover navigation, forms, feedback, accessibility labels, date/number formatting and analytics. Account preferences synchronize safely after offline changes.
+- User names, notes, documents, canonical categories, exact monetary values and units remain unchanged. The isolated demo has a separate localized presentation.
+- English and Russian READMEs now have matching screenshots and Hyperframes infographics. Analytics screenshots select Volvo XC60 to avoid connecting different vehicles' fuel histories.
+- Fixed administrator backup controls being hidden in Settings.
+- Both README footers: Vibecoded with love ❤️
+
+[Validation and limitations](docs/release-validation-1.4.md) · [macOS / Windows testing](docs/testing-release.md)
+
+Russian remains the default. No schema migration, translation API or infrastructure change. Export/PDF contents and external notification payloads keep their existing language; no currency/unit conversion. Physical iPhone and separate macOS/arm64 Docker remain unverified. Existing OCR/AI and other future integrations are outside this release.
+
+---
+
 # MASHINA 1.3.0
 
 A more personal garage: dedicated tire care, clearer fuel analytics and a new green Apex M identity.

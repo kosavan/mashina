@@ -1,3 +1,5 @@
+import { categoryLabel } from "./utils";
+import { tr } from "./i18n";
 import { useRef, useState } from "react";
 import {
   Plus,
@@ -45,7 +47,7 @@ function Field({
 }) {
   return (
     <label>
-      {label}
+      {tr(label)}
       {children || (
         <input
           name={name}
@@ -101,26 +103,29 @@ export function RecordForm({
   const title =
     type === "vehicle"
       ? record
-        ? "Профиль автомобиля"
-        : "Новый автомобиль"
+        ? tr("Профиль автомобиля")
+        : tr("Новый автомобиль")
       : type === "document"
-        ? "Добавить документ"
+        ? tr("Добавить документ")
         : type === "reminder"
           ? record
-            ? "Настроить напоминание"
-            : "Новое напоминание"
+            ? tr("Настроить напоминание")
+            : tr("Новое напоминание")
           : type === "category"
-            ? "Новая категория"
-            : `${record ? "Редактировать · " : ""}${kindNames[type]}`;
+            ? tr("Новая категория")
+            : `${record ? tr("Редактировать · ") : ""}${kindNames[type]}`;
   function close() {
-    if (dirty && !confirm("Закрыть форму и потерять несохранённые изменения?"))
+    if (
+      dirty &&
+      !confirm(tr("Закрыть форму и потерять несохранённые изменения?"))
+    )
       return;
     onClose();
   }
   function chooseFiles(e: React.ChangeEvent<HTMLInputElement>) {
     const list = Array.from(e.target.files || []);
     if (list.some((f) => f.size > 20 * 1024 * 1024)) {
-      setError("Каждый файл должен быть меньше 20 МБ");
+      setError(tr("Каждый файл должен быть меньше 20 МБ"));
       return;
     }
     setFiles(list);
@@ -149,7 +154,8 @@ export function RecordForm({
       if (type !== "vehicle" && type !== "category")
         data.vehicle_id = vehicleId;
       if (type === "document") {
-        if (!files.length) throw new Error("Выберите документ для загрузки");
+        if (!files.length)
+          throw new Error(tr("Выберите документ для загрузки"));
         await upload(files[0], data as Record<string, string>);
       } else {
         if (
@@ -175,14 +181,18 @@ export function RecordForm({
           (data.odometer === "" || data.odometer == null)
         )
           throw new Error(
-            "Для повторения ТО по километрам укажите подтверждённый пробег при выполнении.",
+            tr(
+              "Для повторения ТО по километрам укажите подтверждённый пробег при выполнении.",
+            ),
           );
         const result = await save(entity, data, saved || record);
         setSaved(result);
         if (files.length) {
           if (result.pending)
             throw new Error(
-              "Запись сохранена офлайн. Файлы выберите и загрузите после синхронизации.",
+              tr(
+                "Запись сохранена офлайн. Файлы выберите и загрузите после синхронизации.",
+              ),
             );
           for (const file of files) {
             const attachment = await upload(file, {
@@ -220,7 +230,11 @@ export function RecordForm({
         }
       }
       setDirty(false);
-      notify(record ? "Изменения сохранены" : "Готово. История стала полнее.");
+      notify(
+        record
+          ? tr("Изменения сохранены")
+          : tr("Готово. История стала полнее."),
+      );
       await refresh().catch(() => {});
       onClose();
     } catch (error) {
@@ -234,7 +248,7 @@ export function RecordForm({
     ...state.categories.filter((c) => !c.deleted).map((c) => c.name),
   ];
   return (
-    <Sheet open onClose={close} title={title} wide={type === "vehicle"}>
+    <Sheet open onClose={close} title={tr(title)} wide={type === "vehicle"}>
       <form
         ref={form}
         className="record-form"
@@ -243,7 +257,7 @@ export function RecordForm({
       >
         {type !== "vehicle" && type !== "category" && (
           <label>
-            Автомобиль
+            {tr("Автомобиль")}
             <select
               value={vehicleId}
               onChange={(e) => setVehicleId(e.target.value)}
@@ -252,7 +266,7 @@ export function RecordForm({
               {allowedVehicles.map((v) => (
                 <option key={v.id} value={v.id}>
                   {v.name}
-                  {v.status !== "active" ? " · архив" : ""}
+                  {v.status !== "active" ? tr(" · архив") : ""}
                 </option>
               ))}
             </select>
@@ -262,36 +276,36 @@ export function RecordForm({
           type !== "vehicle" &&
           type !== "category" && (
             <div className="error-box">
-              Сначала добавьте автомобиль в гараж.
+              {tr("Сначала добавьте автомобиль в гараж.")}
             </div>
           )}
         {type === "vehicle" ? (
           <>
             <Field
-              label="Название автомобиля"
+              label={tr("Название автомобиля")}
               name="name"
               value={record?.name}
               required
-              placeholder="Например, Volvo XC60"
+              placeholder={tr("Например, Volvo XC60")}
             />
             <div className="field-grid">
-              <Field label="Марка" name="brand" value={record?.brand} />
-              <Field label="Модель" name="model" value={record?.model} />
+              <Field label={tr("Марка")} name="brand" value={record?.brand} />
+              <Field label={tr("Модель")} name="model" value={record?.model} />
               <Field
-                label="Год выпуска"
+                label={tr("Год выпуска")}
                 name="year"
                 type="number"
                 value={record?.year}
               />
               <Field
-                label="Госномер"
+                label={tr("Госномер")}
                 name="plate"
                 value={record?.plate}
-                placeholder="А777АА 777"
+                placeholder={tr("А777АА 777")}
               />
             </div>
             <Field
-              label="Пробег при покупке, км"
+              label={tr("Пробег при покупке, км")}
               name="purchase_odometer"
               type="number"
               step="1"
@@ -300,13 +314,13 @@ export function RecordForm({
             />
             <div className="field-grid">
               <Field
-                label="Дата покупки"
+                label={tr("Дата покупки")}
                 name="purchase_date"
                 type="date"
                 value={record?.purchase_date}
               />
               <Field
-                label="Цена покупки, ₽"
+                label={tr("Цена покупки, ₽")}
                 name="purchase_amount"
                 type="number"
                 step="0.01"
@@ -318,11 +332,13 @@ export function RecordForm({
             <label className="upload-zone">
               <Upload size={24} />
               <strong>
-                {files.length ? files[0].name : "Фотография вашего автомобиля"}
+                {files.length
+                  ? files[0].name
+                  : tr("Фотография вашего автомобиля")}
               </strong>
-              <span>JPEG, PNG, WebP · до 20 МБ</span>
+              <span>{tr("JPEG, PNG, WebP · до 20 МБ")}</span>
               <small>
-                Обложка будет видна всем участникам этого автомобиля.
+                {tr("Обложка будет видна всем участникам этого автомобиля.")}
               </small>
               <input
                 name="file"
@@ -333,67 +349,79 @@ export function RecordForm({
             </label>
             <details open={!!record}>
               <summary>
-                Характеристики и владение
+                {tr("Характеристики и владение")}
                 <ChevronDown size={16} />
               </summary>
               <div className="field-grid">
                 <Field
-                  label="Поколение"
+                  label={tr("Поколение")}
                   name="generation"
                   value={record?.generation}
                 />
-                <Field label="Комплектация" name="trim" value={record?.trim} />
-                <Field label="VIN" name="vin" value={record?.vin} />
-                <Field label="Двигатель" name="engine" value={record?.engine} />
                 <Field
-                  label="Коробка передач"
+                  label={tr("Комплектация")}
+                  name="trim"
+                  value={record?.trim}
+                />
+                <Field label="VIN" name="vin" value={record?.vin} />
+                <Field
+                  label={tr("Двигатель")}
+                  name="engine"
+                  value={record?.engine}
+                />
+                <Field
+                  label={tr("Коробка передач")}
                   name="transmission"
                   value={record?.transmission}
                 />
-                <Field label="Привод" name="drive" value={record?.drive} />
-                <Field label="Топливо" name="fuel" value={record?.fuel} />
                 <Field
-                  label="Валюта"
+                  label={tr("Привод")}
+                  name="drive"
+                  value={record?.drive}
+                />
+                <Field label={tr("Топливо")} name="fuel" value={record?.fuel} />
+                <Field
+                  label={tr("Валюта")}
                   name="currency"
                   value={record?.currency || "RUB"}
                 />
               </div>
-              <Field label="Статус" name="status">
+              <Field label={tr("Статус")} name="status">
                 <select name="status" defaultValue={record?.status || "active"}>
-                  <option value="active">В гараже</option>
-                  <option value="archived">В архиве</option>
-                  <option value="sold">Продан</option>
+                  <option value="active">{tr("В гараже")}</option>
+                  <option value="archived">{tr("В архиве")}</option>
+                  <option value="sold">{tr("Продан")}</option>
                 </select>
               </Field>
               <div className="field-grid">
                 <Field
-                  label="Дата продажи"
+                  label={tr("Дата продажи")}
                   name="sale_date"
                   type="date"
                   value={record?.sale_date}
                 />
                 <Field
-                  label="Цена продажи"
+                  label={tr("Цена продажи")}
                   name="sale_amount"
                   type="number"
                   step="0.01"
                   value={record?.sale_minor ? record.sale_minor / 100 : ""}
                 />
               </div>
-              <Field label="Заметки" name="notes" value={record?.notes} />
+              <Field label={tr("Заметки")} name="notes" value={record?.notes} />
             </details>
           </>
         ) : type === "category" ? (
           <>
             <Field
-              label="Название категории"
+              label={tr("Название категории")}
               name="name"
               value={record?.name}
               required
             />
-            <Field label="Родительская категория" name="parent_id">
+            <Field label={tr("Родительская категория")} name="parent_id">
               <select name="parent_id" defaultValue="">
-                <option value="">Самостоятельная категория</option>
+                <option value="">{tr("Самостоятельная категория")}</option>
                 {state.categories
                   .filter((c) => !c.parent_id && !c.deleted)
                   .map((c) => (
@@ -406,32 +434,34 @@ export function RecordForm({
           </>
         ) : type === "document" ? (
           <>
-            <Field label="Название" name="title" required />
-            <Field label="Тип документа" name="document_type">
+            <Field label={tr("Название")} name="title" required />
+            <Field label={tr("Тип документа")} name="document_type">
               <select name="document_type">
                 {[
-                  "СТС",
-                  "ПТС / ЭПТС",
-                  "ОСАГО",
-                  "КАСКО",
-                  "Договор",
-                  "Заказ-наряд",
-                  "Чек",
-                  "Диагностическая карта",
-                  "Фотография",
-                  "Прочее",
+                  tr("СТС"),
+                  tr("ПТС / ЭПТС"),
+                  tr("ОСАГО"),
+                  tr("КАСКО"),
+                  tr("Договор"),
+                  tr("Заказ-наряд"),
+                  tr("Чек"),
+                  tr("Диагностическая карта"),
+                  tr("Фотография"),
+                  tr("Прочее"),
                 ].map((t) => (
-                  <option key={t}>{t}</option>
+                  <option key={t} value={t}>
+                    {tr(t)}
+                  </option>
                 ))}
               </select>
             </Field>
             <div className="field-grid">
-              <Field label="Дата выдачи" name="issued" type="date" />
-              <Field label="Действует до" name="expires" type="date" />
+              <Field label={tr("Дата выдачи")} name="issued" type="date" />
+              <Field label={tr("Действует до")} name="expires" type="date" />
             </div>
-            <Field label="Связать с событием" name="event_id">
+            <Field label={tr("Связать с событием")} name="event_id">
               <select name="event_id" defaultValue={record?.event_id || ""}>
-                <option value="">Документ автомобиля</option>
+                <option value="">{tr("Документ автомобиля")}</option>
                 {state.events
                   .filter((e) => e.vehicle_id === vehicleId && !e.deleted)
                   .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))
@@ -443,32 +473,32 @@ export function RecordForm({
                   ))}
               </select>
             </Field>
-            <Field label="Заметка" name="notes" />
+            <Field label={tr("Заметка")} name="notes" />
             <label className="upload-zone">
               <Upload size={24} />
-              <strong>{files[0]?.name || "Выберите файл"}</strong>
-              <span>Изображение, PDF или другой файл · до 20 МБ</span>
+              <strong>{files[0]?.name || tr("Выберите файл")}</strong>
+              <span>{tr("Изображение, PDF или другой файл · до 20 МБ")}</span>
               <input name="file" type="file" onChange={chooseFiles} required />
             </label>
           </>
         ) : type === "reminder" ? (
           <>
             <Field
-              label="Что нужно сделать"
+              label={tr("Что нужно сделать")}
               name="title"
               value={record?.title}
               required
-              placeholder="Замена моторного масла"
+              placeholder={tr("Замена моторного масла")}
             />
             <div className="field-grid">
               <Field
-                label="К дате"
+                label={tr("К дате")}
                 name="due_date"
                 type="date"
                 value={record?.due_date}
               />
               <Field
-                label="На пробеге, км"
+                label={tr("На пробеге, км")}
                 name="due_odometer"
                 type="number"
                 step="1"
@@ -476,29 +506,29 @@ export function RecordForm({
               />
             </div>
             <p className="field-help">
-              Если заданы оба условия, напомним при наступлении любого.
+              {tr("Если заданы оба условия, напомним при наступлении любого.")}
             </p>
             <div className="field-grid">
               <Field
-                label="Предупредить за, дней"
+                label={tr("Предупредить за, дней")}
                 name="warning_days"
                 type="number"
                 value={record?.warning_days ?? 30}
               />
               <Field
-                label="Предупредить за, км"
+                label={tr("Предупредить за, км")}
                 name="warning_km"
                 type="number"
                 value={record?.warning_km ?? 1000}
               />
               <Field
-                label="Повтор каждые, дней"
+                label={tr("Повтор каждые, дней")}
                 name="repeat_days"
                 type="number"
                 value={record?.repeat_days || 0}
               />
               <Field
-                label="Повтор каждые, км"
+                label={tr("Повтор каждые, км")}
                 name="repeat_km"
                 type="number"
                 value={record?.repeat_km || 0}
@@ -510,22 +540,24 @@ export function RecordForm({
                 name="enabled"
                 defaultChecked={record?.enabled ?? true}
               />
-              Напоминание включено
+              {tr("Напоминание включено")}
             </label>
             <details
               className="advanced-fields"
               open={record?.estimated_cost_minor != null}
             >
               <summary>
-                Плановая стоимость обслуживания <ChevronDown size={16} />
+                {tr("Плановая стоимость обслуживания ")}
+                <ChevronDown size={16} />
               </summary>
               <p className="field-help">
-                Необязательная оценка для плана. Пусто — стоимость неизвестна.
-                Фактический расход вносится отдельно.
+                {tr(
+                  "Необязательная оценка для плана. Пусто — стоимость неизвестна. Фактический расход вносится отдельно.",
+                )}
               </p>
               <div className="field-grid">
                 <Field
-                  label="Ориентировочная стоимость"
+                  label={tr("Ориентировочная стоимость")}
                   name="estimated_cost"
                   type="number"
                   step="0.01"
@@ -536,7 +568,7 @@ export function RecordForm({
                   }
                 />
                 <Field
-                  label="Валюта оценки"
+                  label={tr("Валюта оценки")}
                   name="cost_currency"
                   value={record?.cost_currency || vehicle?.currency || "RUB"}
                 />
@@ -547,14 +579,14 @@ export function RecordForm({
           <>
             <div className="field-grid">
               <Field
-                label="Дата и время"
+                label={tr("Дата и время")}
                 name="occurred_at"
                 type="datetime-local"
                 value={record?.occurred_at?.slice(0, 16) || today() + "T12:00"}
                 required
               />
               <Field
-                label="Пробег, км"
+                label={tr("Пробег, км")}
                 name="odometer"
                 type="number"
                 step="1"
@@ -566,25 +598,25 @@ export function RecordForm({
               <>
                 <div className="fuel-form-heading">
                   <Fuel size={21} />
-                  <span>Любые два значения — третье рассчитаем</span>
+                  <span>{tr("Любые два значения — третье рассчитаем")}</span>
                 </div>
                 <div className="field-grid three">
                   {(
                     [
-                      ["liters", "Литры"],
-                      ["price", "Цена за литр, ₽"],
-                      ["amount", "Сумма, ₽"],
+                      ["liters", tr("Литры")],
+                      ["price", tr("Цена за литр, ₽")],
+                      ["amount", tr("Сумма, ₽")],
                     ] as const
                   ).map(([key, label]) => (
                     <label key={key}>
-                      {label}
+                      {tr(label)}
                       <input
                         type="number"
                         min={key === "liters" ? "0.001" : "0.01"}
                         step={key === "liters" ? "0.001" : "0.01"}
                         inputMode="decimal"
                         value={fuelValues[key]}
-                        placeholder="Автоматически"
+                        placeholder={tr("Автоматически")}
                         onChange={(e) =>
                           setFuelValues((v) => ({
                             ...v,
@@ -598,7 +630,7 @@ export function RecordForm({
                 <div className="field-grid">
                   <Field
                     key={`fuel-${vehicleId}`}
-                    label="Топливо"
+                    label={tr("Топливо")}
                     name="fuel"
                     value={
                       record?.fuel || lastFuel?.fuel || vehicle?.fuel || "АИ-95"
@@ -606,7 +638,7 @@ export function RecordForm({
                   />
                   <Field
                     key={`station-${vehicleId}`}
-                    label="АЗС"
+                    label={tr("АЗС")}
                     name="station"
                     value={record?.station ?? lastFuel?.station}
                   />
@@ -617,7 +649,7 @@ export function RecordForm({
                     type="checkbox"
                     defaultChecked={record?.full ?? false}
                   />
-                  Полный бак
+                  {tr("Полный бак")}
                 </label>
                 <label className="check-field">
                   <input
@@ -625,19 +657,19 @@ export function RecordForm({
                     type="checkbox"
                     defaultChecked={record?.gap ?? false}
                   />
-                  Перед этой записью была пропущенная заправка
+                  {tr("Перед этой записью была пропущенная заправка")}
                 </label>
                 <p className="field-help">
-                  Пропуск прерывает расчёт расхода до следующего полного бака.
+                  {tr(
+                    "Пропуск прерывает расчёт расхода до следующего полного бака.",
+                  )}
                 </p>
                 <details>
-                  <summary>Записать по чеку или оплате</summary>
+                  <summary>{tr("Записать по чеку или оплате")}</summary>
                   <p className="field-help">
-                    Чек АЗС: перенесите литры и сумму, цену рассчитаем. Скрин
-                    оплаты: перенесите сумму, добавьте литры с колонки или чека.
-                    Пробег и полный бак подтвердите сами. Фото можно прикрепить
-                    ниже; оно останется на вашем сервере. Автоматического
-                    распознавания пока нет.
+                    {tr(
+                      "Чек АЗС: перенесите литры и сумму, цену рассчитаем. Скрин оплаты: перенесите сумму, добавьте литры с колонки или чека. Пробег и полный бак подтвердите сами. Фото можно прикрепить ниже; оно останется на вашем сервере. Автоматического распознавания пока нет.",
+                    )}
                   </p>
                 </details>
               </>
@@ -645,7 +677,7 @@ export function RecordForm({
               <>
                 {type === "maintenance" && vehicle?.can_edit !== false && (
                   <label>
-                    Готовый шаблон
+                    {tr("Готовый шаблон")}
                     <select
                       defaultValue=""
                       onChange={(e) => {
@@ -656,23 +688,25 @@ export function RecordForm({
                         setDirty(true);
                       }}
                     >
-                      <option value="">Выберите работу</option>
+                      <option value="">{tr("Выберите работу")}</option>
                       {maintenanceTemplates.map((t) => (
-                        <option key={t}>{t}</option>
+                        <option key={t} value={t}>
+                          {tr(t)}
+                        </option>
                       ))}
                     </select>
                   </label>
                 )}
                 <div className="field-grid">
                   <Field
-                    label="Сумма, ₽"
+                    label={tr("Сумма, ₽")}
                     name="amount"
                     type="number"
                     step="0.01"
                     value={record?.amount || ""}
                     required={!items.length}
                   />
-                  <Field label="Категория" name="category">
+                  <Field label={tr("Категория")} name="category">
                     <select
                       name="category"
                       defaultValue={
@@ -681,7 +715,9 @@ export function RecordForm({
                       }
                     >
                       {allCategories.map((c) => (
-                        <option key={c}>{c}</option>
+                        <option key={c} value={c}>
+                          {categoryLabel(c)}
+                        </option>
                       ))}
                     </select>
                   </Field>
@@ -689,35 +725,39 @@ export function RecordForm({
               </>
             ) : null}
             <Field
-              label={type === "note" ? "Ваша заметка" : "Описание"}
+              label={type === "note" ? tr("Ваша заметка") : tr("Описание")}
               name="description"
               value={record?.description}
               required={type === "note"}
               placeholder={
                 type === "maintenance"
-                  ? "Что сделали с автомобилем?"
-                  : "Что важно сохранить?"
+                  ? tr("Что сделали с автомобилем?")
+                  : tr("Что важно сохранить?")
               }
             />
             {(type === "maintenance" || type === "expense") && (
               <details open={type === "maintenance" || !!items.length}>
                 <summary>
-                  Позиции, запчасти и работы
+                  {tr("Позиции, запчасти и работы")}
                   <ChevronDown size={16} />
                 </summary>
                 <p className="field-help">
-                  Если есть позиции, итог рассчитывается из них, а не из поля
-                  «Сумма».
+                  {tr(
+                    "Если есть позиции, итог рассчитывается из них, а не из поля «Сумма».",
+                  )}
                 </p>
                 <div className="items-list">
                   {items.map((item, index) => (
                     <div className="item-editor" key={index}>
                       <div className="item-editor-title">
-                        <span>ПОЗИЦИЯ {index + 1}</span>
+                        <span>
+                          {tr("ПОЗИЦИЯ ")}
+                          {index + 1}
+                        </span>
                         <button
                           type="button"
                           className="icon-button"
-                          aria-label={`Удалить позицию ${index + 1}`}
+                          aria-label={tr("Удалить позицию {0}", [index + 1])}
                           onClick={() =>
                             setItems((v) => v.filter((_, i) => i !== index))
                           }
@@ -726,7 +766,7 @@ export function RecordForm({
                         </button>
                       </div>
                       <label>
-                        Название
+                        {tr("Название")}
                         <input
                           value={item.name}
                           onChange={(e) =>
@@ -736,7 +776,7 @@ export function RecordForm({
                         />
                       </label>
                       <label>
-                        Артикул
+                        {tr("Артикул")}
                         <input
                           value={item.part_number}
                           onChange={(e) =>
@@ -747,13 +787,13 @@ export function RecordForm({
                       <div className="field-grid three">
                         {(
                           [
-                            ["quantity", "Кол-во"],
-                            ["unit_price", "Цена, ₽"],
-                            ["discount", "Скидка, ₽"],
+                            ["quantity", tr("Кол-во")],
+                            ["unit_price", tr("Цена, ₽")],
+                            ["discount", tr("Скидка, ₽")],
                           ] as const
                         ).map(([key, label]) => (
                           <label key={key}>
-                            {label}
+                            {tr(label)}
                             <input
                               type="number"
                               step="0.01"
@@ -769,7 +809,8 @@ export function RecordForm({
                       </div>
                       {item.amount_minor != null && (
                         <small>
-                          Сохранённый итог: {money(item.amount_minor)}
+                          {tr("Сохранённый итог: ")}
+                          {money(item.amount_minor)}
                         </small>
                       )}
                     </div>
@@ -793,10 +834,10 @@ export function RecordForm({
                   }
                 >
                   <Plus size={17} />
-                  Добавить позицию
+                  {tr("Добавить позицию")}
                 </Button>
                 <Field
-                  label="Корректировка итога, ₽ (можно отрицательную)"
+                  label={tr("Корректировка итога, ₽ (можно отрицательную)")}
                   name="adjustment"
                   type="number"
                   step="0.01"
@@ -806,49 +847,50 @@ export function RecordForm({
             )}
             <details>
               <summary>
-                Дополнительные поля
+                {tr("Дополнительные поля")}
                 <ChevronDown size={16} />
               </summary>
               <div className="field-grid">
                 <Field
-                  label="Сервис / продавец"
+                  label={tr("Сервис / продавец")}
                   name="vendor"
                   value={record?.vendor}
                 />
                 <Field
-                  label="Адрес сервиса"
+                  label={tr("Адрес сервиса")}
                   name="service_address"
                   value={record?.service_address}
                 />
                 <Field
-                  label="Широта сервиса"
+                  label={tr("Широта сервиса")}
                   name="service_latitude"
                   type="number"
                   step="any"
                   value={record?.service_latitude}
                 />
                 <Field
-                  label="Долгота сервиса"
+                  label={tr("Долгота сервиса")}
                   name="service_longitude"
                   type="number"
                   step="any"
                   value={record?.service_longitude}
                 />
                 <Field
-                  label="Способ оплаты"
+                  label={tr("Способ оплаты")}
                   name="payment"
                   value={record?.payment}
                 />
-                <Field label="Теги" name="tags" value={record?.tags} />
+                <Field label={tr("Теги")} name="tags" value={record?.tags} />
                 <Field
-                  label="Валюта"
+                  label={tr("Валюта")}
                   name="currency"
                   value={record?.currency || "RUB"}
                 />
               </div>
               <p className="field-help">
-                Адрес хранится локально. Координаты необязательны: добавьте их
-                парой для просмотра карты. Геокодирование не выполняется.
+                {tr(
+                  "Адрес хранится локально. Координаты необязательны: добавьте их парой для просмотра карты. Геокодирование не выполняется.",
+                )}
               </p>
               <label className="check-field warning-text">
                 <input
@@ -857,17 +899,18 @@ export function RecordForm({
                   defaultChecked={false}
                 />
                 <span>
-                  Я проверил пробег и подтверждаю исправление, даже если оно
-                  нарушает хронологию
+                  {tr(
+                    "Я проверил пробег и подтверждаю исправление, даже если оно нарушает хронологию",
+                  )}
                 </span>
               </label>
               {type === "maintenance" && vehicle?.can_edit !== false && (
                 <Field
-                  label="Выполнить и обновить напоминание"
+                  label={tr("Выполнить и обновить напоминание")}
                   name="next_reminder"
                 >
                   <select name="next_reminder">
-                    <option value="">Не изменять</option>
+                    <option value="">{tr("Не изменять")}</option>
                     {state.reminders
                       .filter(
                         (r) =>
@@ -889,24 +932,24 @@ export function RecordForm({
               <span>
                 {files.length
                   ? files.map((f) => f.name).join(", ")
-                  : "Прикрепить чек, фото или заказ-наряд"}
+                  : tr("Прикрепить чек, фото или заказ-наряд")}
               </span>
               <input name="file" type="file" multiple onChange={chooseFiles} />
             </label>
             <small className="muted">
-              Вложения загружаются при подключении к серверу.
+              {tr("Вложения загружаются при подключении к серверу.")}
             </small>
           </>
         )}
         {error && (
           <div className="error-box" role="alert">
             <AlertTriangle size={16} />
-            <span>{error}</span>
+            <span>{tr(error)}</span>
           </div>
         )}
         <div className="form-footer">
           <Button variant="outline" type="button" onClick={close}>
-            Отмена
+            {tr("Отмена")}
           </Button>
           <Button
             type="submit"
@@ -914,7 +957,11 @@ export function RecordForm({
               busy || (!vehicleId && type !== "vehicle" && type !== "category")
             }
           >
-            {busy ? "Сохраняем…" : saved ? "Повторить сохранение" : "Сохранить"}
+            {busy
+              ? tr("Сохраняем…")
+              : saved
+                ? tr("Повторить сохранение")
+                : tr("Сохранить")}
             {!busy && <Check size={17} />}
           </Button>
         </div>

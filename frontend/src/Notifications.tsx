@@ -1,3 +1,5 @@
+import { intlLocale } from "./i18n";
+import { tr } from "./i18n";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -61,7 +63,7 @@ export default function Notifications() {
     null,
   );
   const [current, setCurrent] = useState("");
-  const [deviceLabel, setDeviceLabel] = useState("Это устройство");
+  const [deviceLabel, setDeviceLabel] = useState(tr("Это устройство"));
   const supported =
     typeof PushManager !== "undefined" &&
     "Notification" in window &&
@@ -115,44 +117,45 @@ export default function Notifications() {
     <>
       <Button variant="outline" onClick={() => void openSheet()}>
         <Bell size={17} />
-        Уведомления
+        {tr("Уведомления")}
       </Button>
       <Sheet
         open={open}
         onClose={() => {
           if (!busy) setOpen(false);
         }}
-        title="Важное — вовремя"
+        title={tr("Важное — вовремя")}
       >
         <div className="notification-content">
           <p className="muted">
-            Напоминания об обслуживании. Только для владельцев автомобилей, по
-            внесённым датам и подтверждённому пробегу.
+            {tr(
+              "Напоминания об обслуживании. Только для владельцев автомобилей, по внесённым датам и подтверждённому пробегу.",
+            )}
           </p>
           <div className="info-box">
             <ShieldCheck size={20} />
             <p>
-              Сообщение содержит только «MASHINA: есть напоминание об
-              обслуживании». Данные машины и работ остаются на сервере. Push
-              использует внешний сервис браузера; Telegram получает текст
-              сообщения. Уведомление может быть видно на заблокированном экране.
+              {tr(
+                "Сообщение содержит только «MASHINA: есть напоминание об обслуживании». Данные машины и работ остаются на сервере. Push использует внешний сервис браузера; Telegram получает текст сообщения. Уведомление может быть видно на заблокированном экране.",
+              )}
             </p>
           </div>
           {session.demo ? (
             <div className="info-box">
-              Демогараж изолирован: он не подключается к внешним сервисам.
-              Настройка каналов доступна в личном гараже.
+              {tr(
+                "Демогараж изолирован: он не подключается к внешним сервисам. Настройка каналов доступна в личном гараже.",
+              )}
             </div>
           ) : (
             <>
               {status.isPending && (
-                <p role="status">Проверяем настройки сервера…</p>
+                <p role="status">{tr("Проверяем настройки сервера…")}</p>
               )}
               {status.isError && (
                 <div className="error-box" role="alert">
-                  {status.error.message}
+                  {tr(status.error.message)}
                   <Button variant="ghost" onClick={() => void status.refetch()}>
-                    Повторить
+                    {tr("Повторить")}
                   </Button>
                 </div>
               )}
@@ -161,13 +164,13 @@ export default function Notifications() {
                   {data.paused_after_restore && (
                     <div className="info-box">
                       <Pause size={18} />
-                      После восстановления отправка приостановлена. Владелец
-                      сервера должен выполнить notification-resume; затем
-                      включите свои каналы.
+                      {tr(
+                        "После восстановления отправка приостановлена. Владелец сервера должен выполнить notification-resume; затем включите свои каналы.",
+                      )}
                     </div>
                   )}
                   <div className="section-heading">
-                    <h3>Ваши каналы</h3>
+                    <h3>{tr("Ваши каналы")}</h3>
                     <Button
                       variant="ghost"
                       disabled={busy}
@@ -184,50 +187,52 @@ export default function Notifications() {
                         )
                       }
                     >
-                      {data.enabled ? "Приостановить" : "Включить"}
+                      {data.enabled ? tr("Приостановить") : tr("Включить")}
                     </Button>
                   </div>
                   <p className="tiny muted">
                     {data.enabled
-                      ? "Ваше согласие активно."
-                      : "Ваши каналы приостановлены."}{" "}
-                    Отправку запускает настроенный владельцем сервера таймер.
-                    Принятие сервисом не гарантирует показ или прочтение.
+                      ? tr("Ваше согласие активно.")
+                      : tr("Ваши каналы приостановлены.")}{" "}
+                    {tr(
+                      "Отправку запускает настроенный владельцем сервера таймер. Принятие сервисом не гарантирует показ или прочтение.",
+                    )}
                   </p>
                   <section className="notification-channel">
                     <div className="notification-title">
                       <Smartphone size={22} />
-                      <h3>На это устройство</h3>
+                      <h3>{tr("На это устройство")}</h3>
                     </div>
                     {!data.push_configured ? (
                       <p className="muted">
-                        Web Push пока не настроен. Владелец сервера создаёт
-                        локальные ключи командой notification-keys и включает
-                        таймер. Остальное приложение работает без уведомлений.
+                        {tr(
+                          "Web Push пока не настроен. Владелец сервера создаёт локальные ключи командой notification-keys и включает таймер. Остальное приложение работает без уведомлений.",
+                        )}
                       </p>
                     ) : !supported ? (
                       <p className="muted">
-                        Этот браузер не предоставляет Web Push. На iPhone
-                        добавьте MASHINA на экран «Домой» и откройте её оттуда.
-                        Нужен HTTPS и поддержка уведомлений браузером.
+                        {tr(
+                          "Этот браузер не предоставляет Web Push. На iPhone добавьте MASHINA на экран «Домой» и откройте её оттуда. Нужен HTTPS и поддержка уведомлений браузером.",
+                        )}
                       </p>
                     ) : (
                       <>
                         {Notification.permission === "denied" && (
                           <p className="muted">
-                            Уведомления запрещены в настройках браузера.
-                            Разрешите их для MASHINA и откройте панель снова.
+                            {tr(
+                              "Уведомления запрещены в настройках браузера. Разрешите их для MASHINA и откройте панель снова.",
+                            )}
                           </p>
                         )}
                         {current ? (
                           <p className="status-chip">
                             <ShieldCheck size={14} />
-                            Это устройство подключено
+                            {tr("Это устройство подключено")}
                           </p>
                         ) : (
                           <>
                             <label className="notification-device-label">
-                              Название устройства
+                              {tr("Название устройства")}
                               <input
                                 maxLength={60}
                                 value={deviceLabel}
@@ -242,8 +247,9 @@ export default function Notifications() {
                                 checked={consent}
                                 onChange={(e) => setConsent(e.target.checked)}
                               />
-                              Я согласен использовать сервис браузера для таких
-                              уведомлений.
+                              {tr(
+                                "Я согласен использовать сервис браузера для таких уведомлений.",
+                              )}
                             </label>
                             <Button
                               disabled={
@@ -258,7 +264,9 @@ export default function Notifications() {
                                 void perform(async () => {
                                   if ((await permission) !== "granted")
                                     throw new Error(
-                                      "Разрешение не получено. Уведомления не подключены.",
+                                      tr(
+                                        "Разрешение не получено. Уведомления не подключены.",
+                                      ),
                                     );
                                   const registration =
                                     await navigator.serviceWorker.ready;
@@ -304,7 +312,7 @@ export default function Notifications() {
                               }}
                             >
                               <Bell size={16} />
-                              Подключить устройство
+                              {tr("Подключить устройство")}
                             </Button>
                           </>
                         )}
@@ -318,8 +326,8 @@ export default function Notifications() {
                               <strong>{device.label}</strong>
                               <small className="muted">
                                 {device.active
-                                  ? "Подписка активна"
-                                  : "Подписка истекла — подключите снова"}
+                                  ? tr("Подписка активна")
+                                  : tr("Подписка истекла — подключите снова")}
                               </small>
                             </span>
                             <Button
@@ -342,7 +350,7 @@ export default function Notifications() {
                                 })
                               }
                             >
-                              Отключить
+                              {tr("Отключить")}
                             </Button>
                           </div>
                         ))}
@@ -352,17 +360,18 @@ export default function Notifications() {
                   <section className="notification-channel">
                     <div className="notification-title">
                       <Send size={22} />
-                      <h3>В Telegram</h3>
+                      <h3>{tr("В Telegram")}</h3>
                     </div>
                     {!data.telegram_configured ? (
                       <p className="muted">
-                        Бот пока не настроен владельцем сервера. Токен хранится
-                        только на сервере и не вводится в приложении.
+                        {tr(
+                          "Бот пока не настроен владельцем сервера. Токен хранится только на сервере и не вводится в приложении.",
+                        )}
                       </p>
                     ) : data.telegram_linked ? (
                       <>
                         <p className="muted">
-                          Личный чат подтверждён одноразовым кодом.
+                          {tr("Личный чат подтверждён одноразовым кодом.")}
                         </p>
                         <Button
                           variant="outline"
@@ -377,13 +386,13 @@ export default function Notifications() {
                             )
                           }
                         >
-                          Отключить Telegram
+                          {tr("Отключить Telegram")}
                         </Button>
                       </>
                     ) : (
                       <>
                         <p className="muted">
-                          Отправьте одноразовый код в личный чат{" "}
+                          {tr("Отправьте одноразовый код в личный чат")}{" "}
                           <a
                             href={`https://t.me/${data.bot_username}`}
                             target="_blank"
@@ -391,19 +400,20 @@ export default function Notifications() {
                           >
                             @{data.bot_username}
                           </a>
-                          . Сервер подтвердит привязку при следующем запуске
-                          таймера. Telegram получит текст уведомления.
+                          {tr(
+                            ". Сервер подтвердит привязку при следующем запуске таймера. Telegram получит текст уведомления.",
+                          )}
                         </p>
                         {code && (
                           <div className="notification-code">
                             <code>{code.code}</code>
                             <small>
-                              Действует до{" "}
+                              {tr("Действует до")}{" "}
                               {new Date(code.expires * 1000).toLocaleTimeString(
-                                "ru-RU",
+                                intlLocale(),
                                 { hour: "2-digit", minute: "2-digit" },
                               )}
-                              , один раз. Скопируйте и отправьте боту.
+                              {tr(", один раз. Скопируйте и отправьте боту.")}
                             </small>
                           </div>
                         )}
@@ -421,26 +431,27 @@ export default function Notifications() {
                             )
                           }
                         >
-                          Получить код и подключить
+                          {tr("Получить код и подключить")}
                         </Button>
                       </>
                     )}
                   </section>
                   <div className="section-heading">
-                    <h3>Последние попытки</h3>
+                    <h3>{tr("Последние попытки")}</h3>
                     <Button
                       variant="ghost"
                       disabled={busy}
                       onClick={() => void status.refetch()}
                     >
                       <RefreshCw size={15} />
-                      Обновить
+                      {tr("Обновить")}
                     </Button>
                   </div>
                   {data.deliveries.length === 0 ? (
                     <p className="muted">
-                      Отправок пока нет. Ближайшее напоминание появится здесь
-                      после запуска таймера.
+                      {tr(
+                        "Отправок пока нет. Ближайшее напоминание появится здесь после запуска таймера.",
+                      )}
                     </p>
                   ) : (
                     <div className="notification-journal">
@@ -449,20 +460,23 @@ export default function Notifications() {
                           <div>
                             <strong>
                               {item.channel === "push"
-                                ? "На устройство"
+                                ? tr("На устройство")
                                 : "Telegram"}
                             </strong>
                             <small>
                               {new Date(item.updated * 1000).toLocaleString(
-                                "ru-RU",
+                                intlLocale(),
                               )}
                             </small>
                           </div>
-                          <p>{states[item.state] || "Неизвестное состояние"}</p>
+                          <p>
+                            {states[item.state] || tr("Неизвестное состояние")}
+                          </p>
                           {item.error_code === "expired" && (
                             <small>
-                              Сервис удалил подписку. Подключите устройство
-                              снова.
+                              {tr(
+                                "Сервис удалил подписку. Подключите устройство снова.",
+                              )}
                             </small>
                           )}
                           {["uncertain", "rejected"].includes(item.state) &&
@@ -473,7 +487,9 @@ export default function Notifications() {
                                 onClick={() => {
                                   if (
                                     confirm(
-                                      "Сервис мог уже принять предыдущее уведомление. Повтор может создать дубликат. Поставить повтор в очередь?",
+                                      tr(
+                                        "Сервис мог уже принять предыдущее уведомление. Повтор может создать дубликат. Поставить повтор в очередь?",
+                                      ),
                                     )
                                   )
                                     void perform(() =>
@@ -490,7 +506,7 @@ export default function Notifications() {
                                     );
                                 }}
                               >
-                                Повторить явно
+                                {tr("Повторить явно")}
                               </Button>
                             )}
                         </article>
@@ -503,7 +519,7 @@ export default function Notifications() {
           )}
           {error && (
             <div className="error-box" role="alert">
-              {error}
+              {tr(error)}
             </div>
           )}
         </div>

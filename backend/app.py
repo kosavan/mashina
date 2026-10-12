@@ -12,6 +12,7 @@ import tempfile
 import time
 import uuid
 from urllib.parse import quote
+from typing import Literal
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerificationError, InvalidHashError
@@ -42,6 +43,7 @@ class Credentials(BaseModel):
     username: str = Field(min_length=3, max_length=64)
     password: str = Field(min_length=12, max_length=256)
     bootstrap_token: str = Field(default="", max_length=256)
+    locale: Literal["ru", "en"] = "ru"
 
 
 class LogoutInput(BaseModel):
@@ -75,7 +77,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.3.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.4.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -221,8 +223,13 @@ def create_app(data_path=None, bootstrap_token=None):
                 raise Denied("Нужен одноразовый код установки с вашего сервера")
             owner = str(uuid.uuid4())
             c.exec_driver_sql(
-                "INSERT INTO users(id,username,password_hash,is_admin) VALUES(?,?,?,1)",
-                (owner, body.username.strip(), HASHER.hash(body.password)),
+                "INSERT INTO users(id,username,password_hash,is_admin,settings) VALUES(?,?,?,1,?)",
+                (
+                    owner,
+                    body.username.strip(),
+                    HASHER.hash(body.password),
+                    dumps({"locale": body.locale}),
+                ),
             )
         if token_path.exists():
             token_path.unlink()

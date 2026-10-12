@@ -1,3 +1,4 @@
+import { tr } from "./i18n";
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -83,12 +84,15 @@ function ToolForm({
   const car = state.vehicles.find((v) => v.id === selected);
   const title =
     entity === "tire_set"
-      ? "Комплект шин"
+      ? tr("Комплект шин")
       : entity === "budget"
-        ? "Месячный бюджет"
-        : "Регулярный платёж";
+        ? tr("Месячный бюджет")
+        : tr("Регулярный платёж");
   function close() {
-    if (!dirty || confirm("Закрыть форму и потерять несохранённые изменения?"))
+    if (
+      !dirty ||
+      confirm(tr("Закрыть форму и потерять несохранённые изменения?"))
+    )
       onClose();
   }
   function changeInterval(index: number, key: keyof Interval, value: string) {
@@ -98,7 +102,7 @@ function ToolForm({
     );
   }
   return (
-    <Sheet open onClose={close} title={title}>
+    <Sheet open onClose={close} title={tr(title)}>
       <form
         className="record-form"
         onChange={() => setDirty(true)}
@@ -122,7 +126,7 @@ function ToolForm({
                 ) as HTMLInputElement
               ).checked;
             await save(entity, data, record);
-            notify("Сохранено");
+            notify(tr("Сохранено"));
             onClose();
           } catch (err) {
             setError((err as Error).message);
@@ -134,29 +138,32 @@ function ToolForm({
         <p className="field-help">
           {car?.name} ·{" "}
           {entity === "tire_set"
-            ? "История использования не создаёт расход. Покупку запишите отдельно."
-            : "План не добавляет фактических расходов."}
+            ? tr(
+                "История использования не создаёт расход. Покупку запишите отдельно.",
+              )
+            : tr("План не добавляет фактических расходов.")}
         </p>
         {entity === "tire_set" ? (
           <>
             <div className="field-grid">
               <label>
-                DOT самой старой шины
+                {tr("DOT самой старой шины")}
                 <input
                   name="manufacture_code"
                   defaultValue={record?.manufacture_code}
                   pattern="[0-9]{4}"
                   inputMode="numeric"
                   maxLength={4}
-                  placeholder="3421 · неделя 34, 2021 год"
+                  placeholder={tr("3421 · неделя 34, 2021 год")}
                 />
                 <small>
-                  Последние 4 цифры маркировки. Шины комплекта могут иметь
-                  разный возраст.
+                  {tr(
+                    "Последние 4 цифры маркировки. Шины комплекта могут иметь разный возраст.",
+                  )}
                 </small>
               </label>
               <label>
-                Ваш порог замены, мм
+                {tr("Ваш порог замены, мм")}
                 <input
                   name="tread_threshold_mm"
                   type="number"
@@ -168,23 +175,26 @@ function ToolForm({
                       ? record.tread_threshold_tenths / 10
                       : ""
                   }
-                  placeholder="По рекомендации производителя"
+                  placeholder={tr("По рекомендации производителя")}
                 />
                 <small>
-                  Личный порог, не оценка безопасности и не правовой норматив.
+                  {tr(
+                    "Личный порог, не оценка безопасности и не правовой норматив.",
+                  )}
                 </small>
               </label>
             </div>
             <section className="tread-editor">
-              <h3>Измерения протектора</h3>
+              <h3>{tr("Измерения протектора")}</h3>
               <p className="field-help">
-                Запишите наименьшую измеренную глубину по комплекту. Замер не
-                заменяет осмотр повреждений.
+                {tr(
+                  "Запишите наименьшую измеренную глубину по комплекту. Замер не заменяет осмотр повреждений.",
+                )}
               </p>
               {measurements.map((m, i) => (
                 <div className="tread-row" key={m.id}>
                   <label>
-                    Дата замера
+                    {tr("Дата замера")}
                     <input
                       type="date"
                       max={today()}
@@ -200,7 +210,7 @@ function ToolForm({
                     />
                   </label>
                   <label>
-                    Минимум по комплекту, мм
+                    {tr("Минимум по комплекту, мм")}
                     <input
                       type="number"
                       min="0"
@@ -220,7 +230,7 @@ function ToolForm({
                   <button
                     type="button"
                     className="icon-button"
-                    aria-label={`Удалить замер ${i + 1}`}
+                    aria-label={tr("Удалить замер {0}", [i + 1])}
                     onClick={() => {
                       setDirty(true);
                       setMeasurements((rows) => rows.filter((_, j) => j !== i));
@@ -247,12 +257,12 @@ function ToolForm({
                 }}
               >
                 <Plus size={16} />
-                Добавить замер
+                {tr("Добавить замер")}
               </Button>
             </section>
             <div className="field-grid">
               <label>
-                Марка шин
+                {tr("Марка шин")}
                 <input
                   name="brand"
                   defaultValue={record?.brand}
@@ -261,7 +271,7 @@ function ToolForm({
                 />
               </label>
               <label>
-                Модель шин
+                {tr("Модель шин")}
                 <input
                   name="model"
                   defaultValue={record?.model}
@@ -271,7 +281,7 @@ function ToolForm({
             </div>
             <div className="field-grid">
               <label>
-                Размер
+                {tr("Размер")}
                 <input
                   name="size"
                   placeholder="235/55 R19"
@@ -279,31 +289,34 @@ function ToolForm({
                 />
               </label>
               <label>
-                Сезон
+                {tr("Сезон")}
                 <select name="season" defaultValue={record?.season || "winter"}>
                   {Object.entries(seasons).map(([key, label]) => (
                     <option key={key} value={key}>
-                      {label}
+                      {tr(label)}
                     </option>
                   ))}
                 </select>
               </label>
             </div>
             <label>
-              Заметка
+              {tr("Заметка")}
               <textarea name="notes" defaultValue={record?.notes} />
             </label>
             <div className="section-heading">
-              <h3>Подтверждённая история</h3>
+              <h3>{tr("Подтверждённая история")}</h3>
             </div>
             {intervals.map((row, index) => (
               <section className="tire-interval" key={index}>
                 <div className="section-heading">
-                  <strong>Интервал {index + 1}</strong>
+                  <strong>
+                    {tr("Интервал ")}
+                    {index + 1}
+                  </strong>
                   <button
                     className="icon-button"
                     type="button"
-                    aria-label={`Удалить интервал ${index + 1}`}
+                    aria-label={tr("Удалить интервал {0}", [index + 1])}
                     onClick={() => {
                       setDirty(true);
                       setIntervals((rows) =>
@@ -316,7 +329,7 @@ function ToolForm({
                 </div>
                 <div className="field-grid">
                   <label>
-                    Установлены
+                    {tr("Установлены")}
                     <input
                       type="date"
                       required
@@ -327,7 +340,7 @@ function ToolForm({
                     />
                   </label>
                   <label>
-                    Пробег установки
+                    {tr("Пробег установки")}
                     <input
                       type="number"
                       required
@@ -342,7 +355,7 @@ function ToolForm({
                 </div>
                 <div className="field-grid">
                   <label>
-                    Сняты
+                    {tr("Сняты")}
                     <input
                       type="date"
                       value={row.removed_at}
@@ -352,7 +365,7 @@ function ToolForm({
                     />
                   </label>
                   <label>
-                    Пробег снятия
+                    {tr("Пробег снятия")}
                     <input
                       type="number"
                       min="0"
@@ -384,12 +397,13 @@ function ToolForm({
               }}
             >
               <Plus size={16} />
-              Добавить установку
+              {tr("Добавить установку")}
             </Button>
             {intervals.some((i) => !i.removed_at) && (
               <p className="field-help">
-                Закройте текущий интервал перед следующей установкой. Пробег шин
-                не является оценкой их технического состояния.
+                {tr(
+                  "Закройте текущий интервал перед следующей установкой. Пробег шин не является оценкой их технического состояния.",
+                )}
               </p>
             )}
           </>
@@ -397,7 +411,7 @@ function ToolForm({
           <>
             {entity === "budget" ? (
               <label>
-                Месяц
+                {tr("Месяц")}
                 <input
                   type="month"
                   name="month"
@@ -407,18 +421,18 @@ function ToolForm({
               </label>
             ) : (
               <label>
-                Название платежа
+                {tr("Название платежа")}
                 <input
                   name="title"
                   required
                   defaultValue={record?.title}
-                  placeholder="Страховка, парковка, налог"
+                  placeholder={tr("Страховка, парковка, налог")}
                 />
               </label>
             )}
             <div className="field-grid">
               <label>
-                Сумма
+                {tr("Сумма")}
                 <input
                   name="amount"
                   type="number"
@@ -429,7 +443,7 @@ function ToolForm({
                 />
               </label>
               <label>
-                Валюта
+                {tr("Валюта")}
                 <input
                   name="currency"
                   pattern="[A-Za-z]{3}"
@@ -440,14 +454,14 @@ function ToolForm({
               </label>
             </div>
             <label>
-              Категория (пусто — все расходы)
+              {tr("Категория (пусто — все расходы)")}
               <input name="category" defaultValue={record?.category} />
             </label>
             {entity === "recurring_cost" && (
               <>
                 <div className="field-grid">
                   <label>
-                    Ближайшая дата
+                    {tr("Ближайшая дата")}
                     <input
                       type="date"
                       name="next_date"
@@ -456,7 +470,7 @@ function ToolForm({
                     />
                   </label>
                   <label>
-                    Каждые, месяцев
+                    {tr("Каждые, месяцев")}
                     <input
                       type="number"
                       min="1"
@@ -474,7 +488,7 @@ function ToolForm({
                     type="checkbox"
                     defaultChecked={record?.enabled ?? true}
                   />
-                  Включить в прогноз
+                  {tr("Включить в прогноз")}
                 </label>
               </>
             )}
@@ -482,15 +496,15 @@ function ToolForm({
         )}
         {error && (
           <p className="form-error" role="alert">
-            {error}
+            {tr(error)}
           </p>
         )}
         <div className="form-footer">
           <Button type="button" variant="outline" onClick={close}>
-            Отмена
+            {tr("Отмена")}
           </Button>
           <Button type="submit" disabled={busy}>
-            {busy ? "Сохраняем…" : "Сохранить"}
+            {busy ? tr("Сохраняем…") : tr("Сохранить")}
           </Button>
         </div>
       </form>
@@ -515,31 +529,32 @@ function CSVImport() {
   return (
     <>
       <PageHeading
-        eyebrow="ВАША ИСТОРИЯ БЕЗ РУЧНОГО ВВОДА"
-        title="Импорт из CSV"
-        description="Сначала проверьте строки. В гараж попадут только подтверждённые записи."
+        eyebrow={tr("ВАША ИСТОРИЯ БЕЗ РУЧНОГО ВВОДА")}
+        title={tr("Импорт из CSV")}
+        description={tr(
+          "Сначала проверьте строки. В гараж попадут только подтверждённые записи.",
+        )}
       />
       <section className="panel ownership-import">
-        <h3>Документированный формат</h3>
+        <h3>{tr("Документированный формат")}</h3>
         <p className="muted">
-          UTF-8, разделитель запятая или точка с запятой. Обязательны
-          occurred_at и kind. Для расходов нужна amount; для топлива — любые два
-          из amount, liters, price. Максимум 1 000 строк и 2 МБ.
+          {tr(
+            "UTF-8, разделитель запятая или точка с запятой. Обязательны occurred_at и kind. Для расходов нужна amount; для топлива — любые два из amount, liters, price. Максимум 1 000 строк и 2 МБ.",
+          )}
         </p>
         <code className="csv-example">
           external_id,occurred_at,kind,amount,description
           <br />
-          my-001,2026-01-15,expense,1500,Мойка
+          {tr("my-001,2026-01-15,expense,1500,Мойка")}
         </code>
         <p className="field-help">
-          Типы: expense, fuel, maintenance, odometer, note. Дополнительно:
-          category, odometer, currency, full, gap, fuel, station, vendor, tags.
-          external_id помогает обнаружить повторный импорт; изменённая строка с
-          тем же ID будет отклонена.
+          {tr(
+            "Типы: expense, fuel, maintenance, odometer, note. Дополнительно: category, odometer, currency, full, gap, fuel, station, vendor, tags. external_id помогает обнаружить повторный импорт; изменённая строка с тем же ID будет отклонена.",
+          )}
         </p>
         <label className="file-picker">
           <Upload size={22} />
-          <span>Выбрать CSV для проверки</span>
+          <span>{tr("Выбрать CSV для проверки")}</span>
           <input
             type="file"
             accept=".csv,text/csv"
@@ -553,7 +568,7 @@ function CSVImport() {
               setConfirmed(false);
               try {
                 if (file.size > 2 * 1024 * 1024)
-                  throw new Error("CSV превышает 2 МБ");
+                  throw new Error(tr("CSV превышает 2 МБ"));
                 const body = new FormData();
                 body.append("file", file);
                 body.append("vehicle_id", selected);
@@ -580,23 +595,25 @@ function CSVImport() {
           />
         </label>
         {!navigator.onLine && (
-          <p className="field-help">Импорт требует подключения к серверу.</p>
+          <p className="field-help">
+            {tr("Импорт требует подключения к серверу.")}
+          </p>
         )}
-        {busy && <p role="status">Обрабатываем файл…</p>}
+        {busy && <p role="status">{tr("Обрабатываем файл…")}</p>}
         {error && (
           <p className="form-error" role="alert">
-            {error}
+            {tr(error)}
           </p>
         )}
       </section>
       {rows.length > 0 && (
         <section className="panel ownership-import">
           <div className="section-heading">
-            <h3>Проверка строк</h3>
+            <h3>{tr("Проверка строк")}</h3>
             <span className="muted">
-              {selectedRows.length} выбрано ·{" "}
-              {rows.filter((row) => row.error).length} ошибок ·{" "}
-              {rows.filter((row) => row.duplicate).length} повторов
+              {selectedRows.length} {tr(" выбрано ·")}{" "}
+              {rows.filter((row) => row.error).length} {tr(" ошибок ·")}{" "}
+              {rows.filter((row) => row.duplicate).length} {tr(" повторов")}
             </span>
           </div>
           <div className="csv-rows">
@@ -625,13 +642,13 @@ function CSVImport() {
                 />
                 <span>
                   <strong>
-                    Строка {row.line} ·{" "}
-                    {row.source.description || row.source.kind}
+                    {tr("Строка ")}
+                    {row.line} · {row.source.description || row.source.kind}
                   </strong>
                   <small>
-                    {row.error ||
+                    {(row.error && tr(row.error)) ||
                       (row.duplicate
-                        ? "Уже импортирована / повтор в файле"
+                        ? tr("Уже импортирована / повтор в файле")
                         : `${row.data?.occurred_at?.slice(0, 10)} · ${money(row.data?.amount_minor, row.data?.currency)}`)}
                   </small>
                 </span>
@@ -645,7 +662,7 @@ function CSVImport() {
                 checked={confirmed}
                 onChange={(e) => setConfirmed(e.target.checked)}
               />
-              Я проверил исторические показания пробега выбранных строк
+              {tr("Я проверил исторические показания пробега выбранных строк")}
             </label>
           )}
           <Button
@@ -678,7 +695,9 @@ function CSVImport() {
                 );
                 setChecked(new Set());
                 notify(
-                  "История импортирована. Повторные операции защищены от дублирования.",
+                  tr(
+                    "История импортирована. Повторные операции защищены от дублирования.",
+                  ),
                 );
               } catch (err) {
                 setError((err as Error).message);
@@ -687,7 +706,8 @@ function CSVImport() {
               }
             }}
           >
-            Подтвердить импорт · {selectedRows.length}
+            {tr("Подтвердить импорт · ")}
+            {selectedRows.length}
           </Button>
         </section>
       )}
@@ -786,10 +806,10 @@ export default function OwnershipTools({
       };
     });
   async function remove(entity: Mutation["entity"], row: RecordBase) {
-    if (!confirm("Удалить запись? Действие можно отменить.")) return;
+    if (!confirm(tr("Удалить запись? Действие можно отменить."))) return;
     try {
       const removed = await save(entity, {}, row, "delete");
-      notify("Запись удалена", () => {
+      notify(tr("Запись удалена"), () => {
         void save(entity, {}, removed, "restore").catch((err) =>
           notify((err as Error).message),
         );
@@ -804,14 +824,14 @@ export default function OwnershipTools({
         <div
           className="tabs ownership-tabs"
           role="tablist"
-          aria-label="Инструменты обслуживания"
+          aria-label={tr("Инструменты обслуживания")}
         >
           {[
-            ["work", "Работы"],
-            ["tires", "Шины"],
-            ["parts", "Запчасти"],
-            ["budget", "Бюджет"],
-            ["import", "Импорт"],
+            ["work", tr("Работы")],
+            ["tires", tr("Шины")],
+            ["parts", tr("Запчасти")],
+            ["budget", tr("Бюджет")],
+            ["import", tr("Импорт")],
           ]
             .filter(
               ([key]) =>
@@ -828,15 +848,15 @@ export default function OwnershipTools({
                 key={key}
                 onClick={() => setTab(key)}
               >
-                {label}
+                {tr(label)}
               </button>
             ))}
         </div>
         {visibleTab !== "work" && (
           <label className="filter-select">
-            Автомобиль
+            {tr("Автомобиль")}
             <select
-              aria-label="Автомобиль инструментов"
+              aria-label={tr("Автомобиль инструментов")}
               value={selected}
               onChange={(e) => {
                 setSelected(e.target.value);
@@ -856,15 +876,17 @@ export default function OwnershipTools({
         children
       ) : !selected ? (
         <Empty
-          title="Сначала добавьте автомобиль"
-          description="Инструменты владения привязаны к вашему автомобилю."
+          title={tr("Сначала добавьте автомобиль")}
+          description={tr(
+            "Инструменты владения привязаны к вашему автомобилю.",
+          )}
         />
       ) : visibleTab === "import" ? (
         <>
           <Suspense
             fallback={
               <p role="status" className="muted">
-                Загружаем проверку выписок…
+                {tr("Загружаем проверку выписок…")}
               </p>
             }
           >
@@ -875,9 +897,11 @@ export default function OwnershipTools({
       ) : visibleTab === "tires" ? (
         <>
           <PageHeading
-            eyebrow="СЕЗОНЫ МЕНЯЮТСЯ. ИСТОРИЯ ОСТАЁТСЯ."
-            title="Комплекты шин"
-            description="Размеры, установки и подтверждённый пробег — в одном месте."
+            eyebrow={tr("СЕЗОНЫ МЕНЯЮТСЯ. ИСТОРИЯ ОСТАЁТСЯ.")}
+            title={tr("Комплекты шин")}
+            description={tr(
+              "Размеры, установки и подтверждённый пробег — в одном месте.",
+            )}
             action={
               <Button
                 hidden={
@@ -887,45 +911,47 @@ export default function OwnershipTools({
                 onClick={() => setModal({ entity: "tire_set" })}
               >
                 <Plus size={16} />
-                Добавить комплект
+                {tr("Добавить комплект")}
               </Button>
             }
           />
           {!tires.length ? (
             <Empty
               icon={CircleDot}
-              title="У каждого сезона свой комплект"
-              description="Добавьте марку, размер и историю использования. Мы не будем выдавать пробег за техническое состояние."
+              title={tr("У каждого сезона свой комплект")}
+              description={tr(
+                "Добавьте марку, размер и историю использования. Мы не будем выдавать пробег за техническое состояние.",
+              )}
               onClick={
                 state.vehicles.find((v) => v.id === selected)?.can_edit ===
                 false
                   ? undefined
                   : () => setModal({ entity: "tire_set" })
               }
-              label="Добавить комплект"
+              label={tr("Добавить комплект")}
             />
           ) : (
             <div className="ownership-grid">
               {tires.map((tire) => (
                 <article className="panel tire-card" key={tire.id}>
                   <div className="section-heading">
-                    <span className="eyebrow">{seasons[tire.season]}</span>
+                    <span className="eyebrow">{tr(seasons[tire.season])}</span>
                     <CircleDot size={30} />
                   </div>
                   <h2>
                     {tire.brand} {tire.model}
                   </h2>
                   <TireHealth tire={tire} />
-                  <p className="muted">{tire.size || "Размер не указан"}</p>
+                  <p className="muted">{tire.size || tr("Размер не указан")}</p>
                   <div className="tire-distance">
                     <strong>
                       {number(tire.confirmed_km || 0)}
-                      <small> км</small>
+                      <small> {tr(" км")}</small>
                     </strong>
                     <span>
                       {tire.pending
-                        ? "Предварительно · ожидает проверки сервером"
-                        : "подтверждено в закрытых интервалах"}
+                        ? tr("Предварительно · ожидает проверки сервером")
+                        : tr("подтверждено в закрытых интервалах")}
                     </span>
                   </div>
                   <div className="tire-history">
@@ -934,14 +960,14 @@ export default function OwnershipTools({
                         <div key={i}>
                           <span>
                             {interval.mounted_at} →{" "}
-                            {interval.removed_at || "установлены"}
+                            {interval.removed_at || tr("установлены")}
                           </span>
                           <strong>
                             {number(Number(interval.mounted_km))} →{" "}
                             {interval.removed_km !== null
                               ? number(Number(interval.removed_km))
                               : "…"}{" "}
-                            км
+                            {tr("км")}
                           </strong>
                         </div>
                       ),
@@ -959,11 +985,11 @@ export default function OwnershipTools({
                       }
                     >
                       <Pencil size={15} />
-                      История и параметры
+                      {tr("История и параметры")}
                     </Button>
                     <button
                       className="icon-button"
-                      aria-label={`Удалить ${tire.brand}`}
+                      aria-label={tr("Удалить {0}", [tire.brand])}
                       onClick={() => remove("tire_set", tire)}
                     >
                       <Trash2 size={16} />
@@ -977,23 +1003,27 @@ export default function OwnershipTools({
       ) : visibleTab === "parts" ? (
         <>
           <PageHeading
-            eyebrow="ПОМНИТЬ КАЖДУЮ ДЕТАЛЬ"
-            title="Установленные запчасти"
-            description="Каталог из реальных записей ТО. Измените работу — каталог обновится."
+            eyebrow={tr("ПОМНИТЬ КАЖДУЮ ДЕТАЛЬ")}
+            title={tr("Установленные запчасти")}
+            description={tr(
+              "Каталог из реальных записей ТО. Измените работу — каталог обновится.",
+            )}
           />
           <label className="search-field">
             <Search size={17} />
             <input
-              aria-label="Поиск запчастей"
-              placeholder="Название или артикул"
+              aria-label={tr("Поиск запчастей")}
+              placeholder={tr("Название или артикул")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </label>
           {!parts.length ? (
             <Empty
-              title="Детали появятся из истории ТО"
-              description="Добавьте позиции и артикулы в запись обслуживания. Их стоимость уже включена в ТО и не учитывается повторно."
+              title={tr("Детали появятся из истории ТО")}
+              description={tr(
+                "Добавьте позиции и артикулы в запись обслуживания. Их стоимость уже включена в ТО и не учитывается повторно.",
+              )}
             />
           ) : (
             <div className="ownership-grid">
@@ -1009,13 +1039,13 @@ export default function OwnershipTools({
                     key={part.event_id + ":" + part.index}
                   >
                     <span className="eyebrow">
-                      {part.part_number || "АРТИКУЛ НЕ УКАЗАН"}
+                      {part.part_number || tr("АРТИКУЛ НЕ УКАЗАН")}
                     </span>
                     <h3>{part.name}</h3>
                     <p className="muted">
-                      {part.quantity} шт. ·{" "}
+                      {part.quantity} {tr(" шт. ·")}{" "}
                       {part.amount_minor === undefined
-                        ? "Итог после синхронизации"
+                        ? tr("Итог после синхронизации")
                         : money(part.amount_minor, part.currency)}
                     </p>
                     {state.events.find((e) => e.id === part.event_id) && (
@@ -1033,20 +1063,22 @@ export default function OwnershipTools({
       ) : (
         <>
           <PageHeading
-            eyebrow="ПЛАНИРУЙТЕ СПОКОЙНО"
-            title="Бюджет и будущие расходы"
-            description="Факт из истории, план — из известных платежей. Эти суммы не смешиваются."
+            eyebrow={tr("ПЛАНИРУЙТЕ СПОКОЙНО")}
+            title={tr("Бюджет и будущие расходы")}
+            description={tr(
+              "Факт из истории, план — из известных платежей. Эти суммы не смешиваются.",
+            )}
             action={
               <Button onClick={() => setModal({ entity: "budget" })}>
                 <Plus size={16} />
-                Задать бюджет
+                {tr("Задать бюджет")}
               </Button>
             }
           />
           <label className="ownership-month">
-            Месяц
+            {tr("Месяц")}
             <input
-              aria-label="Месяц бюджета"
+              aria-label={tr("Месяц бюджета")}
               type="month"
               value={month}
               onChange={(e) => {
@@ -1055,31 +1087,35 @@ export default function OwnershipTools({
             />
           </label>
           <>
-            {report.isLoading && <p role="status">Обновляем прогноз…</p>}
+            {report.isLoading && (
+              <p role="status">{tr("Обновляем прогноз…")}</p>
+            )}
             {report.error && (
-              <p role="alert">{(report.error as Error).message}</p>
+              <p role="alert">{tr((report.error as Error).message)}</p>
             )}
             {(!navigator.onLine || queue.length > 0) && (
               <p className="field-help">
-                Бюджет рассчитан из локальной истории. Прогноз показан по
-                последнему сохранённому отчёту и обновится после синхронизации.
+                {tr(
+                  "Бюджет рассчитан из локальной истории. Прогноз показан по последнему сохранённому отчёту и обновится после синхронизации.",
+                )}
               </p>
             )}
             <div className="ownership-grid">
               {budgets.map((budget) => (
                 <article className="panel budget-card" key={budget.id}>
                   <span className="eyebrow">
-                    {budget.category || "ВСЕ РАСХОДЫ"} · {budget.currency}
+                    {budget.category || tr("ВСЕ РАСХОДЫ")} · {budget.currency}
                   </span>
                   <h2>{money(budget.actual_minor, budget.currency)}</h2>
                   <p className="muted">
-                    из {money(budget.amount_minor, budget.currency)} на{" "}
+                    {tr("из ")}
+                    {money(budget.amount_minor, budget.currency)} {tr(" на")}{" "}
                     {budget.month}
                   </p>
                   <div
                     className="budget-progress"
                     role="meter"
-                    aria-label="Доля использованного бюджета"
+                    aria-label={tr("Доля использованного бюджета")}
                     aria-valuenow={Math.max(0, budget.actual_minor)}
                     aria-valuemin={0}
                     aria-valuemax={Math.max(
@@ -1099,8 +1135,10 @@ export default function OwnershipTools({
                       budget.remaining_minor < 0 ? "warning-text" : "muted"
                     }
                   >
-                    {budget.remaining_minor < 0 ? "Превышение" : "Осталось"}:{" "}
-                    {money(Math.abs(budget.remaining_minor), budget.currency)}
+                    {budget.remaining_minor < 0
+                      ? tr("Превышение")
+                      : tr("Осталось")}
+                    : {money(Math.abs(budget.remaining_minor), budget.currency)}
                   </p>
                   <div className="ownership-actions">
                     <Button
@@ -1109,11 +1147,11 @@ export default function OwnershipTools({
                         setModal({ entity: "budget", record: budget })
                       }
                     >
-                      Изменить
+                      {tr("Изменить")}
                     </Button>
                     <button
                       className="icon-button"
-                      aria-label="Удалить бюджет"
+                      aria-label={tr("Удалить бюджет")}
                       onClick={() => remove("budget", budget)}
                     >
                       <Trash2 size={16} />
@@ -1124,20 +1162,22 @@ export default function OwnershipTools({
             </div>
             {!budgets.length && (
               <Empty
-                title="Расходам можно задать ориентир"
-                description="Создайте бюджет на месяц для всего автомобиля или конкретной категории."
+                title={tr("Расходам можно задать ориентир")}
+                description={tr(
+                  "Создайте бюджет на месяц для всего автомобиля или конкретной категории.",
+                )}
                 onClick={() => setModal({ entity: "budget" })}
-                label="Задать бюджет"
+                label={tr("Задать бюджет")}
               />
             )}
             <div className="section-heading">
-              <h3>Регулярные платежи</h3>
+              <h3>{tr("Регулярные платежи")}</h3>
               <Button
                 variant="outline"
                 onClick={() => setModal({ entity: "recurring_cost" })}
               >
                 <Plus size={16} />
-                Добавить платёж
+                {tr("Добавить платёж")}
               </Button>
             </div>
             <div className="ownership-grid">
@@ -1149,8 +1189,9 @@ export default function OwnershipTools({
                     <h3>{row.title}</h3>
                     <strong>{money(row.amount_minor, row.currency)}</strong>
                     <p className="muted">
-                      {row.next_date} · каждые {row.interval_months} мес. ·{" "}
-                      {row.enabled ? "в прогнозе" : "отключён"}
+                      {row.next_date} {tr(" · каждые ")}
+                      {row.interval_months} {tr(" мес. ·")}{" "}
+                      {row.enabled ? tr("в прогнозе") : tr("отключён")}
                     </p>
                     <div className="ownership-actions">
                       <Button
@@ -1159,11 +1200,11 @@ export default function OwnershipTools({
                           setModal({ entity: "recurring_cost", record: row })
                         }
                       >
-                        Изменить
+                        {tr("Изменить")}
                       </Button>
                       <button
                         className="icon-button"
-                        aria-label={`Удалить платёж ${row.title}`}
+                        aria-label={tr("Удалить платёж {0}", [row.title])}
                         onClick={() => remove("recurring_cost", row)}
                       >
                         <Trash2 size={16} />
@@ -1173,18 +1214,23 @@ export default function OwnershipTools({
                 ))}
             </div>
             <section className="panel forecast-panel">
-              <span className="eyebrow">ПЛАН · НЕ ФАКТИЧЕСКИЕ РАСХОДЫ</span>
-              <h3>Следующие 12 месяцев от {month}</h3>
+              <span className="eyebrow">
+                {tr("ПЛАН · НЕ ФАКТИЧЕСКИЕ РАСХОДЫ")}
+              </span>
+              <h3>
+                {tr("Следующие 12 месяцев от ")}
+                {month}
+              </h3>
               <p className="muted">
-                Известные регулярные платежи и ближайшие ТО с заданной оценкой.
-                Дата ТО — календарный предел: по пробегу оно может потребоваться
-                раньше. Повторы появятся после подтверждения выполнения. Не
-                добавляйте одну работу одновременно как платёж и ТО.
+                {tr(
+                  "Известные регулярные платежи и ближайшие ТО с заданной оценкой. Дата ТО — календарный предел: по пробегу оно может потребоваться раньше. Повторы появятся после подтверждения выполнения. Не добавляйте одну работу одновременно как платёж и ТО.",
+                )}
               </p>
               {!report.data?.forecast.length ? (
                 <p className="muted">
-                  Добавьте регулярный платёж или стоимость ТО с датой в этом
-                  периоде.
+                  {tr(
+                    "Добавьте регулярный платёж или стоимость ТО с датой в этом периоде.",
+                  )}
                 </p>
               ) : (
                 report.data.forecast.map((row, i) => (
@@ -1194,9 +1240,9 @@ export default function OwnershipTools({
                       {row.title}
                       {row.source === "maintenance" && (
                         <small className="muted">
-                          Оценка ТО
+                          {tr("Оценка ТО")}
                           {row.mileage_deadline
-                            ? " · или раньше по пробегу"
+                            ? tr(" · или раньше по пробегу")
                             : ""}
                         </small>
                       )}
@@ -1207,12 +1253,11 @@ export default function OwnershipTools({
               )}
             </section>
             <section className="panel forecast-panel">
-              <h3>Обслуживание по известным интервалам</h3>
+              <h3>{tr("Обслуживание по известным интервалам")}</h3>
               <p className="muted">
-                Километровый предел не преобразуется в выдуманную дату. Работа
-                без цены остаётся неизвестной суммой; без даты — вне
-                календарного плана. Просроченные работы не переносятся
-                автоматически на начало периода.
+                {tr(
+                  "Километровый предел не преобразуется в выдуманную дату. Работа без цены остаётся неизвестной суммой; без даты — вне календарного плана. Просроченные работы не переносятся автоматически на начало периода.",
+                )}
               </p>
               {report.data?.maintenance_due?.map((row) => (
                 <button
@@ -1220,18 +1265,23 @@ export default function OwnershipTools({
                   key={row.id}
                   onClick={() => setPage("reminders")}
                 >
-                  <span>{row.due_date || "По пробегу"}</span>
+                  <span>{row.due_date || tr("По пробегу")}</span>
                   <strong>
                     {row.title}
                     <small className="muted">
                       {row.estimated_cost_minor == null
-                        ? "Стоимость не задана"
-                        : `Оценка: ${money(row.estimated_cost_minor, row.cost_currency || "RUB")}`}
+                        ? tr("Стоимость не задана")
+                        : tr("Оценка: {0}", [
+                            money(
+                              row.estimated_cost_minor,
+                              row.cost_currency || "RUB",
+                            ),
+                          ])}
                     </small>
                   </strong>
                   <span>
                     {row.due_odometer !== null && row.due_odometer !== undefined
-                      ? number(row.due_odometer) + " км"
+                      ? number(row.due_odometer) + tr(" км")
                       : ""}
                   </span>
                 </button>

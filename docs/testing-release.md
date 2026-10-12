@@ -129,7 +129,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-Нужны Python3.12+ (CI3.14), Node22 и uv. Playwright запускается без видимого окна,
+Нужны Python 3.12+ (CI 3.14), Node 22 и uv. Playwright запускается без видимого окна,
 использует вымышленные данные в игнорируемом `.cache/browser-test-data` и временно
 включает API только для тестового сервера. CI дополнительно собирает Linux Docker
 и проверяет healthcheck. Успех автотестов не заменяет проверку установки на вашем

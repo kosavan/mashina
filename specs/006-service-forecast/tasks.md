@@ -9,7 +9,7 @@
 - [x] T005 Add next dated service estimates to ownership_report and preserve separate undated/unknown/deadline display in frontend/src/OwnershipTools.tsx.
 - [x] T006 Correct backend repeat-cycle deadlines and match offline semantics; actual financial history stays unchanged.
 ## Phase4 — US3 polish and verification
-- [ ] T007 Add isolated demo estimates and headless360px offline/edit/clear/forecast journeys.
+- [x] T007 Add isolated demo estimates and headless360px offline/edit/clear/forecast journeys.
 - [ ] T008 Document no-schema-change compatibility, money/period semantics and evidence; run checks/convergence, scan/publish PR and merge on green CI.
 
 Dependency order: T001 → failing testsT002 → independent backend/UI validationT003 → projectionT004 → reportT005/cycleT006 → browser/demoT007 → verificationT008. Backend-only and UI-only tasks could run independently after contracts, but shared files are edited sequentially here. Each story is independently testable using its acceptance scenarios; no further project setup or dependencies required.

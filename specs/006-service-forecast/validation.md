@@ -4,3 +4,5 @@ Local2026-10-12:83 Pytest and14 Vitest passed; Ruff, TypeScript, ESLint, Prettie
 Headless mobile tests cover estimate offline create/reload/sync, one canonical reminder/no expense, edit/clear and planning labels, confirmed completion offline/reload/sync without inventing odometer readings. Form and forecast inspected at360px; dark/light inherited. Final browser result and Linux container CI recorded before merge. Actual iPhone hardware is not claimed.
 
 No schema migration needed: existing optional JSON fields default unknown; existing004 archives retain estimates. Publication excludes generated QA screenshots, environments, runtime data and secrets.
+
+Final local regression:18/18 Playwright passed. Initial full run correctly hit the existing12-demo/5-minute protection; the new tests now use one explicit authenticated test session and unique real test cars, leaving production/demo limits unchanged. No client/provider networking bypass was introduced.

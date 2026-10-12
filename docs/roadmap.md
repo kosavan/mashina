@@ -1,10 +1,10 @@
 # MASHINA roadmap
 
-Current stable release: **1.4.0**. Core garage, exact expenses/fuel/service, documents,
+Release **1.5.0** adds the first fully local text OCR slice. Core garage, exact expenses/fuel/service, documents,
 reminders, analytics, offline/PWA, backups, sharing, tires, budgets, reviewed CSV,
 sale PDF, optional notifications/API/read-only MCP and Russian/English UI are shipped.
 
-## Next: fully local OCR and reviewed entry
+## Available in 1.5: fully local text OCR and reviewed entry
 
 - Fuel receipts: read text and propose explicitly printed date, total, litres and unit price.
 - Workshop invoices, bills and work orders: read selected PDF pages/photos, propose total

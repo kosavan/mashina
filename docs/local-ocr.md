@@ -18,7 +18,8 @@ line items must be reconciled manually before applying an OCR total.
 The general screenshot mode extracts text from banking apps, vehicle apps and other
 screens. It does not assume that a bank payment is fuel, treat balance as an expense,
 or assign unlabelled digits to the odometer. You can enter values manually in review.
-OCR accuracy varies with layout, glare and font. Seven-segment displays and unlabelled
+OCR accuracy varies with layout, glare and font. Compressed scans can lose date
+punctuation; unknown dates remain empty rather than guessing a separator. Seven-segment displays and unlabelled
 dashboards can require manual transcription. Workshop text is available immediately;
 structured multi-page line items are a [follow-up](roadmap.md).
 

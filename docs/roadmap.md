@@ -43,6 +43,9 @@ gated on successful CI for the exact source. Publication, GitHub metadata, searc
 console verification, indexing and directory acceptance remain externally
 unverified. See [the discovery guide](discoverability.md).
 
+Google Search Console: owner-supplied public HTML verification tag added;
+ownership confirmation and sitemap submission remain owner actions.
+
 | Priority | Planned work | Acceptance boundary |
 |---|---|---|
 | Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |

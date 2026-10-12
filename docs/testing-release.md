@@ -8,7 +8,137 @@
 Добавьте/исправьте/удалите запись, затем сбросьте демо. Демо изолировано от личной
 базы и не требует ввода настоящих документов. API-ключи в демо недоступны.
 
-## Установка зафиксированной версии
+## Локальная проверка на macOS
+
+1. Установите [Docker Desktop для Mac](https://docs.docker.com/desktop/setup/install/mac-install/):
+   выберите вариант Apple Silicon для M1/M2/M3/M4 и следующих моделей либо Intel
+   для Intel Mac. Запустите Docker Desktop и дождитесь готовности Docker Engine.
+2. Откройте Terminal. Проверьте `git --version`; если macOS предложит установить
+   Command Line Tools, завершите установку. Python и Node для контейнерного запуска
+   отдельно устанавливать не нужно.
+3. Выполните команды в новом тестовом каталоге:
+
+```sh
+docker version
+docker compose version
+git clone --branch v1.2.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+cd mashina-test
+cp .env.example .env
+mkdir -p data
+docker compose build
+docker compose run --rm --no-deps --user 0:0 --cap-add CHOWN --entrypoint sh mashina -c 'chown 10001:10001 /app/data'
+docker compose up -d
+docker compose ps
+```
+
+Команда `chown` подготавливает только тестовый каталог данных для пользователя
+приложения внутри контейнера. Само приложение запускается без root.
+Откройте Safari или Chrome: **http://localhost:8000**. Для первого осмотра нажмите
+**«Посмотреть демогараж»**. Для постоянного тестового гаража создайте администратора:
+
+```sh
+docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
+```
+
+Введите логин от 3 символов и пароль от 12 символов; при вводе пароль не отображается.
+Команда создания администратора нужна один раз для нового каталога данных.
+Интернет нужен для первоначальной загрузки образов и зависимостей при сборке.
+Повторный запуск использует уже собранный образ. Linux amd64 проверен в CI;
+отдельный запуск на macOS/Apple Silicon пока не проверен, arm64 нельзя считать
+подтверждённым только по наличию инструкции.
+
+## Локальная проверка на Windows
+
+1. Установите [Docker Desktop для Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
+   с WSL 2 backend и режимом **Linux containers**, а также Git for Windows.
+   Актуальные требования Windows/WSL и виртуализации приведены по ссылке Docker.
+   При необходимости выполните предложенную установщиком настройку WSL и перезагрузку.
+2. Запустите Docker Desktop и дождитесь готовности Engine. Откройте обычный
+   **PowerShell**, команды ниже не требуют запуска PowerShell от администратора.
+3. Выберите локальный каталог вне OneDrive, сетевого диска и синхронизируемых папок.
+   Например, создайте `mashina-testing` в папке пользователя:
+
+```powershell
+New-Item -ItemType Directory -Force "$env:USERPROFILE\mashina-testing" | Out-Null
+Set-Location "$env:USERPROFILE\mashina-testing"
+docker version
+docker compose version
+git --version
+git clone --branch v1.2.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+Set-Location mashina-test
+Copy-Item .env.example .env
+New-Item -ItemType Directory -Force data | Out-Null
+docker compose build
+docker compose run --rm --no-deps --user 0:0 --cap-add CHOWN --entrypoint sh mashina -c 'chown 10001:10001 /app/data'
+docker compose up -d
+docker compose ps
+```
+
+После каждой команды убедитесь, что нет ошибки; при ошибке сборки не переходите
+к запуску. `chown` выполняется внутри Linux-контейнера, устанавливать эту команду
+на Windows не нужно. Откройте Edge или Chrome: **http://localhost:8000**.
+Начните с **«Посмотреть демогараж»** либо создайте постоянный тестовый аккаунт:
+
+```powershell
+docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
+```
+
+Пароль от 12 символов вводится скрыто. Python/Node на Windows для этого способа
+не нужны. Если Docker сообщает о недоступном Engine, сначала запустите Docker Desktop;
+при ошибке Windows image/OS проверьте режим Linux containers. Если bind mount запрещён,
+разрешите доступ к выбранному каталогу в настройках Docker Desktop. Контейнерный
+запуск на физическом Windows Docker Desktop отдельно не проверен; Linux-образ проверен CI.
+
+## Управление тестовым экземпляром на Mac и Windows
+
+Следующие команды одинаковы в Terminal и PowerShell и выполняются из `mashina-test`:
+
+```sh
+docker compose ps
+docker compose logs --tail=100 mashina
+docker compose stop
+docker compose start
+```
+
+`stop` останавливает приложение, `start` запускает снова; каталог `data` сохраняется.
+Чтобы убрать тестовые контейнеры, используйте `docker compose down`. Данные остаются
+в `mashina-test/data`; повторный `docker compose up -d` использует их.
+Не удаляйте этот каталог, если хотите сохранить историю. Для отдельного чистого
+теста создайте другой каталог `mashina-test-2`, остановив первый экземпляр, чтобы
+освободить порт 8000. Не запускайте `create-admin` повторно для уже заполненной базы.
+
+Если порт 8000 занят другим приложением, остановите конфликтующий экземпляр либо
+в файле `.env` измените обе строки на `MASHINA_PORT=8001` и
+`MASHINA_ORIGIN=http://localhost:8001`, затем выполните `docker compose up -d` и
+откройте http://localhost:8001. При проблеме входа проверяйте именно настроенный
+origin: `localhost` и `127.0.0.1` не подменяют друг друга для настроек безопасности.
+
+Для офлайн-проверки на компьютере сначала войдите онлайн и откройте нужные разделы.
+В Chrome/Edge откройте DevTools → Network → Offline, создайте расход, перезагрузите
+страницу, верните Online и синхронизируйте. Должна остаться одна запись. Проверка
+DevTools помогает проверить очередь, но не заменяет проверку PWA на физическом iPhone.
+Скачанный в браузере ZIP-бэкап находится в загрузках компьютера; держите отдельную
+копию вне каталога тестового экземпляра. Сценарии ниже подходят для обеих ОС.
+
+## Проверка приложения на Linux-сервере с Mac или Windows
+
+Устанавливать Docker на ноутбук не обязательно, если MASHINA уже запущена на сервере.
+Откройте Terminal на Mac или PowerShell на Windows с установленным OpenSSH Client:
+
+```sh
+ssh -N -L 8000:127.0.0.1:8000 USER@SERVER
+```
+
+Подставьте свою учётную запись и адрес. Оставьте окно терминала открытым и откройте
+http://localhost:8000 в браузере ноутбука. `Ctrl+C` закрывает туннель. Для этого
+варианта серверный `MASHINA_ORIGIN` должен быть `http://localhost:8000`; освободите
+локальный порт 8000 перед запуском туннеля. Если на сервере уже настроен HTTPS-домен,
+используйте его напрямую: туннель не отменяет проверку разрешённого origin.
+Файлы остаются на сервере, кроме явно скачанных документов/экспортов и локального
+кэша браузера. Для телефона используйте HTTPS, как описано ниже; `localhost`
+на телефоне означает сам телефон, а не Mac/Windows-компьютер.
+
+## Установка зафиксированной версии на Linux
 
 Нужны Git, Docker Engine и Docker Compose на Linux. Команды выполняются на сервере:
 
@@ -34,8 +164,7 @@ ssh -L 8000:127.0.0.1:8000 USER@SERVER
 
 Затем откройте `http://localhost:8000` на компьютере с туннелем. USER/SERVER — ваши
 учётная запись и адрес, без включения инфраструктурных паролей в исходники.
-На Windows для локальной пробы можно использовать Docker Desktop с Linux containers;
-инструкция выше и CI проверяют Linux, физический Windows Docker отдельно не проверен.
+Для локального Mac/Windows используйте отдельные инструкции выше; CI проверяет Linux.
 
 Для телефона настройте HTTPS reverse proxy по `Caddyfile.example`, укажите свой
 `MASHINA_ORIGIN=https://…` и `MASHINA_SECURE_COOKIES=1` в `.env`, пересоздайте контейнер.

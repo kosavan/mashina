@@ -1,0 +1,2 @@
+# API contract
+Existing POST /api/v1/mutate entity=reminder accepts estimated_cost decimal text (empty clears), or estimated_cost_minor integer|null, cost_currency three letters. Existing version/idempotency/RBAC rules apply. Canonical responses/state contain only estimated_cost_minor/cost_currency. Existing GET /api/v1/ownership forecast adds source/estimated/mileage_deadline fields for dated service rows; recurring rows retain current shape. maintenance_due preserves estimates for undated/out-of-period display. No new endpoint or actual financial entity.

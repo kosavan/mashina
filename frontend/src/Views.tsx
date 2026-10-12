@@ -1340,8 +1340,10 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
             <input
               name="completion_odometer"
               type="number"
-              defaultValue={car?.current_odometer || 0}
-              required
+              placeholder={
+                r.repeat_km ? "Пробег при выполнении" : "Необязательно"
+              }
+              required={!!r.repeat_km}
             />
           </label>
           <p className="field-help">

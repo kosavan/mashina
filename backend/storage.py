@@ -267,8 +267,14 @@ class Store:
                 elif action == "complete" and entity == "reminder":
                     from datetime import date
 
-                    done = iso(data.get("completion_date") or date.today().isoformat())[:10]
-                    km = integer(data.get("completion_odometer"))
+                    done = iso(
+                        payload.get("data", {}).get("completion_date") or date.today().isoformat()
+                    )[:10]
+                    km = (
+                        integer(payload.get("data", {}).get("completion_odometer"))
+                        if data.get("repeat_km")
+                        else None
+                    )
                     if data.get("repeat_days") or data.get("repeat_km"):
                         if data.get("repeat_days"):
                             data["due_date"] = (
@@ -276,11 +282,17 @@ class Store:
                                 .date()
                                 .isoformat()
                             )
+                        else:
+                            data["due_date"] = ""
                         if data.get("repeat_km"):
                             data["due_odometer"] = km + data["repeat_km"]
+                        else:
+                            data["due_odometer"] = None
                         data["completed_at"] = ""
                     else:
                         data["completed_at"] = done
+                    data.pop("completion_date", None)
+                    data.pop("completion_odometer", None)
                 elif action not in {"create", "update"}:
                     raise ValueError("Неизвестное действие")
                 data.pop("current_odometer", None)

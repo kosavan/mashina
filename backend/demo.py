@@ -131,6 +131,8 @@ def seed(store):
                         "due_odometer": current + offset if offset else None,
                         "repeat_days": 365,
                         "repeat_km": 10000 if offset else 0,
+                        "estimated_cost": "12500" if offset else "",
+                        "cost_currency": "RUB",
                     },
                 },
             )

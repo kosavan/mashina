@@ -14,4 +14,4 @@ Sequential vertical slices; no real external sends during implementation.
 - [x] T008 Implement bounded explicit CLI dispatch, atomic ledger, current-owner checks, status/retry/expiry logic and restore interprocess guard.
 ## Phase5 — verification
 - [x] T009 Add headless browser and service-worker tests, 1000-reminder budget, privacy/output checks and backup/legacy regression.
-- [ ] T010 Document optional setup/timer/secrets/external disclosure/recovery; run all checks and Spec Kit convergence; scan/publish PR and merge only on green CI.
+- [x] T010 Document optional setup/timer/secrets/external disclosure/recovery; run all checks and Spec Kit convergence; scan/publish PR and merge only on green CI.

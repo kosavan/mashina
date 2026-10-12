@@ -16,6 +16,13 @@ function minor([n, d]: Ratio): bigint {
   const positive = n * sign * 100n;
   return sign * ((positive * 2n + d) / (d * 2n));
 }
+export function estimatedCost(value: unknown): number | null {
+  if (value == null || value === "") return null;
+  const [n, d] = ratio(value);
+  if (n < 0n || (n * 100n) % d !== 0n || (n * 100n) / d > 1000000000000n)
+    throw new Error("Стоимость: неотрицательная сумма с точностью до копеек");
+  return Number((n * 100n) / d);
+}
 export function pendingMoney(record: Record<string, any>): number {
   if (record.kind === "note" || record.kind === "odometer") return 0;
   let result: bigint;

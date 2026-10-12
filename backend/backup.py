@@ -136,6 +136,10 @@ def _restore_backup(store, blob):
                         or hashlib.sha256(target.read_bytes()).hexdigest() != meta["sha256"]
                     ):
                         raise ValueError("Вложение отсутствует или повреждено")
+                from backend.domain import normalize_reminder
+
+                for (data,) in check.execute("SELECT data FROM reminders"):
+                    normalize_reminder(json.loads(data))
                 if revision == "004":
                     from backend.notifications import validate_notification_archive
 

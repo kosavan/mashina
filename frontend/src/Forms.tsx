@@ -164,6 +164,14 @@ export function RecordForm({
                 : "event";
         const reminderId = data.next_reminder;
         delete data.next_reminder;
+        if (
+          reminderId &&
+          state.reminders.find((r) => r.id === reminderId)?.repeat_km &&
+          (data.odometer === "" || data.odometer == null)
+        )
+          throw new Error(
+            "Для повторения ТО по километрам укажите подтверждённый пробег при выполнении.",
+          );
         const result = await save(entity, data, saved || record);
         setSaved(result);
         if (files.length) {
@@ -199,7 +207,7 @@ export function RecordForm({
               {
                 completion_date: data.occurred_at,
                 completion_odometer:
-                  data.odometer || vehicle?.current_odometer || 0,
+                  data.odometer === "" ? undefined : data.odometer,
               },
               reminder,
               "complete",
@@ -499,6 +507,36 @@ export function RecordForm({
               />
               Напоминание включено
             </label>
+            <details
+              className="advanced-fields"
+              open={record?.estimated_cost_minor != null}
+            >
+              <summary>
+                Плановая стоимость обслуживания <ChevronDown size={16} />
+              </summary>
+              <p className="field-help">
+                Необязательная оценка для плана. Пусто — стоимость неизвестна.
+                Фактический расход вносится отдельно.
+              </p>
+              <div className="field-grid">
+                <Field
+                  label="Ориентировочная стоимость"
+                  name="estimated_cost"
+                  type="number"
+                  step="0.01"
+                  value={
+                    record?.estimated_cost_minor == null
+                      ? ""
+                      : record.estimated_cost_minor / 100
+                  }
+                />
+                <Field
+                  label="Валюта оценки"
+                  name="cost_currency"
+                  value={record?.cost_currency || vehicle?.currency || "RUB"}
+                />
+              </div>
+            </details>
           </>
         ) : (
           <>

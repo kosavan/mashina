@@ -1,0 +1,2 @@
+# Verification
+Create reminder with date in selected month, estimated price1234.56 RUB; forecast shows1234.56 as planned service, while expenses remain unchanged. Clear price: unknown and absent from dated monetary list. Add mileage-only estimate: known threshold/cost separate from calendar projection. Mark completed: removed or existing repeat advances next reminder. Offline create/reload/reconnect: one reminder, exact estimate, zero expenses. Backup/restore preserves optional fields and legacy no-estimate reminders.

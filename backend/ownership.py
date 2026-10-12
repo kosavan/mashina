@@ -8,7 +8,7 @@ import json
 import re
 import uuid
 from datetime import date
-from backend.domain import text, iso, integer, minor, currency, normalize_event
+from backend.domain import text, iso, integer, minor, currency, normalize_event, decimal
 
 
 def month_value(value):
@@ -29,6 +29,61 @@ def normalize_ownership(entity, data):
         r["season"] = r.get("season", "summer")
         if r["season"] not in {"summer", "winter", "all"}:
             raise ValueError("Выберите сезон шин")
+        code = text(r.get("manufacture_code"), maximum=4)
+        if code:
+            if not re.fullmatch(r"\d{4}", code) or not 1 <= int(code[:2]) <= 53:
+                raise ValueError("DOT: четыре цифры — неделя 01–53 и год, например 3421")
+            year = 2000 + int(code[2:])
+            if year > date.today().year or (
+                year == date.today().year and int(code[:2]) > date.today().isocalendar().week + 1
+            ):
+                raise ValueError("DOT не может быть в будущем")
+        r["manufacture_code"] = code
+        threshold = r.get("tread_threshold_mm")
+        if threshold not in (None, ""):
+            depth = decimal(threshold, "Порог протектора", True) * 10
+            if depth != int(depth) or depth > 200:
+                raise ValueError("Порог: от 0,1 до 20 мм, шаг 0,1")
+            r["tread_threshold_tenths"] = int(depth)
+        elif "tread_threshold_mm" in r:
+            r["tread_threshold_tenths"] = None
+        elif r.get("tread_threshold_tenths") is not None:
+            r["tread_threshold_tenths"] = integer(r["tread_threshold_tenths"], "Порог", 200)
+            if not r["tread_threshold_tenths"]:
+                raise ValueError("Порог должен быть больше нуля")
+        r.pop("tread_threshold_mm", None)
+        measurements = r.get("tread_measurements", [])
+        if not isinstance(measurements, list) or len(measurements) > 200:
+            raise ValueError("Не более 200 замеров протектора")
+        cleaned_measurements, ids = [], set()
+        for row in measurements:
+            if not isinstance(row, dict):
+                raise ValueError("Некорректный замер")
+            measurement_id = str(uuid.UUID(str(row.get("id", ""))))
+            if measurement_id in ids:
+                raise ValueError("Повторный ID замера")
+            ids.add(measurement_id)
+            measured_at = iso(row.get("measured_at"))[:10]
+            if measured_at > date.today().isoformat():
+                raise ValueError("Дата замера не может быть в будущем")
+            depth = (
+                decimal(row["depth_mm"], "Протектор") * 10
+                if "depth_mm" in row
+                else decimal(row.get("depth_tenths"), "Протектор")
+            )
+            if depth != int(depth) or not 0 <= depth <= 300:
+                raise ValueError("Протектор: от 0 до 30 мм, шаг 0,1")
+            cleaned_measurements.append(
+                {
+                    "id": measurement_id,
+                    "measured_at": measured_at,
+                    "depth_tenths": int(depth),
+                    "notes": text(row.get("notes"), maximum=500),
+                }
+            )
+        r["tread_measurements"] = sorted(
+            cleaned_measurements, key=lambda m: (m["measured_at"], m["id"])
+        )
         intervals = r.get("intervals", [])
         if not isinstance(intervals, list) or len(intervals) > 200:
             raise ValueError("Не более 200 интервалов использования")

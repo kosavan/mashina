@@ -13,3 +13,6 @@ backups
 **/*.db
 **/*.sqlite*
 frontend/test-results
+design
+docs/assets
+**/.hyperframes

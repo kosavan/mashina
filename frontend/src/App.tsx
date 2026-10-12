@@ -22,6 +22,7 @@ import {
   Sun,
   Moon,
   LockKeyhole,
+  CircleDot,
 } from "lucide-react";
 import type {
   Kind,
@@ -57,12 +58,15 @@ import {
 } from "./Views";
 import { RecordForm } from "./Forms";
 import { permissionError, scopeKey } from "./permissions";
+import { BrandMark } from "./BrandMark";
 const Analytics = lazy(() => import("./Analytics"));
+const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const navigation = [
   ["garage", "Мой гараж", LayoutGrid],
   ["timeline", "История", Clock3],
   ["fuel", "Заправки", Fuel],
   ["maintenance", "Обслуживание", Wrench],
+  ["tires", "Шины", CircleDot],
   ["analytics", "Аналитика", ChartNoAxesCombined],
   ["documents", "Документы", Files],
   ["reminders", "Напоминания", Bell],
@@ -111,9 +115,9 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
       <section className="auth-story">
         <a href="#" className="wordmark">
           <span className="brand-mark">
-            <CarFront size={21} />
+            <BrandMark />
           </span>
-          MASHINA<span className="brand-dot">®</span>
+          MASHINA
         </a>
         <div className="auth-copy">
           <span className="eyebrow">ДЛЯ ТЕХ, КТО ЛЮБИТ СВОЮ МАШИНУ</span>
@@ -532,9 +536,9 @@ export default function App() {
             }}
           >
             <span className="brand-mark">
-              <CarFront size={20} />
+              <BrandMark />
             </span>
-            MASHINA<span className="brand-dot">®</span>
+            MASHINA
           </a>
           <button
             className="mobile-menu-close icon-button"
@@ -548,7 +552,7 @@ export default function App() {
             {navigation.map(([id, label, Icon]) => (
               <button
                 key={id}
-                className={`nav-item ${page === id || (id === "garage" && page === "vehicle") ? "active" : ""}`}
+                className={`nav-item ${page === id || (id === "garage" && page === "vehicle") || (id === "analytics" && page === "fuel-analytics") ? "active" : ""}`}
                 onClick={() => {
                   setPage(id);
                   setMenu(false);
@@ -627,7 +631,9 @@ export default function App() {
               <strong>
                 {page === "vehicle"
                   ? "Автомобиль"
-                  : navigation.find((n) => n[0] === page)?.[1] || "Настройки"}
+                  : page === "fuel-analytics"
+                    ? "Аналитика топлива"
+                    : navigation.find((n) => n[0] === page)?.[1] || "Настройки"}
               </strong>
             </div>
             <div className="topbar-right">
@@ -762,7 +768,13 @@ export default function App() {
               <FuelPage />
             ) : page === "maintenance" ? (
               <Maintenance />
-            ) : page === "analytics" ? (
+            ) : page === "tires" ? (
+              <Suspense
+                fallback={<p role="status">Открываем комплекты шин…</p>}
+              >
+                <OwnershipTools key="tires" tiresOnly />
+              </Suspense>
+            ) : page === "analytics" || page === "fuel-analytics" ? (
               <Suspense
                 fallback={
                   <div
@@ -771,7 +783,7 @@ export default function App() {
                   />
                 }
               >
-                <Analytics />
+                <Analytics key={page} fuel={page === "fuel-analytics"} />
               </Suspense>
             ) : page === "documents" ? (
               <Documents />
@@ -814,7 +826,9 @@ export default function App() {
             <Plus size={27} />
           </button>
           <button
-            className={page === "analytics" ? "active" : ""}
+            className={
+              page === "analytics" || page === "fuel-analytics" ? "active" : ""
+            }
             onClick={() => setPage("analytics")}
           >
             <ChartNoAxesCombined size={21} />

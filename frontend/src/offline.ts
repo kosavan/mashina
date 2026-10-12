@@ -173,6 +173,22 @@ function project(state: State, operation: Mutation): State {
     record.description ||= "";
   }
   if (operation.entity === "tire_set") {
+    record.tread_measurements = (record.tread_measurements || []).map(
+      (m: any) => ({
+        ...m,
+        depth_tenths:
+          "depth_mm" in m
+            ? Math.round(Number(String(m.depth_mm).replace(",", ".")) * 10)
+            : m.depth_tenths,
+      }),
+    );
+    if ("tread_threshold_mm" in record)
+      record.tread_threshold_tenths =
+        record.tread_threshold_mm === ""
+          ? null
+          : Math.round(
+              Number(String(record.tread_threshold_mm).replace(",", ".")) * 10,
+            );
     record.confirmed_km = (record.intervals || []).reduce(
       (sum: number, row: any) =>
         sum +

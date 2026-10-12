@@ -144,6 +144,9 @@ def seed(store):
                     "model": "Pilot Alpin",
                     "size": "235/55 R19",
                     "season": "winter",
+                    "manufacture_code": f"34{(today.year - 3) % 100:02d}",
+                    "tread_threshold_mm": "4",
+                    "tread_measurements": [{"id": str(uuid.uuid4()), "measured_at": (today - timedelta(days=30)).isoformat(), "depth_mm": "6.4", "notes": "Вымышленный замер демогаража"}],
                     "intervals": [
                         {
                             "mounted_at": (today - timedelta(days=200)).isoformat(),

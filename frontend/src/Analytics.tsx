@@ -74,14 +74,14 @@ function ChartEmpty() {
     </div>
   );
 }
-export default function Analytics() {
-  const { state, session } = useApp();
-  const [car, setCar] = useState("");
-  const [period, setPeriod] = useState("year");
+export default function Analytics({ fuel = false }: { fuel?: boolean }) {
+  const { state, session, selected } = useApp();
+  const [car, setCar] = useState(fuel ? selected : "");
+  const [period, setPeriod] = useState(fuel ? "all" : "year");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [category, setCategory] = useState("");
-  const [kind, setKind] = useState("");
+  const [kind, setKind] = useState(fuel ? "fuel" : "");
   const [currency, setCurrency] = useState("RUB");
   const from =
     period === "year"

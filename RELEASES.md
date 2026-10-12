@@ -1,3 +1,21 @@
+# MASHINA 1.3.0
+
+A more personal garage: dedicated tire care, clearer fuel analytics and a new green Apex M identity.
+
+- Fixed Fuel → charts to keep the selected vehicle and fuel filter, including demo and mobile.
+- Reworked welcome artwork, replaced branding with the owner-approved green logo, favicon and iOS/PWA icons.
+- Added dedicated Tires navigation, oldest-tire DOT, dated tread measurements and a personal replacement threshold. Unknown condition stays unknown; guidance distinguishes manufacture age from service life.
+- Added private service addresses and optional coordinates. Styled OpenStreetMap view loads only after an explicit disclosed action; no automatic geocoding or GPS tracking.
+- Improved per-vehicle fuel defaults and receipt/payment entry guidance. Full tank requires confirmation; no automatic screenshot recognition is claimed.
+- Rebuilt the GitHub landing page in English with a Russian option, a local Hyperframes infographic and isolated demo screenshots.
+- Included macOS/Windows testing, self-hosting, capture strategy and tire/location documentation.
+
+[Installation and testing](docs/testing-release.md) · [Validation evidence and limitations](docs/release-validation-1.3.md)
+
+Source-only release. Back up database and attachments before updating; new JSON fields are additive and no destructive migration is added. Physical iPhone, separate arm64/macOS Docker and real external notifications remain unverified. OCR and the remaining 2.0 integrations are still future work.
+
+---
+
 # MASHINA 1.2.0
 
 Проверенный текущий срез персонального self-hosted гаража. Релиз фиксирует готовый

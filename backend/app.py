@@ -75,7 +75,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.2.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.3.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -112,7 +112,7 @@ def create_app(data_path=None, bootstrap_token=None):
         response.headers["X-Frame-Options"] = "SAMEORIGIN"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
         response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; frame-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; frame-src 'self' blob: https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
         )
         if request.url.path.startswith((PREFIX, "/api/machine/")):
             response.headers["Cache-Control"] = "no-store"

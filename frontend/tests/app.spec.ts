@@ -20,6 +20,9 @@ test("demo, analytics, documents and isolated reset", async ({ page }) => {
     fullPage: true,
   });
   await page
+    .locator(".vehicle-grid")
+    .screenshot({ path: "../.cache/screenshots/garage-cards.png", style: ".desktop-fab { visibility: hidden; }" });
+  await page
     .locator(".sidebar")
     .getByRole("button", { name: "Аналитика", exact: true })
     .click();

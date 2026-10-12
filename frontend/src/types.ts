@@ -77,6 +77,14 @@ export interface TireSet extends RecordBase {
   season: "summer" | "winter" | "all";
   intervals: TireInterval[];
   confirmed_km: number;
+  manufacture_code?: string;
+  tread_threshold_tenths?: number | null;
+  tread_measurements?: {
+    id: string;
+    measured_at: string;
+    depth_tenths: number;
+    notes: string;
+  }[];
   notes: string;
 }
 export interface Budget extends RecordBase {
@@ -141,6 +149,8 @@ export type Page =
   | "vehicle"
   | "timeline"
   | "fuel"
+  | "fuel-analytics"
+  | "tires"
   | "maintenance"
   | "analytics"
   | "documents"

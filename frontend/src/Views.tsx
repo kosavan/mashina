@@ -51,6 +51,7 @@ import {
 } from "./utils";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
+import { ServiceLocation } from "./ServiceLocation";
 
 export function PageHeading({
   eyebrow,
@@ -658,6 +659,7 @@ export function EventRow({ entry }: { entry: Entry }) {
                 </div>
               ))}
           </dl>
+          <ServiceLocation entry={entry} />
           {entry.items?.length > 0 && (
             <div className="detail-items">
               <h4>Запчасти и работы</h4>
@@ -1125,7 +1127,7 @@ export function FuelPage() {
             заправки. Если была пропущена запись, отметьте это в форме.
           </p>
         </div>
-        <button className="text-link" onClick={() => setPage("analytics")}>
+        <button className="text-link" onClick={() => setPage("fuel-analytics")}>
           Графики и расход
           <ArrowUpRight size={17} />
         </button>

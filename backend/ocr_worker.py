@@ -34,7 +34,7 @@ def run(folder):
         output = folder / "page"
         result = subprocess.run(
             [renderer, "-f", str(request["page"]), "-l", str(request["page"]),
-             "-singlefile", "-scale-to", "2400", "-png", str(source), str(output)],
+             "-singlefile", "-scale-to", "2100", "-png", str(source), str(output)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
         )
@@ -53,7 +53,15 @@ def run(folder):
                 raise ValueError()
             original.load()
             image = ImageOps.exif_transpose(original)
-            image.thumbnail((2400, 2400))
+            image.thumbnail((2100, 2100), Image.Resampling.LANCZOS)
+            # Small punctuation can disappear at screenshot resolution. Upscale at most
+            # 2x, within the same bounded canvas used for PDF rendering.
+            scale = min(2, 2100 / max(image.size))
+            if scale > 1:
+                image = image.resize(
+                    (round(image.width * scale), round(image.height * scale)),
+                    Image.Resampling.LANCZOS,
+                )
             if image.mode in {"RGBA", "LA"} or "transparency" in image.info:
                 rgba = image.convert("RGBA")
                 image = Image.new("RGB", rgba.size, "white")

@@ -88,14 +88,6 @@ def test_real_local_engine_image_and_pdf(pdf, russian):
     output = io.BytesIO()
     image.save(output, format="PDF" if pdf else "PNG", resolution=150)
     result = recognize(output.getvalue(), "receipt", 1)
-    expected = {"amount": "1234.56", "odometer": "123456", "occurred_at": "2026-10-12"}
-    if result["fields"] != expected:
-        # Synthetic fixtures only: diagnose resolution without relaxing numeric assertions.
-        for scale in (0.75, 1.25, 1.5, 2):
-            resized = image.resize((int(image.width * scale), int(image.height * scale)), Image.Resampling.LANCZOS)
-            candidate = io.BytesIO()
-            resized.save(candidate, format="PNG")
-            print("synthetic scale", scale, recognize(candidate.getvalue(), "receipt", 1))
     assert result["engine"] == "tesseract-local"
     assert result["fields"].get("amount") == "1234.56", result
     assert result["fields"].get("odometer") == "123456", result

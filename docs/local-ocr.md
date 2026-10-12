@@ -30,7 +30,7 @@ OCR runs on demand on the owner's server, one file at a time, with one CPU threa
 Native decoding happens in a short-lived process; private temporary input/output is
 removed after success/failure. It is process isolation with limits, not a full security sandbox.
 
-Limits: 20 MiB file, 25 MP image, one PDF page up to page 20, 2400px normalized image,
+Limits: 20 MiB file, 25 MP image, one PDF page up to page 20, 2100px normalized image (small sources upscaled at most 2x),
 64 KiB recognized text, 45s deadline, 10 requests per user/client in five minutes.
 Linux worker caps address space at 512 MiB and native CPU time at 30s. Oversized,
 corrupt, protected or unreadable documents produce errors. OCR itself needs a connection

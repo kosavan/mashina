@@ -24,7 +24,7 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - run: uv sync --frozen --extra dev
+      - run: uv sync --frozen --extra dev --extra recognition
       - run: uv run python tools/check_secrets.py
       - run: uv run ruff check backend && uv run pytest -q
       - run: npm ci --no-audit --no-fund
@@ -43,3 +43,7 @@ jobs:
           done
           docker logs mashina-check
           exit 1
+      - name: Optional PDF renderer image
+        run: |
+          docker build --build-arg MASHINA_RECOGNITION=1 -t mashina:recognition .
+          docker run --rm --entrypoint /app/.venv/bin/python mashina:recognition -c "import pypdfium2; print(pypdfium2.PYPDFIUM_INFO.version)"

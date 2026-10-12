@@ -45,7 +45,7 @@ Independent check: restore revokes all keys while preserving existing bank/notif
 ## Cross-cutting verification
 
 - [x] T017 Run full Pytest/Vitest/Playwright/static/build/budgets and tracked-source secret scan; document actual evidence in specs/008-machine-access/validation.md.
-- [ ] T018 Publish source-only PR, attach it, pass Linux Docker CI and run Spec Kit converge against all acceptance scenarios; close gaps before completion in specs/008-machine-access/tasks.md.
+- [x] T018 Publish source-only PR, attach it, pass Linux Docker CI and run Spec Kit converge against all acceptance scenarios; close gaps before completion in specs/008-machine-access/tasks.md.
 
 ## Dependencies and delivery
 

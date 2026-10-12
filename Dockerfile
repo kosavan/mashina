@@ -21,7 +21,10 @@ COPY --from=sqlite /opt/sqlite/lib/ /opt/sqlite/lib/
 COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /usr/local/bin/uv
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-dev --no-cache
+ARG MASHINA_RECOGNITION=0
+RUN if [ "$MASHINA_RECOGNITION" = "1" ]; then \
+      uv sync --frozen --no-dev --extra recognition --no-cache; \
+    else uv sync --frozen --no-dev --no-cache; fi
 COPY backend/ ./backend/
 COPY --from=frontend /build/dist/ ./frontend/dist/
 RUN groupadd --gid 10001 mashina && useradd --uid 10001 --gid 10001 --no-create-home mashina \

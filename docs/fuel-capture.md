@@ -1,24 +1,23 @@
-# Заправка за несколько действий
+# Fast fuel entry
 
-1. «+» → «Заправка». Автомобиль, дата, последнее топливо и АЗС уже подставлены; проверьте их.
-2. Введите пробег и любые два значения: литры, цену литра, сумму. Третье рассчитается.
-3. Отметьте **полный бак** только если действительно долили до полного. Если пропустили запись, отметьте пропуск.
-4. При необходимости прикрепите чек и сохраните. Без сети запись надёжно остаётся на устройстве; файл загружается при подключении.
+English · [Russian](fuel-capture.ru.md)
 
-## Что брать из источника
+1. **+ → Fill-up**. Check suggested car, date, fuel and station.
+2. Enter mileage and any two of litres, unit price and total; the third is calculated.
+3. Mark full tank only when actually filled. Mark missed records explicitly.
+4. Optionally attach a receipt and save. Offline records stay on the device;
+   attachment uploads require connectivity.
 
-| Источник | Достоверно переносим | Подтверждаем отдельно |
+| Source | Useful printed facts | Confirm separately |
 |---|---|---|
-| Чек АЗС | Дата, литры, цена, сумма, АЗС, вид топлива — если напечатаны | Одометр, полный бак, пропуск предыдущей заправки |
-| Банковский скрин | Оплаченная сумма, дата, продавец — если видны | Литры, цена литра, одометр, полный бак; оплата не доказывает заправку |
-| Банковский CSV | Сумма, дата, описание, ID операции | Связь с существующей заправкой или создание расхода; без повторного учёта |
+| Receipt | Date, litres, price, total, station/fuel if printed | Mileage, full tank, missed records |
+| Bank screenshot | Payment, date and merchant if visible | Fuel purchase, litres, price, mileage, full tank |
+| Bank CSV | Date, amount, description and operation ID | Link existing entry or create expense |
 
-В форме доступно [локальное OCR](local-ocr.md): фото или PDF → распознанный текст → проверенные поля → обычное сохранение. Для приборки выбирайте «Фото приборки», для приложений — общий скриншот. Исходник прикрепляется только по вашему выбору. Это текстовый OCR, а не универсальная AI-модель. Не нужно передавать личный банковский скрин внешней модели ради трёх полей. Перед прикреплением можно самостоятельно скрыть баланс и лишние операции.
-
-Для банковского CSV есть [проверяемый импорт](bank-import.md): уже записанную заправку связывайте с оплатой, а не создавайте второй расход.
-
-## MCP и дальнейшее распознавание
-
-Существующий [локальный MCP](machine-access.md) предоставляет чтение выбранной истории; он не является распознавателем и не создаёт заправки. Ограниченный REST API поддерживает операции только с явно выданными владельцем правами, стабильным ID и явным подтверждением исправления пробега.
-
-Текущий поток: локальный чек → извлечённый **черновик** → подсветка неизвестных полей → подтверждение владельца → одна идемпотентная запись. Банковский скрин не должен автоматически заполнять литры или полный бак. Внешние OCR-провайдеры не используются. Будущие модели распознавания также должны работать локально на сервере владельца, без облачного запасного варианта. Старая экспериментальная ветка провайдерного распознавания не подключена; текущий OCR работает только локально, без внешнего провайдера.
+[Local OCR](local-ocr.md) proposes fields for mandatory human review. Select
+dashboard mode for labelled mileage or general screenshot mode for apps. Source
+attachment is optional. Redact unrelated payments/balances first. Text OCR is
+not universal document understanding. [Bank import](bank-import.md) links an
+existing fill-up without duplicate money. [MCP](machine-access.md) is read-only;
+scoped REST writes require permission and stable operation IDs. Future recognition
+also remains local, without cloud fallback.

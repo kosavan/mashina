@@ -59,6 +59,16 @@ Docker data MUST use persistent mounted storage. SQLite backups MUST be consiste
 include attachments; restore MUST be tested. Schema evolution MUST preserve existing
 history, with a recovery path before destructive migration. Users MUST be able to export
 the full archive without dependence on the developer.
+Every release MUST preserve supported installed databases, attachments, settings,
+stable operation IDs and pending offline actions. Migration revisions already shipped
+MUST remain immutable. Startup MUST refuse unknown/newer schemas and preserve a
+consistent recovery snapshot before upgrading an existing schema. Releases MUST test
+upgrades from every supported schema and repeat startup without duplicate changes.
+Breaking changes require an explicit versioned migration, recovery procedure and
+release notice; silently resetting data or requiring reinstallation is forbidden.
+Update instructions MUST identify the target release, backup, verification and rollback
+steps on Linux, macOS and Windows. Rolling back code alone after a schema change MUST
+NOT be described as safe; use the matching pre-upgrade backup and previous image.
 
 ### XII. MVP Discipline
 Essential features MUST be implemented and verified before optional integrations.
@@ -77,6 +87,9 @@ Specify user outcomes and acceptance criteria, plan the architecture and data co
 create independently testable vertical-slice tasks, implement, and run convergence.
 Record remaining work as tasks and repeat until required behavior has evidence.
 Each review MUST assess scope, correctness, data safety, accessibility and verification.
+Each change MUST review upgrade and offline-client compatibility, update the roadmap
+when product status changes, and maintain English/Russian user documentation. Release
+checks MUST include migration, backup/restore and production-container durability tests.
 
 ## Governance
 This constitution governs feature artifacts and implementation, subject to explicit user
@@ -85,5 +98,5 @@ impact and migration. MAJOR denotes incompatible rules/removals, MINOR new or ex
 obligations, PATCH non-semantic clarification. Review compliance at planning/convergence.
 Preserve the original ratification date; update amendment date and version on change.
 
-**Version**: 1.1.0 | **Ratified**: 2026-10-11 | **Last Amended**: 2026-10-11
+**Version**: 1.2.0 | **Ratified**: 2026-10-11 | **Last Amended**: 2026-10-12
 

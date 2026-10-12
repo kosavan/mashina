@@ -357,6 +357,11 @@ export default function App() {
     window.addEventListener("online", on);
     window.addEventListener("offline", off);
     document.addEventListener("visibilitychange", focus);
+    // Connectivity can change while an offline session is still booting and
+    // before this session's listeners replace the initial unauthenticated ones.
+    // Reconcile the actual state at subscription time as well as on events.
+    if (navigator.onLine) on();
+    else setOnline(false);
     return () => {
       window.removeEventListener("online", on);
       window.removeEventListener("offline", off);

@@ -12,6 +12,8 @@ import uuid
 
 from alembic import command
 from alembic.config import Config
+from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
 from sqlalchemy import create_engine, event as sa_event
 from sqlalchemy.pool import StaticPool
 
@@ -93,14 +95,47 @@ class Store:
             conn.execute("PRAGMA journal_mode=WAL")
             conn.execute("PRAGMA synchronous=FULL")
 
-        self.migrate()
+        try:
+            self.migrate()
+        except Exception:
+            self.engine.dispose()
+            raise
 
     def migrate(self):
-        with self.lock, self.engine.begin() as connection:
+        with self.lock, self.engine.connect() as connection:
             cfg = Config()
             cfg.set_main_option("script_location", str(Path(__file__).parent / "migrations"))
+            scripts = ScriptDirectory.from_config(cfg)
+            current = MigrationContext.configure(connection).get_current_heads()
+            known = {revision.revision for revision in scripts.walk_revisions()}
+            if len(current) > 1 or any(revision not in known for revision in current):
+                raise RuntimeError(
+                    "Database schema is newer or unsupported. Use a matching release; do not downgrade the database."
+                )
+            tables = {
+                r[0]
+                for r in connection.exec_driver_sql(
+                    "SELECT name FROM sqlite_master WHERE type='table'"
+                )
+            }
+            if not current and tables - {"alembic_version"}:
+                raise RuntimeError(
+                    "Unversioned existing database refused. Preserve it and restore a verified backup."
+                )
+            connection.commit()
+            if current and set(current) != set(scripts.get_heads()):
+                from backend.backup import make_backup
+
+                directory = self.path / "upgrades"
+                directory.mkdir(mode=0o700, exist_ok=True)
+                snapshot = (
+                    directory / f"before-{'-'.join(current)}-{datetime.now():%Y%m%d-%H%M%S-%f}.zip"
+                )
+                snapshot.write_bytes(make_backup(self))
+                snapshot.chmod(0o600)
             cfg.attributes["connection"] = connection
-            command.upgrade(cfg, "head")
+            with connection.begin():
+                command.upgrade(cfg, "head")
 
     @contextmanager
     def transaction(self):
@@ -237,10 +272,16 @@ class Store:
                     or payload["data"]["locale"] not in {"ru", "en"}
                 ):
                     raise ValueError("Неподдерживаемый язык интерфейса")
+                prior_settings = c.exec_driver_sql(
+                    "SELECT settings FROM users WHERE id=?", (owner,)
+                ).scalar_one()
                 settings = {
-                    k: v
-                    for k, v in payload["data"].items()
-                    if k in {"theme", "locale", "units", "last_vehicle", "last_category"}
+                    **json.loads(prior_settings),
+                    **{
+                        k: v
+                        for k, v in payload["data"].items()
+                        if k in {"theme", "locale", "units", "last_vehicle", "last_category"}
+                    },
                 }
                 c.exec_driver_sql(
                     "UPDATE users SET settings=? WHERE id=?", (dumps(settings), owner)

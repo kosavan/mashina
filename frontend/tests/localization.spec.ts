@@ -3,6 +3,16 @@ import { randomUUID } from "node:crypto";
 
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "198.51.100.61" } });
 
+test("bundled fonts respect the production content security policy", async ({ page }) => {
+  const blocked: string[] = [];
+  page.on("console", message => {
+    if (message.type() === "error" && /font.*Content Security Policy/i.test(message.text())) blocked.push(message.text());
+  });
+  await page.goto("/");
+  await page.evaluate(async () => { await document.fonts.ready; });
+  expect(blocked).toEqual([]);
+});
+
 async function untranslated(page: import("@playwright/test").Page) {
   return page.evaluate(() => {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
@@ -118,6 +128,27 @@ test("real account locale changes offline, persists after sync and preserves veh
   await expect(page.getByRole("heading", { name: "История", exact: true }).first()).toBeVisible();
   await page.locator(".sidebar").getByRole("button", { name: "Settings", exact: true }).click();
   await expect(page.getByRole("button", { name: "Download full backup", exact: true })).toBeVisible();
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("ru");
+  await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("ru");
+  // Deterministically reconnect while the old offline sync request is still failing.
+  // The online trigger must be serialized rather than silently discarded.
+  await context.setOffline(true);
+  let release!: () => void;
+  let started!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; });
+  const requested = new Promise<void>(resolve => { started = resolve; });
+  await page.route("**/api/v1/mutate", async route => {
+    started();
+    await held;
+    await route.abort("internetdisconnected");
+  }, { times: 1 });
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("en");
+  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await requested;
+  await context.setOffline(false);
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  release();
+  await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("en");
   await page.getByLabel("Язык / Language", { exact: true }).selectOption("ru");
   await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("ru");
 });

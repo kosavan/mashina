@@ -18,9 +18,13 @@ The non-root container serves frontend and backend in one process. `./data` hold
 
 ## Backup before updating
 
+Use the [complete update and rollback guide](updating.md), including release
+selection and retaining the previous image. Stop writers before a CLI backup.
+
 ```sh
-docker compose exec mashina /app/.venv/bin/python -m backend.cli backup --backup-dir /app/data/backups --keep 7
-docker compose stop
+docker compose stop mashina
+
+docker compose run --rm --no-deps mashina /app/.venv/bin/python -m backend.cli backup --backup-dir /app/data/backups --keep 7
 docker compose build --pull
 docker compose up -d
 ```

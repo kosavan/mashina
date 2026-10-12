@@ -9,7 +9,7 @@ test("device notifications require consent and disconnect locally without any pr
   const login = await request.post((await setup.json()).required ? "/api/v1/setup" : "/api/v1/login", { data: credentials });
   expect(login.ok()).toBeTruthy();
   const owner = await login.json();
-  execFileSync(resolve("../.venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python"), ["-X", "utf8", "-m", "backend.cli", "notification-keys", "--data", ".cache/browser-test-data"], { cwd: resolve("..") });
+  execFileSync(resolve("../.venv", process.platform === "win32" ? "Scripts/python.exe" : "bin/python"), ["-X", "utf8", "-m", "backend.cli", "notification-keys", "--data", process.env.MASHINA_E2E_DATA!], { cwd: resolve("..") });
   const endpoint = "https://fcm.googleapis.com/fcm/send/browser-test-" + randomUUID();
   await page.addInitScript(({ endpoint }) => {
     let subscription: any = null;

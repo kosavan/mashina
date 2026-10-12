@@ -1,0 +1,9 @@
+{
+  "backend/migrations/versions/001_initial.py": "b0c3f99e018391349c5e89b63632785ce97301fde52f16c6aae4278413df8d72",
+  "backend/migrations/versions/002_ownership.py": "1c80f71ab63630a3db52cfcba6fc1fe5b7c16088f28da16693020d7f52db5337",
+  "backend/migrations/versions/003_sharing.py": "896c359b8a49973f80a1bde543b1cb8facc7febca3b19a6d6fafc4001c919fc5",
+  "backend/migrations/versions/004_notifications.py": "2424f3ab2eafdf8cfa91f976853e5ce217a973ab5b9a8c8938be4b56304c607b",
+  "backend/migrations/versions/005_bank_review.py": "9dc39b3b38b7484b243dc61cdcae0234d771d9515b2df877b59b82162eeaf17b",
+  "backend/migrations/versions/006_machine_access.py": "042feb9c9b0852bf93e5a95484a45b99c42b403a0b8ea80be7de15f920710d45",
+  "backend/schema.py": "9490d46806a2ddf93344ec072b9883479aa0c516d9a34f944307f37eb8795229"
+}

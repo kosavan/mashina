@@ -25,3 +25,32 @@ def test_locale_settings_do_not_change_user_records(client):
     assert state["vehicles"][0]["name"] == car["name"]
     assert mutate(client, "settings", {"locale": "de"}).status_code == 422
     assert client.get("/api/v1/state").json()["settings"]["locale"] == "en"
+
+
+def test_partial_settings_preserve_existing_and_future_preferences(client):
+    import json
+
+    store = client.app.state.store
+    with store.transaction() as c:
+        c.exec_driver_sql(
+            "UPDATE users SET settings=?",
+            (
+                json.dumps(
+                    {
+                        "theme": "light",
+                        "locale": "ru",
+                        "last_category": "fuel",
+                        "future_preference": {"keep": True},
+                    }
+                ),
+            ),
+        )
+    assert (
+        mutate(client, "settings", {"locale": "en", "unknown_input": "ignored"}).status_code == 200
+    )
+    assert client.get("/api/v1/state").json()["settings"] == {
+        "theme": "light",
+        "locale": "en",
+        "last_category": "fuel",
+        "future_preference": {"keep": True},
+    }

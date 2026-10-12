@@ -26,6 +26,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: uv sync --frozen --extra dev
       - run: uv run python tools/check_secrets.py
+      - run: uv run python tools/check_docs.py
+      - run: uv run python tools/check_migrations.py
       - name: Local OCR engine and PDF renderer
         run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng poppler-utils
       - run: uv run ruff check backend && uv run pytest -q
@@ -46,13 +48,15 @@ jobs:
       - run: docker build -t mashina:verify .
       - name: Container health and persistent initialization
         run: |
-          docker run -d --name mashina-check -p 8000:8000 mashina:verify
+          docker run -d --name mashina-check --read-only --tmpfs /tmp:rw,size=128m --mount type=volume,source=mashina-ci-data,target=/app/data -p 8000:8000 mashina:verify
           for i in $(seq 1 30); do
             if curl -fsS http://localhost:8000/api/v1/health; then exit 0; fi
             sleep 2
           done
           docker logs mashina-check
           exit 1
+      - name: Backup and restore on the persistent writable volume
+        run: docker exec -i mashina-check /app/.venv/bin/python < tools/check_container_restore.py
       - name: Local OCR inside the non-root production container
         run: |
           docker exec -i mashina-check /app/.venv/bin/python - <<'PY'

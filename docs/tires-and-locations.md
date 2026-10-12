@@ -1,17 +1,31 @@
-# Шины и места обслуживания
+# Tires and service locations
 
-«Шины» — самостоятельный раздел основного меню. Существующие комплекты и интервалы установки сохранены; старый путь через обслуживание также работает.
+English · [Russian](tires-and-locations.ru.md)
 
-В параметрах комплекта можно указать последние четыре цифры DOT **самой старой шины**, например `3421` — неделя 34, 2021 год. Это приблизительный возраст, а не точный день выпуска или начало эксплуатации. Если шины разного возраста, проверяйте каждую отдельно.
+**Tires** is a dedicated section; existing sets/intervals also remain accessible
+through Maintenance. DOT `3421` means week 34 of 2021: approximate manufacture
+age, not an exact date or start of use. Record the oldest tire and check each
+tire separately when ages differ.
 
-Замеры — датированная история минимальной измеренной глубины по комплекту, в десятых миллиметра. Старые замеры можно исправить; отсутствие замера показывается как «Не измерен». Пробег закрытых интервалов не превращается в «процент здоровья». Ваш порог замены необязателен и не является юридическим нормативом. При достижении порога показывается предупреждение. Новые поля сохраняются офлайн, в JSON и полном архиве; SQL-схема не меняется.
+Measurements retain dated minimum tread depth in tenths of a millimetre. Historical
+measurements are editable; missing readings stay unknown. Closed mounting mileage
+is not a health percentage. A personal warning threshold is not a legal limit.
+Fields persist offline, in JSON and full backups without changing the SQL schema.
 
-Общие рекомендации основаны на [Michelin](https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/when-do-i-need-new-tires): ежегодный профессиональный осмотр после пяти лет **эксплуатации**, профилактическая замена через десять лет от **изготовления**. Следуйте руководству именно своего автомобиля и производителя шин; интерфейс не подтверждает исправность. Сезон определяется условиями, а не календарём или автоматически угаданной погодой. [Расшифровка маркировки](https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-markings-explained).
+Reference [Michelin's guidance](https://www.michelinman.com/auto/auto-tips-and-advice/tire-buying-guide/when-do-i-need-new-tires)
+and [marking explanations](https://www.michelinman.com/auto/auto-tips-and-advice/tires-101/tire-markings-explained).
+Follow your vehicle/tire manufacturer's instructions. The UI does not measure
+condition or automatically determine the correct season/weather.
 
-## Сервисы на карте
+## Service address cards
 
-В дополнительных полях события доступны сервис/продавец, адрес и необязательная пара широта/долгота. Приложение не геокодирует адрес и не собирает геолокацию устройства. Указанная вручную точка — данные владельца, не подтверждённый адрес сервиса.
+Advanced event fields include vendor, address and an optional latitude/longitude
+pair. No device location collection or automatic geocoding occurs. A manually
+entered point is owner-provided, not a verified service address.
 
-В деталях записи отображается адресная карточка с копированием. При наличии координат кнопка **«Загрузить карту · OpenStreetMap»** загружает карту в отдельном iframe. До нажатия запросов провайдеру нет. После нажатия OpenStreetMap получает IP и область координат; доступность внешней карты не гарантируется. Адрес и координаты остаются локально доступными при отсутствии сети. Карты не скачиваются для офлайна.
-
-CSP разрешает iframe только точного хоста `https://www.openstreetmap.org`, кроме существующих локальных preview. Прямые внешние тайлы, геокодирование и произвольные URL не добавляются. Интеграция использует официальный embed с атрибуцией; [правила OSM](https://operations.osmfoundation.org/policies/tiles/).
+Details show a local address card with copying. **Load map · OpenStreetMap**
+explicitly loads an attributed iframe when coordinates exist. No provider request
+is made before this action. Loading shares IP/coordinate area with OpenStreetMap;
+availability is not guaranteed. Addresses remain local offline, maps are not
+downloaded for offline use. CSP permits the exact OSM embed host, not arbitrary
+external frames. [OSM policy](https://operations.osmfoundation.org/policies/tiles/).

@@ -3,7 +3,7 @@
 ## Use
 
 While adding a fuel fill-up, expense, service record or odometer reading, choose
-**Read a photo or PDF / Распознать фото или PDF**. Choose fuel receipt, workshop invoice,
+**Read a photo or PDF**. Choose fuel receipt, workshop invoice,
 dashboard or any screenshot/document. Select JPEG/PNG/WebP or one PDF page (1–20),
 then **Read locally**. Inspect the extracted text and correct suggested values.
 Tick only fields you verified, then **Apply selected fields**. This only updates the

@@ -1,35 +1,21 @@
-# Как проверить MASHINA 1.5
+# Testing MASHINA
 
-## Выбор языка
+English · [Russian](testing-release.ru.md) · [Roadmap](roadmap.md) · [Updates](updating.md)
 
-До первого входа или создания аккаунта выберите **Русский** или **English**.
-После входа язык меняется в **Настройки → Язык приложения / Settings → App language**.
-Настройка сохраняется в аккаунте; офлайн изменение дождётся подключения. Названия,
-заметки, документы, суммы, валюта и единицы измерения остаются вашими исходными данными.
-Язык экспортируемого PDF/CSV и внешних уведомлений этим переключателем не меняется.
+Use a separate installation with fictional information. Select **English** before
+setup/sign-in, or under **Settings → App language**. Your preference synchronizes
+after offline changes; user records, units and currencies are unchanged. Export
+and notification localization remain planned.
 
-## Быстрый осмотр
+## macOS Terminal
 
-Установите релиз на отдельный тестовый каталог данных. На экране входа нажмите
-**«Посмотреть демогараж»**: два вымышленных автомобиля и история расходов уже готовы.
-Проверьте гараж, карточку автомобиля, журнал, графики, фильтры и обе темы.
-Добавьте/исправьте/удалите запись, затем сбросьте демо. Демо изолировано от личной
-базы и не требует ввода настоящих документов. API-ключи в демо недоступны.
-
-## Локальная проверка на macOS
-
-1. Установите [Docker Desktop для Mac](https://docs.docker.com/desktop/setup/install/mac-install/):
-   выберите вариант Apple Silicon для M1/M2/M3/M4 и следующих моделей либо Intel
-   для Intel Mac. Запустите Docker Desktop и дождитесь готовности Docker Engine.
-2. Откройте Terminal. Проверьте `git --version`; если macOS предложит установить
-   Command Line Tools, завершите установку. Python и Node для контейнерного запуска
-   отдельно устанавливать не нужно.
-3. Выполните команды в новом тестовом каталоге:
+Install Git and Docker Desktop for your Mac architecture. Start Docker Desktop
+and wait for the engine. Python/Node are not needed for container use.
 
 ```sh
 docker version
 docker compose version
-git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone https://github.com/kosavan/mashina.git mashina-test
 cd mashina-test
 cp .env.example .env
 mkdir -p data
@@ -39,32 +25,23 @@ docker compose up -d
 docker compose ps
 ```
 
-Команда `chown` подготавливает только тестовый каталог данных для пользователя
-приложения внутри контейнера. Само приложение запускается без root.
-Откройте Safari или Chrome: **http://localhost:8000**. Для первого осмотра нажмите
-**«Посмотреть демогараж»**. Для постоянного тестового гаража создайте администратора:
+The ownership command prepares only this data volume; the app runs without root.
+Open **http://localhost:8000**, then **Explore the demo garage**. For a permanent
+test garage, create an administrator once:
 
 ```sh
 docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
 ```
 
-Введите логин от 3 символов и пароль от 12 символов; при вводе пароль не отображается.
-Команда создания администратора нужна один раз для нового каталога данных.
-Интернет нужен для первоначальной загрузки образов и зависимостей при сборке.
-Повторный запуск использует уже собранный образ. Linux amd64 проверен в CI;
-отдельный запуск на macOS/Apple Silicon пока не проверен, arm64 нельзя считать
-подтверждённым только по наличию инструкции.
+Enter a username of 3–64 characters and a password of at least 12 characters;
+password input is hidden. First build requires internet. Physical macOS/Apple
+Silicon Docker deployment has not been independently verified.
 
-## Локальная проверка на Windows
+## Windows PowerShell
 
-1. Установите [Docker Desktop для Windows](https://docs.docker.com/desktop/setup/install/windows-install/)
-   с WSL 2 backend и режимом **Linux containers**, а также Git for Windows.
-   Актуальные требования Windows/WSL и виртуализации приведены по ссылке Docker.
-   При необходимости выполните предложенную установщиком настройку WSL и перезагрузку.
-2. Запустите Docker Desktop и дождитесь готовности Engine. Откройте обычный
-   **PowerShell**, команды ниже не требуют запуска PowerShell от администратора.
-3. Выберите локальный каталог вне OneDrive, сетевого диска и синхронизируемых папок.
-   Например, создайте `mashina-testing` в папке пользователя:
+Install Git for Windows and Docker Desktop with WSL 2 and **Linux containers**.
+Start Docker Desktop. Use ordinary PowerShell and a local directory outside
+OneDrive, network drives and synchronized folders.
 
 ```powershell
 New-Item -ItemType Directory -Force "$env:USERPROFILE\mashina-testing" | Out-Null
@@ -72,7 +49,7 @@ Set-Location "$env:USERPROFILE\mashina-testing"
 docker version
 docker compose version
 git --version
-git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone https://github.com/kosavan/mashina.git mashina-test
 Set-Location mashina-test
 Copy-Item .env.example .env
 New-Item -ItemType Directory -Force data | Out-Null
@@ -82,24 +59,32 @@ docker compose up -d
 docker compose ps
 ```
 
-После каждой команды убедитесь, что нет ошибки; при ошибке сборки не переходите
-к запуску. `chown` выполняется внутри Linux-контейнера, устанавливать эту команду
-на Windows не нужно. Откройте Edge или Chrome: **http://localhost:8000**.
-Начните с **«Посмотреть демогараж»** либо создайте постоянный тестовый аккаунт:
+Stop if a command fails. `chown` runs inside Linux, not Windows. Allow the bind
+mount in Docker Desktop if requested. Open **http://localhost:8000** and explore
+the demo or create an administrator with the same command as above. Physical
+Windows Docker Desktop deployment is not a CI claim.
 
-```powershell
-docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
+## Linux, releases and server access
+
+See [self-hosting](self-hosting.md). These clone commands use current `main`,
+including fixes newer than release tags. To pin a release, choose an existing
+tag from [Releases](https://github.com/kosavan/mashina/releases) and run
+`git switch --detach TAG` before building, replacing `TAG` with its exact name.
+Read the [update guide](updating.md) before changing an existing installation.
+
+Use your server's configured HTTPS URL or an SSH tunnel:
+
+```sh
+ssh -N -L 8000:127.0.0.1:8000 USER@SERVER
 ```
 
-Пароль от 12 символов вводится скрыто. Python/Node на Windows для этого способа
-не нужны. Если Docker сообщает о недоступном Engine, сначала запустите Docker Desktop;
-при ошибке Windows image/OS проверьте режим Linux containers. Если bind mount запрещён,
-разрешите доступ к выбранному каталогу в настройках Docker Desktop. Контейнерный
-запуск на физическом Windows Docker Desktop отдельно не проверен; Linux-образ проверен CI.
+Keep the terminal open; Ctrl+C closes the tunnel. Its URL must match
+`MASHINA_ORIGIN`. On a phone, localhost means the phone, not your server.
+For iPhone PWA installation use HTTPS and Safari → Share → Add to Home Screen.
 
-## Управление тестовым экземпляром на Mac и Windows
+## Manage the test instance
 
-Следующие команды одинаковы в Terminal и PowerShell и выполняются из `mashina-test`:
+From the installation directory, on either desktop OS:
 
 ```sh
 docker compose ps
@@ -108,203 +93,58 @@ docker compose stop
 docker compose start
 ```
 
-`stop` останавливает приложение, `start` запускает снова; каталог `data` сохраняется.
-Чтобы убрать тестовые контейнеры, используйте `docker compose down`. Данные остаются
-в `mashina-test/data`; повторный `docker compose up -d` использует их.
-Не удаляйте этот каталог, если хотите сохранить историю. Для отдельного чистого
-теста создайте другой каталог `mashina-test-2`, остановив первый экземпляр, чтобы
-освободить порт 8000. Не запускайте `create-admin` повторно для уже заполненной базы.
+`docker compose down` removes containers but retains `./data`; preserve that
+folder and private `.env`. Do not repeat setup on an existing database. If port
+8000 is busy, set both `MASHINA_PORT=8001` and
+`MASHINA_ORIGIN=http://localhost:8001` in `.env`, recreate the container and use
+that exact URL. Localhost and 127.0.0.1 are distinct origins.
 
-Если порт 8000 занят другим приложением, остановите конфликтующий экземпляр либо
-в файле `.env` измените обе строки на `MASHINA_PORT=8001` и
-`MASHINA_ORIGIN=http://localhost:8001`, затем выполните `docker compose up -d` и
-откройте http://localhost:8001. При проблеме входа проверяйте именно настроенный
-origin: `localhost` и `127.0.0.1` не подменяют друг друга для настроек безопасности.
+## Acceptance walkthrough
 
-Для офлайн-проверки на компьютере сначала войдите онлайн и откройте нужные разделы.
-В Chrome/Edge откройте DevTools → Network → Offline, создайте расход, перезагрузите
-страницу, верните Online и синхронизируйте. Должна остаться одна запись. Проверка
-DevTools помогает проверить очередь, но не заменяет проверку PWA на физическом iPhone.
-Скачанный в браузере ZIP-бэкап находится в загрузках компьютера; держите отдельную
-копию вне каталога тестового экземпляра. Сценарии ниже подходят для обеих ОС.
+1. Create two cars, purchase odometer 10000, with fictional photos. Reload each
+   profile; check switching, empty states and both themes.
+2. Save 1234.56 RUB, edit to 1000, delete and undo. History/analytics must reflect
+   exactly one expense and each correction.
+3. Fuel: 30 L × 60 RUB/L = 1800 RUB. One full tank cannot measure consumption.
+   On a separate car record a full tank at 10000 km, partial 10 L at 10200 km,
+   full 30 L at 10500 km: 8 L/100 km. Exclude the initial tank's litres.
+4. Service: 3 × 100.10 RUB minus 0.20, plus 700 RUB minus 0.09 = 1000.01 RUB.
+   Attach a synthetic PDF; find part numbers and confirm one financial entry.
+5. Historical mileage must not reduce current mileage. Incorrect chronology
+   requires deliberate confirmation. Repeating reminders advance using actual
+   completion facts; estimated costs do not become expenses.
+6. Compare currencies/periods/cars. Purchase and sale remain separate; missing
+   mileage produces an explanation rather than fabricated zero values.
+7. Load online, choose DevTools → Network → Offline, create a fuel/expense/service
+   record, reload, reconnect and sync. Exactly one server entry must remain.
+8. Create a driver and verify limited access/private documents/revocation in
+   another browser profile. Test tires, budgets, CSV and sale PDF disclosure.
+9. Restore a full ZIP into a separate instance. Check cars, exact totals, photos
+   and PDFs. Restored sessions/keys are invalidated and notifications paused.
 
-## Проверка приложения на Linux-сервере с Mac или Windows
+## Import and OCR
 
-Устанавливать Docker на ноутбук не обязательно, если MASHINA уже запущена на сервере.
-Откройте Terminal на Mac или PowerShell на Windows с установленным OpenSSH Client:
-
-```sh
-ssh -N -L 8000:127.0.0.1:8000 USER@SERVER
-```
-
-Подставьте свою учётную запись и адрес. Оставьте окно терминала открытым и откройте
-http://localhost:8000 в браузере ноутбука. `Ctrl+C` закрывает туннель. Для этого
-варианта серверный `MASHINA_ORIGIN` должен быть `http://localhost:8000`; освободите
-локальный порт 8000 перед запуском туннеля. Если на сервере уже настроен HTTPS-домен,
-используйте его напрямую: туннель не отменяет проверку разрешённого origin.
-Файлы остаются на сервере, кроме явно скачанных документов/экспортов и локального
-кэша браузера. Для телефона используйте HTTPS, как описано ниже; `localhost`
-на телефоне означает сам телефон, а не Mac/Windows-компьютер.
-
-## Установка зафиксированной версии на Linux
-
-Нужны Git, Docker Engine и Docker Compose на Linux. Команды выполняются на сервере:
-
-```sh
-git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git
-cd mashina
-cp .env.example .env
-mkdir -p data
-sudo chown 10001:10001 data
-docker compose up -d --build
-docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
-docker compose ps
-```
-
-Последняя интерактивная команда создания администратора запрашивает логин/пароль.
-Не публикуйте `.env`, каталог `data`, архивы и токены. Порт по умолчанию доступен
-только на самом сервере: откройте `http://localhost:8000` на нём или используйте
-SSH-туннель на своём компьютере:
-
-```sh
-ssh -L 8000:127.0.0.1:8000 USER@SERVER
-```
-
-Затем откройте `http://localhost:8000` на компьютере с туннелем. USER/SERVER — ваши
-учётная запись и адрес, без включения инфраструктурных паролей в исходники.
-Для локального Mac/Windows используйте отдельные инструкции выше; CI проверяет Linux.
-
-Для телефона настройте HTTPS reverse proxy по `Caddyfile.example`, укажите свой
-`MASHINA_ORIGIN=https://…` и `MASHINA_SECURE_COOKIES=1` в `.env`, пересоздайте контейнер.
-Не открывайте обычный HTTP в интернет. На iPhone: Safari → «Поделиться» →
-«На экран Домой». Реальная установка, фоновые ограничения и Push требуют проверки
-на вашем устройстве; браузерные автотесты их полностью не заменяют.
-
-## Проверка собственных сценариев
-
-Используйте тестовые сведения и отдельный тестовый экземпляр для восстановления.
-
-1. Создайте два автомобиля с пробегом покупки 10000 и фотографиями. Откройте каждый,
-   проверьте переключение, пустые состояния и сохранение профиля после перезагрузки.
-2. Создайте расход 1234,56 ₽. Исправьте на 1000 ₽: журнал и аналитика должны измениться
-   на 234,56 ₽. Удалите и отмените удаление, убедитесь в правильном итоге.
-3. Для топлива внесите 30 л и 60 ₽/л: итог 1800 ₽. Одного полного бака недостаточно
-   для расчёта расхода. Для отдельного тестового автомобиля внесите полный бак на
-   10000 км, частичную заправку 10 л на 10200 км и полный бак 30 л на 10500 км:
-   цикл должен дать 8 л/100 км. Первую заправку цикла в потраченное за цикл топливо
-   не включают. Пропущенные записи обозначайте соответствующим признаком.
-4. Внесите ТО с позициями: масло 3 × 100,10 ₽, скидка 0,20 ₽ и работа 700 ₽,
-   скидка 0,09 ₽. Итог 1000,01 ₽, единая финансовая запись; приложите тестовый PDF.
-   Проверьте артикул детали в журнале/каталоге и предпросмотр вложения.
-5. Добавьте историческое показание, меньше текущего. Текущий пробег не должен
-   уменьшиться. Нехронологичный пробег должен требовать осознанного подтверждения.
-6. Создайте напоминание по дате и километрам с повторением. Выполните его с фактическими
-   датой/пробегом, проверьте новый срок. Плановая стоимость не должна стать расходом.
-7. Посмотрите месяц/год, категории, разные автомобили и валюты. Покупка/продажа
-   отделены от эксплуатации; стоимость километра использует подтверждённый пробег
-   владения, а при нехватке данных объясняет невозможность расчёта.
-8. Откройте приложение и нужную машину онлайн, отключите сеть, добавьте расход/ТО/
-   заправку. Перезагрузите страницу: ожидающая запись сохраняется. Верните соединение,
-   синхронизируйте и перезагрузите ещё раз: должна остаться одна серверная запись.
-9. В настройках создайте локального водителя и выдайте доступ. Проверьте его вход
-   в другом браузерном профиле, запрет чужих правок/приватных документов и отзыв доступа.
-10. Проверьте комплекты шин, бюджеты/план расходов, обычный CSV-импорт и локальный PDF
-    для продажи. В PDF включайте личные поля только явным выбором.
-
-## Банковская выписка
-
-«Обслуживание → Импорт → Проверить выписку». Для теста сохраните UTF-8 файл:
+**Maintenance → Import → Review statement** accepts a mapped synthetic CSV:
 
 ```csv
-Дата;Сумма;Описание;ID;Валюта
-01.10.2026;-1800,00;Тестовая заправка;test-fuel-1;RUB
-02.10.2026;-1000,01;Тестовое ТО;test-service-1;RUB
+date;amount;description;id;currency
+2026-10-01;-1800.00;Test fill-up;test-fuel-1;RUB
+2026-10-02;-1000.01;Test service;test-service-1;RUB
 ```
 
-Выберите разделитель `;`, формат ДД.ММ.ГГГГ, отрицательные суммы как расходы,
-сопоставьте столбцы. Создайте источник с вымышленным названием. Существующую
-заправку/ТО свяжите с соответствующей строкой, новую трату подтвердите отдельно.
-Автоматического принятия совпадений нет. Повторный импорт с теми же стабильными ID
-не должен создавать повторные расходы. Ограничения и варианты CSV:
-[bank-import.md](bank-import.md).
+Choose semicolon, ISO dates and negative expenses. Link existing entries instead
+of duplicating them; reimport the same stable IDs. [Bank import](bank-import.md).
 
-## Необязательный API/MCP
+Choose **Read a photo or PDF** in a form. Inspect/edit recognition, tick verified
+fields and apply to the draft; only normal Save creates an entry. Test cancel,
+optional attachment and manual offline fallback. Full tank is human-confirmed.
+[OCR limits](local-ocr.md). Optional API keys require explicit enablement and
+scope; test revocation without publishing secrets. [API/MCP](machine-access.md).
 
-По умолчанию выключен. Только для отдельной проверки установите
-`MASHINA_API_ENABLED=1` в `.env` и выполните `docker compose up -d`.
-«Настройки → API и интеграции»: создайте ключ чтения только для одной машины,
-сохраните его один раз и проверьте, что второй автомобиль/документы недоступны.
-Отзовите ключ и убедитесь, что он больше не действует. Секрет не отправляйте в чат
-и не сохраняйте в репозитории. Запись требует отдельного явного разрешения.
-Контракты и запуск read-only MCP через STDIO описаны в
-[machine-access.md](machine-access.md). MCP не имеет доступа к документам,
-банковской сверке, пользователям и резервным копиям.
+## Automated checks and limits
 
-## Резервная копия и восстановление
-
-В настройках скачайте полный ZIP, JSON и CSV. Храните архив на другом физическом
-диске. Для теста поднимите второй экземпляр с другим каталогом `data` и портом,
-создайте его администратора и восстановите ZIP там. Восстановление заменяет
-данные целевого экземпляра — не используйте рабочий гараж для первой пробы.
-После повторного входа проверьте обе машины, точные суммы, историю, фотографию и
-PDF. Сеансы и API-ключи аннулируются, внешние уведомления остаются на паузе.
-Создайте/удалите контейнер тестового экземпляра с сохранением его `data`: история
-и вложения должны сохраниться.
-
-## Автоматические проверки для разработчика
-
-```sh
-uv sync --frozen --extra dev
-uv run ruff check backend
-uv run pytest -q
-cd frontend
-npm ci --no-audit --no-fund
-npm run check
-npm test
-npm run build
-npx playwright install chromium
-npm run test:e2e
-```
-
-Нужны Python 3.12+ (CI 3.14), Node 22 и uv. Playwright запускается без видимого окна,
-использует вымышленные данные в игнорируемом `.cache/browser-test-data` и временно
-включает API только для тестового сервера. CI дополнительно собирает Linux Docker
-и проверяет healthcheck. Успех автотестов не заменяет проверку установки на вашем
-iPhone и доставки внешних уведомлений.
-
-## Новое в 1.3: что проверить
-
-- Экран входа: автомобиль органично встроен в композицию; знак Apex M зелёный.
-- «Заправки → Графики и расход»: выбранный автомобиль и фильтр топлива сохраняются.
-- «Шины»: DOT, замеры, личный порог, редактирование; повторите создание без сети и синхронизацию.
-- «ТО → Дополнительные поля»: адрес и пара координат; карта не загружается до нажатия.
-- [Быстрое внесение заправок](fuel-capture.md), [шины и места обслуживания](tires-and-locations.md).
-
-## Новое в 1.5: локальное распознавание
-
-В Docker нужные движки уже включены. В форме заправки, расхода, ТО или пробега
-нажмите «Распознать фото или PDF». Для первой пробы используйте вымышленный чек
-с явно напечатанными «ИТОГО», датой и суммой либо скриншот без личных данных.
-Выберите подходящий режим: чек, заказ-наряд, приборка или произвольный скриншот.
-Для PDF укажите одну страницу. Проверьте распознанный текст, исправьте значения и
-отметьте только проверенные поля. Перенос обновляет черновик; запись появляется
-только после обычного «Сохранить». Полный бак подтверждается отдельно.
-
-Проверьте отмену без изменения исходного черновика, отсутствие лишнего вложения
-и сохранение ровно одной записи. Прикрепление исходника включается отдельно.
-Повторите без сети: OCR попросит подключиться к вашему серверу, ручной офлайн-ввод
-останется доступным. Подробные ограничения и установка движков при запуске без
-Docker: [local-ocr.md](local-ocr.md).
-
-## Что пока не готово
-
-- Универсальное AI-понимание документов, многостраничные позиции заказ-нарядов и специализированное чтение семисегментной приборки. Локальный текстовый OCR уже доступен; [инструкция](local-ocr.md).
-- Поиск по истории естественным языком.
-- Telegram-бот для внесения расходов; уже имеющиеся Telegram-напоминания — отдельная функция.
-- OBD-II-компонент и получение показаний с оборудования.
-- Passkeys и дополнительные способы входа.
-
-Реальные доставки Push/Telegram, физический iPhone и отдельная arm64-машина в
-разработке не проверялись. Интеграции остаются необязательными и настраиваются
-владельцем. Полная универсальная поддержка форматов банков/Excel/PDF не заявляется:
-банковский импорт работает с явно сопоставленным CSV, без прямого подключения к банку.
+See [development tests](development.md). CI covers backend invariants, real
+native OCR, migrations, browser/offline flows and the production container.
+Physical iPhone installation, arm64 hardware and actual Push/Telegram delivery
+still require device-level validation. The [roadmap](roadmap.md) distinguishes
+shipped features, improvements and research.

@@ -1,3 +1,22 @@
+# MASHINA 1.5.1
+
+Maintenance audit, safe updates and a living bilingual roadmap.
+
+- Fix backup restoration inside read-only non-root containers and recover from failures during every initial file swap.
+- Preserve unrelated and future preferences on partial settings updates; language changes send only their own field.
+- Before an installed schema upgrades, retain a private full recovery snapshot. Refuse newer/unknown/unversioned existing schemas without resetting data.
+- Test actual Alembic upgrades for every supported schema 001–006 and retain immutable fingerprints of released migrations.
+- Serialize overlapping offline/reconnect synchronization requests so pending records are not stranded.
+- Serve bundled fonts as local files compatible with the existing self-only font policy.
+- Publish shipped/planned/research roadmap, complete English user guides with separate Russian versions, and update/rollback walkthroughs for Linux, macOS and Windows.
+- Extend CI with English documentation/link checks and a real production-container restore drill. Include the prior offline lazy-module caching fix.
+
+[Roadmap](docs/roadmap.md) · [Update / rollback](docs/updating.md) · [Russian update guide](docs/updating.ru.md) · [Audit and remaining limits](docs/audit-1.5.1.md)
+
+No schema revision, external service or infrastructure change. Preserve your existing data and environment; read the update guide before switching versions. Publication requires full Linux/native OCR/browser/container CI. Hardware-specific validation and large-archive streaming remain open.
+
+---
+
 # MASHINA 1.5.0
 
 Fully local text OCR for receipts, workshop invoices/work orders, dashboard photographs and arbitrary screenshots.

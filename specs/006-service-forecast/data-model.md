@@ -1,0 +1,3 @@
+# Data model
+Reminder JSON extends with estimated_cost_minor: integer0..10^12|null (defaultnull), cost_currency: uppercase ISO-style3 letters(defaultRUB). Request estimated_cost decimal text is normalized and not retained. Only owner permissions unchanged. Dates/km/repeat/completed fields unchanged. No new SQL table/column or schema version; historical rows and archives validate with defaults. Currency applies only to estimate, never account totals.
+Forecast service row has source=maintenance, id=reminder ID, date=known deadline, title, amount_minor, currency, planned=true, estimated=true, mileage_deadline bool. maintenance_due is existing Reminder list with optional estimated cost. These are derived views with no writes.

@@ -162,6 +162,23 @@ def ownership_report(state, vehicle_id, month):
             or (r.get("due_date") and r["due_date"] < finish.isoformat())
         )
     ]
+    for reminder in maintenance_due:
+        deadline = reminder.get("due_date", "")
+        amount = reminder.get("estimated_cost_minor")
+        if start.isoformat() <= deadline < finish.isoformat() and amount is not None:
+            forecast.append(
+                {
+                    "id": reminder["id"],
+                    "title": reminder["title"],
+                    "date": deadline,
+                    "amount_minor": amount,
+                    "currency": reminder.get("cost_currency", "RUB"),
+                    "source": "maintenance",
+                    "planned": True,
+                    "estimated": True,
+                    "mileage_deadline": reminder.get("due_odometer") is not None,
+                }
+            )
     return {
         "budgets": budgets,
         "maintenance_due": maintenance_due,

@@ -1,6 +1,7 @@
 import type { Cached, Mutation, Session, State } from "./types";
-import { currentKm } from "./utils";
+import { currentKm, today } from "./utils";
 import { pendingMoney } from "./calculations";
+import { projectReminder, reminderStatus } from "./reminders";
 import { permissionError, scopeKey } from "./permissions";
 
 export class APIError extends Error {
@@ -152,7 +153,7 @@ function project(state: State, operation: Mutation): State {
   const rows = (result[table] ||= []) as any[];
   const index = rows.findIndex((r) => r.id === operation.id);
   const prior = index >= 0 ? rows[index] : {};
-  const record = {
+  let record = {
     ...prior,
     ...operation.data,
     id: operation.id,
@@ -189,10 +190,19 @@ function project(state: State, operation: Mutation): State {
     record.currency ||= "RUB";
     record.status ||= "active";
   }
+  if (operation.entity === "reminder")
+    record = projectReminder(record, operation.action, operation.data);
   if (index >= 0) rows[index] = record;
   else rows.push(record);
   for (const v of result.vehicles)
     v.current_odometer = currentKm(v, result.events);
+  for (const reminder of result.reminders) {
+    const vehicle = result.vehicles.find((v) => v.id === reminder.vehicle_id);
+    Object.assign(
+      reminder,
+      reminderStatus(reminder, vehicle?.current_odometer || 0, today()),
+    );
+  }
   return result;
 }
 export async function loadState(session: Session) {

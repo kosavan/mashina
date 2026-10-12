@@ -191,6 +191,31 @@ def normalize_event(data):
 
 def normalize_reminder(data):
     r = dict(data)
+    if "estimated_cost" in r:
+        raw = r.pop("estimated_cost")
+        if raw in (None, ""):
+            r["estimated_cost_minor"] = None
+        else:
+            amount = decimal(raw, "Ориентировочная стоимость") * 100
+            if amount < 0 or amount != amount.to_integral_value():
+                raise ValueError("Стоимость: неотрицательная сумма с точностью до копеек")
+            r["estimated_cost_minor"] = int(amount)
+    raw = r.get("estimated_cost_minor")
+    if raw is not None:
+        try:
+            amount = Decimal(str(raw))
+            if (
+                not amount.is_finite()
+                or not 0 <= amount <= 10**12
+                or amount != amount.to_integral_value()
+            ):
+                raise ValueError()
+            r["estimated_cost_minor"] = int(amount)
+        except (InvalidOperation, ValueError):
+            raise ValueError("Некорректная ориентировочная стоимость") from None
+    else:
+        r["estimated_cost_minor"] = None
+    r["cost_currency"] = currency(r.get("cost_currency"))
     r["title"] = text(r.get("title"), maximum=120, required=True)
     r["due_date"] = iso(r.get("due_date"), True)[:10]
     r["due_odometer"] = (

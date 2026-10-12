@@ -10,3 +10,5 @@ Local checks, 2026-10-12:
 All provider HTTP operations in tests are intercepted; no real Push/Telegram messages or workstation timer were created. Physical iPhone installation and actual provider delivery require an owner-configured HTTPS deployment and are not claimed as tested. Provider acceptance is never reported as device delivery.
 
 No existing Proxmox services were changed. Source publication excludes runtime data, credential helpers, rendered QA files and secrets.
+
+Linux CI38177245363 passed on87af0e9:68 Pytest,10 Vitest,16 Playwright, static checks, build, Docker image and container health. PR4 merged asf876baca8a6f07bd97ea0af4320cb43ab7c71b9d.

@@ -43,6 +43,8 @@ export interface Reminder extends RecordBase {
   status: string;
   remaining_km?: number;
   remaining_days?: number;
+  estimated_cost_minor?: number | null;
+  cost_currency?: string;
 }
 export interface Attachment {
   id: string;

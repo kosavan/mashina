@@ -562,8 +562,16 @@ function CSVImport() {
 }
 
 export default function OwnershipTools({ children }: { children: ReactNode }) {
-  const { state, selected, setSelected, session, save, notify, setPage } =
-    useApp();
+  const {
+    state,
+    selected,
+    setSelected,
+    session,
+    save,
+    notify,
+    setPage,
+    queue,
+  } = useApp();
   const [tab, setTab] = useState("work");
   const visibleTab =
     state.vehicles.find((v) => v.id === selected)?.can_edit === false &&
@@ -582,6 +590,7 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
       state.events,
       state.budgets,
       state.recurring_costs,
+      state.reminders,
     ],
     queryFn: () =>
       cachedAPI<Report>(
@@ -896,7 +905,7 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
             {report.error && (
               <p role="alert">{(report.error as Error).message}</p>
             )}
-            {!navigator.onLine && (
+            {(!navigator.onLine || queue.length > 0) && (
               <p className="field-help">
                 Бюджет рассчитан из локальной истории. Прогноз показан по
                 последнему сохранённому отчёту и обновится после синхронизации.
@@ -1013,18 +1022,31 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
               <span className="eyebrow">ПЛАН · НЕ ФАКТИЧЕСКИЕ РАСХОДЫ</span>
               <h3>Следующие 12 месяцев от {month}</h3>
               <p className="muted">
-                Только известные регулярные платежи. Будущий пробег и
-                неизвестные ремонты не прогнозируются.
+                Известные регулярные платежи и ближайшие ТО с заданной оценкой.
+                Дата ТО — календарный предел: по пробегу оно может потребоваться
+                раньше. Повторы появятся после подтверждения выполнения. Не
+                добавляйте одну работу одновременно как платёж и ТО.
               </p>
               {!report.data?.forecast.length ? (
                 <p className="muted">
-                  Добавьте регулярные платежи для расчёта.
+                  Добавьте регулярный платёж или стоимость ТО с датой в этом
+                  периоде.
                 </p>
               ) : (
                 report.data.forecast.map((row, i) => (
                   <div className="forecast-row" key={i}>
                     <span>{row.date}</span>
-                    <strong>{row.title}</strong>
+                    <strong>
+                      {row.title}
+                      {row.source === "maintenance" && (
+                        <small className="muted">
+                          Оценка ТО
+                          {row.mileage_deadline
+                            ? " · или раньше по пробегу"
+                            : ""}
+                        </small>
+                      )}
+                    </strong>
                     <span>{money(row.amount_minor, row.currency)}</span>
                   </div>
                 ))
@@ -1033,8 +1055,10 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
             <section className="panel forecast-panel">
               <h3>Обслуживание по известным интервалам</h3>
               <p className="muted">
-                Километровый предел не преобразуется в выдуманную дату.
-                Стоимость работ не задана и в денежный прогноз не включена.
+                Километровый предел не преобразуется в выдуманную дату. Работа
+                без цены остаётся неизвестной суммой; без даты — вне
+                календарного плана. Просроченные работы не переносятся
+                автоматически на начало периода.
               </p>
               {report.data?.maintenance_due?.map((row) => (
                 <button
@@ -1043,7 +1067,14 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
                   onClick={() => setPage("reminders")}
                 >
                   <span>{row.due_date || "По пробегу"}</span>
-                  <strong>{row.title}</strong>
+                  <strong>
+                    {row.title}
+                    <small className="muted">
+                      {row.estimated_cost_minor == null
+                        ? "Стоимость не задана"
+                        : `Оценка: ${money(row.estimated_cost_minor, row.cost_currency || "RUB")}`}
+                    </small>
+                  </strong>
                   <span>
                     {row.due_odometer !== null && row.due_odometer !== undefined
                       ? number(row.due_odometer) + " км"

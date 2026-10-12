@@ -34,7 +34,7 @@ def run(folder):
         output = folder / "page"
         result = subprocess.run(
             [renderer, "-f", str(request["page"]), "-l", str(request["page"]),
-             "-singlefile", "-scale-to", "2100", "-png", str(source), str(output)],
+             "-singlefile", "-scale-to", "3000", "-png", str(source), str(output)],
             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=12,
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
         )

@@ -79,6 +79,9 @@ test("English mobile expense keeps user text and syncs once after offline reload
 });
 
 test("real account locale changes offline, persists after sync and preserves vehicle names", async ({ page, context }) => {
+  // Slower devices exposed an uncached lazy-settings import after going offline.
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("Emulation.setCPUThrottlingRate", { rate: 6 });
   const setup = await page.request.get("/api/v1/setup");
   const login = await page.request.post((await setup.json()).required ? "/api/v1/setup" : "/api/v1/login", {
     headers: { "X-Forwarded-For": "198.51.100.62" },
@@ -117,6 +120,26 @@ test("real account locale changes offline, persists after sync and preserves veh
   await expect(page.getByRole("button", { name: "Download full backup", exact: true })).toBeVisible();
   await page.getByLabel("Язык / Language", { exact: true }).selectOption("ru");
   await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("ru");
+});
+
+test("previously unvisited settings and analytics modules open offline", async ({ page, context }) => {
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  await page.goto("/");
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("en");
+  await page.getByRole("button", { name: "Explore the demo garage" }).click();
+  await expect(page.getByRole("heading", { name: "My garage", exact: true })).toBeVisible();
+  await page.evaluate(async () => { await navigator.serviceWorker.ready; });
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "My garage", exact: true })).toBeVisible();
+  await context.setOffline(true);
+  await page.locator(".sidebar").getByRole("button", { name: "Settings", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("ru");
+  await expect(page.getByRole("heading", { name: "Настройки", exact: true })).toBeVisible();
+  await page.locator(".sidebar").getByRole("button", { name: "Аналитика", exact: true }).click();
+  await expect(page.locator(".page-heading")).toBeVisible();
+  expect(errors).toEqual([]);
 });
 
 for (const locale of ["en", "ru"] as const) {

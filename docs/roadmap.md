@@ -41,12 +41,39 @@ Maintenance changes and their automated coverage; see Releases/Actions for verif
 | Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |
 | Next | Output localization | English/Russian PDF/export labels and notifications, unchanged user content |
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
+| Planned | Interactive body damage map | Panel/point markers, photos, repair status and linked service history; details below |
 | Planned | Larger backup archives | Bounded-memory streaming and verified restore beyond the current 200 MiB limit |
 | Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |
 | Later | Natural-language search | Local processing, permissions, measured resource budget |
 | Later | Expense bot and OBD-II | Optional owner-configured components, confirmed writes |
 | Later | Passkeys and more languages | Preserve existing login/data |
 | Research | VIN / compatible parts | Licensed sources and proven fitment; details below |
+
+## Planned: interactive body damage map
+
+An optional visual condition record in each vehicle profile, designed for mobile use.
+This is planned work, not an available feature.
+
+- Select a body panel or place a marker on front, rear, left, right and top views;
+  support multiple damage records on the same panel. Start with a clear generic
+  vehicle outline rather than requiring model-specific illustrations.
+- Record scratches, dents, paint chips, corrosion, cracks and other exterior damage,
+  with date, optional mileage, notes, photos and owner-assessed severity.
+- Track status: observed, needs repair, planned, repaired or monitoring. Use labels
+  and icons as well as colors; provide an accessible list alongside the diagram.
+- Link a repair to an existing maintenance event, service/location, documents and
+  before/after photos. Keep estimates separate from actual expenses; linking a
+  record must never count an expense twice or create a payment automatically.
+- Preserve the damage and repair history after completion, vehicle sale or archive;
+  distinguish current unresolved issues from past repairs.
+- Store records and images locally with vehicle access controls, complete export,
+  backup/restore and compatibility-preserving migrations. Support offline text/marker
+  edits with idempotent sync; clearly show photos awaiting an online upload.
+
+Acceptance: on a 360 px screen, mark two separate issues on one panel, attach photos,
+filter unresolved issues, link one confirmed repair and retain its original history.
+Automated checks must cover authorization, offline replay without duplicates,
+financial linkage, backup/restore and upgrades preserving existing garages.
 
 ## Roadmap maintenance
 

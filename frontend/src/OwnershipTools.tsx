@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { lazy, Suspense, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   CircleDot,
@@ -16,6 +16,8 @@ import type { RecordBase, Mutation } from "./types";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { Empty, EventRow, PageHeading } from "./Views";
+
+const BankImport = lazy(() => import("./BankImport"));
 
 type Entity = "tire_set" | "budget" | "recurring_cost";
 type Interval = {
@@ -718,7 +720,18 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
           description="Инструменты владения привязаны к вашему автомобилю."
         />
       ) : visibleTab === "import" ? (
-        <CSVImport key={selected} />
+        <>
+          <Suspense
+            fallback={
+              <p role="status" className="muted">
+                Загружаем проверку выписок…
+              </p>
+            }
+          >
+            <BankImport key={`bank-${selected}`} />
+          </Suspense>
+          <CSVImport key={selected} />
+        </>
       ) : visibleTab === "tires" ? (
         <>
           <PageHeading

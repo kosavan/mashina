@@ -1,4 +1,303 @@
 @import "tailwindcss";
+
+.bank-intro {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.bank-intro h3 {
+  margin: 6px 0 10px;
+  font-size: 23px;
+  letter-spacing: -0.7px;
+}
+.bank-intro p {
+  margin: 0;
+  max-width: 620px;
+  line-height: 1.65;
+}
+.bank-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  color: var(--accent);
+  background: var(--panel-2);
+  flex-shrink: 0;
+}
+.bank-flow {
+  gap: 20px;
+}
+.bank-field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.bank-flow form {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+.bank-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.bank-steps span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.bank-steps b {
+  width: 25px;
+  height: 25px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+}
+.bank-steps .active {
+  color: var(--text);
+}
+.bank-steps .active b {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+.bank-car {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.bank-car strong {
+  font-size: 20px;
+  letter-spacing: -0.5px;
+}
+.bank-car span {
+  color: var(--muted);
+  font-size: 12px;
+}
+.bank-privacy,
+.bank-overlap {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+.bank-privacy svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.bank-privacy p,
+.bank-overlap p {
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 0;
+}
+.bank-section-title {
+  margin: 6px 0 -8px;
+}
+.bank-review-heading {
+  display: grid;
+  gap: 6px;
+}
+.bank-review-heading h3 {
+  margin: 0;
+  font-size: 23px;
+  letter-spacing: -0.7px;
+}
+.bank-review-heading span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.bank-rows {
+  display: grid;
+  gap: 14px;
+}
+.bank-row {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--panel-2);
+}
+.bank-row header {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.bank-row header span {
+  font-size: 12px;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.bank-row header strong {
+  font-size: 21px;
+  letter-spacing: -0.7px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+.bank-description {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.5;
+  font-weight: 600;
+  margin: 14px 0 18px;
+}
+.bank-row label {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+}
+.bank-row select,
+.bank-row input,
+.bank-row textarea {
+  width: 100%;
+  min-width: 0;
+}
+.bank-edit {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+.bank-linked {
+  color: var(--accent);
+  font-size: 12px;
+  display: flex;
+  gap: 7px;
+  align-items: center;
+  line-height: 1.6;
+}
+.bank-linked svg {
+  flex-shrink: 0;
+}
+.bank-row.processed {
+  background: var(--panel);
+}
+.bank-overlap {
+  margin-top: 14px;
+  display: grid;
+  padding: 12px;
+}
+.bank-row .check-field {
+  display: flex;
+}
+.bank-row .check-field input {
+  width: 20px;
+  flex-shrink: 0;
+}
+.bank-totals {
+  display: grid;
+  gap: 7px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--panel-2);
+}
+.bank-totals > span {
+  font-size: 12px;
+  color: var(--muted);
+}
+.bank-totals strong {
+  font-size: 30px;
+  letter-spacing: -1px;
+  overflow-wrap: anywhere;
+}
+.bank-totals small {
+  color: var(--muted);
+  line-height: 1.6;
+  margin-top: 4px;
+}
+.bank-confirm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.bank-confirm-grid span {
+  display: grid;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.bank-confirm-grid strong {
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--text);
+}
+.bank-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.bank-pagination span {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.bank-export {
+  display: grid;
+  gap: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.bank-export small {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.bank-export .button {
+  white-space: normal;
+}
+.bank-success {
+  display: grid;
+  justify-items: start;
+  gap: 16px;
+  padding: 18px 0;
+}
+.bank-success h3,
+.bank-success p {
+  margin: 0;
+  line-height: 1.6;
+}
+@media (max-width: 700px) {
+  .bank-intro {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 14px;
+    padding: 20px;
+  }
+  .bank-intro > .button {
+    grid-column: 1 / -1;
+  }
+  .bank-intro h3 {
+    font-size: 21px;
+  }
+  .bank-row {
+    padding: 16px;
+  }
+  .bank-steps {
+    font-size: 10px;
+  }
+  .bank-steps span {
+    gap: 4px;
+  }
+  .bank-row header strong {
+    font-size: 19px;
+  }
+}
 @theme {
   --font-sans:
     "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;

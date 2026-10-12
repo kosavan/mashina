@@ -38,6 +38,53 @@ test("demo, analytics, documents and isolated reset", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "Важные бумаги — всегда рядом" }),
   ).toBeVisible();
+  const originalDemo = await (await page.request.get("/api/v1/state")).json();
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Обслуживание", exact: true })
+    .click();
+  await page.getByRole("tab", { name: "Импорт", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Проверить выписку", exact: true })
+    .click();
+  const bank = page.getByRole("dialog");
+  await bank.getByLabel("Банковский CSV", { exact: true }).setInputFiles({
+    name: "invented-demo.csv",
+    mimeType: "text/csv",
+    buffer: Buffer.from(
+      "Дата;Сумма;Описание;ID\n01.10.2026;-1,23;Демонстрационная мойка;demo-bank-1\n",
+    ),
+  });
+  await bank.getByRole("button", { name: "Прочитать столбцы" }).click();
+  await bank.getByLabel("Дата операции", { exact: true }).selectOption("Дата");
+  await bank
+    .getByLabel("Сумма операции", { exact: true })
+    .selectOption("Сумма");
+  await bank
+    .getByLabel("Описание операции", { exact: true })
+    .selectOption("Описание");
+  await bank
+    .getByLabel("ID операции банка", { exact: true })
+    .selectOption("ID");
+  await bank
+    .getByLabel("Название источника", { exact: true })
+    .fill("Вымышленный банк");
+  await bank.getByRole("button", { name: "Показать операции" }).click();
+  await bank
+    .getByLabel("Решение для операции 1", { exact: true })
+    .selectOption("create");
+  await bank.getByRole("button", { name: "Проверить итог" }).click();
+  await bank.getByRole("button", { name: "Подтвердить импорт" }).click();
+  await expect(
+    bank.getByRole("heading", { name: "История обновлена" }),
+  ).toBeVisible();
+  const updatedDemo = await (await page.request.get("/api/v1/state")).json();
+  expect(updatedDemo.events).toHaveLength(originalDemo.events.length + 1);
+  expect(
+    updatedDemo.events.find(
+      (e: any) => e.description === "Демонстрационная мойка",
+    ).amount_minor,
+  ).toBe(123);
   expect(errors).toEqual([]);
 });
 

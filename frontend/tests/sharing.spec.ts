@@ -70,14 +70,15 @@ test("local accounts, driver UI and revoked offline drafts remain isolated", asy
 
 test("owner can create an account and grant access through polished sheets", async ({ page, request }) => {
   const logged = await request.post("/api/v1/login", { data: { username: "browser-owner", password: "browser-test-password" } });
+  expect(logged.ok()).toBeTruthy();
   const owner = await logged.json();
   const carResponse = await request.post("/api/v1/mutate", { headers: { "X-CSRF-Token": owner.csrf }, data: { operation_id: randomUUID(), id: randomUUID(), entity: "vehicle", action: "create", data: { name: "Доступ через интерфейс" } } });
   expect(carResponse.ok()).toBeTruthy();
   const car = (await carResponse.json()).record;
+  // Reuse this authenticated setup session; this journey tests account/grant sheets.
+  await page.context().addCookies((await request.storageState()).cookies);
   await page.goto("/");
-  await page.getByLabel("Имя пользователя", { exact: true }).fill("browser-owner");
-  await page.getByLabel("Пароль", { exact: true }).fill("browser-test-password");
-  await page.getByRole("button", { name: "Войти в гараж", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "Мой гараж", exact: true })).toBeVisible();
   await page.locator(".sidebar").getByRole("button", { name: "Настройки", exact: true }).click();
   await page.getByRole("button", { name: "Пользователи", exact: true }).click();
   const name = "ui-driver-"+randomUUID().slice(0,8);

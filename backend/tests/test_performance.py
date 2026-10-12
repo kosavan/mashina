@@ -45,5 +45,43 @@ def test_migration_restart_preserves_history(tmp_path):
     store.close()
     reopened = Store(tmp_path)
     assert reopened.state(owner)["vehicles"][0]["id"] == car["id"]
-    assert reopened.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "004"
+    assert reopened.query("SELECT version_num FROM alembic_version")[0]["version_num"] == "005"
     reopened.close()
+
+
+def test_bank_1000_rows_against_10000_equal_amount_events(client):
+    """Worst same-amount/day bucket: matching must not scan 10K events per row."""
+    import json
+    from backend.tests.test_api import mutate
+    from backend.tests.test_bank_import import source, preview
+
+    car = mutate(client, "vehicle", {"name": "Performance"}).json()["record"]["id"]
+    sid = source(client, car)
+    actor = client.app.state.store.query("SELECT id FROM users WHERE username='owner'")[0]["id"]
+    data = json.dumps(
+        {
+            "kind": "expense",
+            "amount_minor": 10001,
+            "currency": "RUB",
+            "occurred_at": "2026-10-01",
+            "description": "Synthetic",
+        }
+    )
+    with client.app.state.store.transaction() as c:
+        c.exec_driver_sql(
+            "INSERT INTO events(id,owner_id,version,data,vehicle_id,created_by) VALUES(?,?,1,?,?,?)",
+            [(str(uuid.uuid4()), actor, data, car, actor) for _ in range(10000)],
+        )
+    content = (
+        "date,amount,description,id\n"
+        + "".join(f"2026-10-01,-100.01,Synthetic,{i}\n" for i in range(1000))
+    ).encode()
+    started = time.perf_counter()
+    response = preview(client, car, sid, content)
+    elapsed = time.perf_counter() - started
+    assert response.status_code == 200, response.text
+    assert len(response.json()["rows"]) == 1000
+    assert all(
+        r["candidate_count"] == 10000 and len(r["candidates"]) == 5 for r in response.json()["rows"]
+    )
+    assert elapsed < 2.0, f"Bank review 1000×10000: {elapsed:.3f}s exceeds budget"

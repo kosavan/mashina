@@ -81,6 +81,7 @@ def _restore_backup(store, blob):
                     "002",
                     "003",
                     "004",
+                    "005",
                 }:
                     raise ValueError("Версия архива несовместима")
                 revision = check.execute("SELECT version_num FROM alembic_version").fetchone()[0]
@@ -140,7 +141,12 @@ def _restore_backup(store, blob):
 
                 for (data,) in check.execute("SELECT data FROM reminders"):
                     normalize_reminder(json.loads(data))
-                if revision == "004":
+                if revision == "005":
+                    from backend.bank_archive import validate_bank_archive
+
+                    validate_bank_archive(check)
+                    check.execute("DELETE FROM bank_preview_batches")
+                if revision in {"004", "005"}:
                     from backend.notifications import validate_notification_archive
 
                     validate_notification_archive(check)

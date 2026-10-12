@@ -30,6 +30,7 @@ from backend.access import vehicle_access, upload_access, attachment_access
 from backend.accounts import install_accounts, require_admin
 from backend.reports import ReportOptions, report_snapshot, render_report, RENDER_LOCK
 from backend.notifications import install_notifications
+from backend.bank_api import install_bank
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -591,6 +592,7 @@ def create_app(data_path=None, bootstrap_token=None):
         return {"ok": True, "login_required": True}
 
     install_notifications(app, session, throttle)
+    install_bank(app, session, throttle)
 
     install_accounts(app, session, HASHER, login_response, throttle)
 

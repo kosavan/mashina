@@ -130,6 +130,25 @@ test("real account locale changes offline, persists after sync and preserves veh
   await expect(page.getByRole("button", { name: "Download full backup", exact: true })).toBeVisible();
   await page.getByLabel("Язык / Language", { exact: true }).selectOption("ru");
   await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("ru");
+  // Deterministically reconnect while the old offline sync request is still failing.
+  // The online trigger must be serialized rather than silently discarded.
+  await context.setOffline(true);
+  let release!: () => void;
+  let started!: () => void;
+  const held = new Promise<void>(resolve => { release = resolve; });
+  const requested = new Promise<void>(resolve => { started = resolve; });
+  await page.route("**/api/v1/mutate", async route => {
+    started();
+    await held;
+    await route.abort("internetdisconnected");
+  }, { times: 1 });
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("en");
+  await expect(page.getByRole("heading", { name: "Settings", exact: true })).toBeVisible();
+  await requested;
+  await context.setOffline(false);
+  await page.evaluate(() => window.dispatchEvent(new Event("online")));
+  release();
+  await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("en");
 });
 
 test("previously unvisited settings and analytics modules open offline", async ({ page, context }) => {

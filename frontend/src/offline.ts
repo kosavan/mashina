@@ -248,13 +248,26 @@ export async function enqueue(
   navigator.storage?.persist?.().catch(() => {});
   return next;
 }
-let syncing = false;
+let syncRun: Promise<void> | undefined;
 export async function synchronize(
   session: Session,
   onChange: (state: State, queue: Mutation[]) => void,
 ) {
-  if (syncing) return;
-  syncing = true;
+  // A reconnect must not be discarded while an offline request is still failing.
+  // Serialize callers, then check the durable queue again with current connectivity.
+  while (syncRun) await syncRun;
+  const run = synchronizeOnce(session, onChange);
+  syncRun = run;
+  try {
+    await run;
+  } finally {
+    if (syncRun === run) syncRun = undefined;
+  }
+}
+async function synchronizeOnce(
+  session: Session,
+  onChange: (state: State, queue: Mutation[]) => void,
+) {
   try {
     const run = async () => {
       // Refresh authorization before projecting or sending previously queued drafts.
@@ -306,8 +319,6 @@ export async function synchronize(
     // Network errors leave the durable queue untouched. API errors are surfaced on refresh.
     if (!(error instanceof APIError) && navigator.onLine)
       console.debug("MASHINA sync deferred");
-  } finally {
-    syncing = false;
   }
 }
 export async function resolveOperation(

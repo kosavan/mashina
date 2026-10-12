@@ -6,6 +6,7 @@ Maintenance audit, safe updates and a living bilingual roadmap.
 - Preserve unrelated and future preferences on partial settings updates; language changes send only their own field.
 - Before an installed schema upgrades, retain a private full recovery snapshot. Refuse newer/unknown/unversioned existing schemas without resetting data.
 - Test actual Alembic upgrades for every supported schema 001–006 and retain immutable fingerprints of released migrations.
+- Serialize overlapping offline/reconnect synchronization requests so pending records are not stranded.
 - Serve bundled fonts as local files compatible with the existing self-only font policy.
 - Publish shipped/planned/research roadmap, complete English user guides with separate Russian versions, and update/rollback walkthroughs for Linux, macOS and Windows.
 - Extend CI with English documentation/link checks and a real production-container restore drill. Include the prior offline lazy-module caching fix.

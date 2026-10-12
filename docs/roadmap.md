@@ -31,6 +31,7 @@ Maintenance changes and their automated coverage; see Releases/Actions for verif
 - Refuse unknown/newer schemas; snapshot before changing an installed schema.
 - Separate English/Russian guides and document backup, update and rollback.
 - Complete regression, production-container restore and release audit.
+- Preserve reconnect triggers that overlap an unfinished offline synchronization.
 - Serve bundled fonts as local files compatible with the existing CSP.
 
 ## Prioritized plan

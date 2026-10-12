@@ -26,6 +26,8 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: uv sync --frozen --extra dev
       - run: uv run python tools/check_secrets.py
+      - name: Local OCR engine and PDF renderer
+        run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng poppler-utils
       - run: uv run ruff check backend && uv run pytest -q
       - run: npm ci --no-audit --no-fund
         working-directory: frontend
@@ -43,3 +45,20 @@ jobs:
           done
           docker logs mashina-check
           exit 1
+      - name: Local OCR inside the non-root production container
+        run: |
+          docker exec -i mashina-check /app/.venv/bin/python - <<'PY'
+          import io
+          from PIL import Image, ImageDraw, ImageFont
+          from backend.ocr import recognize
+          image = Image.new('RGB', (1400, 500), 'white')
+          font = ImageFont.truetype('backend/assets/fonts/Manrope-Regular.ttf', 40)
+          ImageDraw.Draw(image).text((60, 40), 'TOTAL 1234.56', fill='black', font=font)
+          for format in ('PNG', 'PDF'):
+              buffer = io.BytesIO()
+              image.save(buffer, format=format, resolution=150)
+              result = recognize(buffer.getvalue(), 'receipt', 1)
+              assert result['engine'] == 'tesseract-local'
+              assert result['fields']['amount'] == '1234.56', result
+          print('Production container: actual image and PDF OCR passed')
+          PY

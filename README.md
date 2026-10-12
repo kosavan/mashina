@@ -29,7 +29,7 @@ Sharing, budgets, sale-history PDFs and reviewed CSV imports are included. Notif
 
 ## Try it before adding your own data
 
-Start MASHINA and choose **«Посмотреть демогараж»** on the welcome screen. Explore two fictional vehicles, costs, fuel, tires and service history. Each demo session has its own temporary database and files, isolated from your real garage.
+Start MASHINA and choose **Explore the demo garage** (select English first) on the welcome screen. Explore two fictional vehicles, costs, fuel, tires and service history. Each demo session has its own temporary database and files, isolated from your real garage.
 
 <details>
 <summary>See the actual garage and analytics</summary>
@@ -63,7 +63,7 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · local attachments. A modul
 
 **[Development & tests](docs/development.md)** · **[Architecture](specs/001-mashina-platform)** · **[Fuel capture](docs/fuel-capture.md)** · **[Tires & service locations](docs/tires-and-locations.md)** · **[API & MCP](docs/machine-access.md)**
 
-Receipt recognition, natural-language history search, an expense-entry bot and OBD-II are still future work. They are not hidden behind working-looking controls.
+[Roadmap](docs/roadmap.md): fully local OCR for receipts, workshop invoices, dashboard photos and arbitrary screenshots; then natural-language history search, an expense-entry bot and OBD-II. [Local text OCR](docs/local-ocr.md) is included: inspect and explicitly apply recognized fields before saving. Multi-page workshop tables and specialized dashboard recognition remain follow-ups.
 
 Built with [Spec Kit](https://github.com/github/spec-kit); identity developed with [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), infographic authored with [Hyperframes](https://github.com/heygen-com/hyperframes).
 

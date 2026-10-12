@@ -16,6 +16,7 @@ RUN curl --fail --location --retry 3 https://www.sqlite.org/2026/sqlite-autoconf
     && make -j2 && make install
 
 FROM python:3.14-slim-bookworm AS app
+RUN apt-get update && apt-get install -y --no-install-recommends tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng poppler-utils && rm -rf /var/lib/apt/lists/*
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 MASHINA_DATA=/app/data MASHINA_PRODUCTION=1 LD_LIBRARY_PATH=/opt/sqlite/lib
 COPY --from=sqlite /opt/sqlite/lib/ /opt/sqlite/lib/
 COPY --from=ghcr.io/astral-sh/uv:0.9.4 /uv /usr/local/bin/uv

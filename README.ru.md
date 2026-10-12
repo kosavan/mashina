@@ -62,7 +62,7 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · локальные вло�
 
 **[Разработка и тесты](docs/development.md)** · **[Архитектура](specs/001-mashina-platform)** · **[Как быстрее заводить заправки](docs/fuel-capture.md)** · **[Шины и адреса сервисов](docs/tires-and-locations.md)** · **[API / MCP](docs/machine-access.md)**
 
-Распознавание чеков, поиск по истории обычным языком, бот внесения расходов и OBD-II пока не реализованы. Незавершённые функции не выдаются за готовые.
+[Роудмап](docs/roadmap.md): полностью локальный OCR чеков, счетов мастерских, приборки и произвольных скриншотов; затем поиск по истории, бот внесения расходов и OBD-II. [Локальный текстовый OCR](docs/local-ocr.md) уже включён: проверьте и выберите поля перед сохранением. Многостраничные таблицы и специализированное распознавание приборки остаются в плане.
 
 Разработка через [Spec Kit](https://github.com/github/spec-kit); логотип — с [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), инфографика — с [Hyperframes](https://github.com/heygen-com/hyperframes).
 

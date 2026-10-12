@@ -1,4 +1,4 @@
-# Как проверить MASHINA 1.4
+# Как проверить MASHINA 1.5
 
 ## Выбор языка
 
@@ -29,7 +29,7 @@
 ```sh
 docker version
 docker compose version
-git clone --branch v1.4.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 cd mashina-test
 cp .env.example .env
 mkdir -p data
@@ -72,7 +72,7 @@ Set-Location "$env:USERPROFILE\mashina-testing"
 docker version
 docker compose version
 git --version
-git clone --branch v1.4.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 Set-Location mashina-test
 Copy-Item .env.example .env
 New-Item -ItemType Directory -Force data | Out-Null
@@ -151,7 +151,7 @@ http://localhost:8000 в браузере ноутбука. `Ctrl+C` закры�
 Нужны Git, Docker Engine и Docker Compose на Linux. Команды выполняются на сервере:
 
 ```sh
-git clone --branch v1.4.0 --depth 1 https://github.com/kosavan/mashina.git
+git clone --branch v1.5.0 --depth 1 https://github.com/kosavan/mashina.git
 cd mashina
 cp .env.example .env
 mkdir -p data
@@ -280,10 +280,25 @@ iPhone и доставки внешних уведомлений.
 - «ТО → Дополнительные поля»: адрес и пара координат; карта не загружается до нажатия.
 - [Быстрое внесение заправок](fuel-capture.md), [шины и места обслуживания](tires-and-locations.md).
 
+## Новое в 1.5: локальное распознавание
+
+В Docker нужные движки уже включены. В форме заправки, расхода, ТО или пробега
+нажмите «Распознать фото или PDF». Для первой пробы используйте вымышленный чек
+с явно напечатанными «ИТОГО», датой и суммой либо скриншот без личных данных.
+Выберите подходящий режим: чек, заказ-наряд, приборка или произвольный скриншот.
+Для PDF укажите одну страницу. Проверьте распознанный текст, исправьте значения и
+отметьте только проверенные поля. Перенос обновляет черновик; запись появляется
+только после обычного «Сохранить». Полный бак подтверждается отдельно.
+
+Проверьте отмену без изменения исходного черновика, отсутствие лишнего вложения
+и сохранение ровно одной записи. Прикрепление исходника включается отдельно.
+Повторите без сети: OCR попросит подключиться к вашему серверу, ручной офлайн-ввод
+останется доступным. Подробные ограничения и установка движков при запуске без
+Docker: [local-ocr.md](local-ocr.md).
+
 ## Что пока не готово
 
-- Распознавание чеков/заказ-нарядов и подтверждение AI-черновика: внутренние модули
-  сохранены отдельно в ветке `codex/mashina-document-review`, в релиз не включены.
+- Универсальное AI-понимание документов, многостраничные позиции заказ-нарядов и специализированное чтение семисегментной приборки. Локальный текстовый OCR уже доступен; [инструкция](local-ocr.md).
 - Поиск по истории естественным языком.
 - Telegram-бот для внесения расходов; уже имеющиеся Telegram-напоминания — отдельная функция.
 - OBD-II-компонент и получение показаний с оборудования.

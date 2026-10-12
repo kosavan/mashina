@@ -20,6 +20,10 @@
 
 ## A garage worth keeping up to date
 
+MASHINA is a modern, open-source, self-hosted vehicle maintenance tracker and car
+logbook. Keep service history, repairs, mileage, fuel and expenses on your own
+server, with a mobile-friendly interface and private local storage.
+
 - **Every vehicle, one history.** Photos, ownership, mileage, service, parts and private documents.
 - **Quick fuel and expense entry.** Exact money, itemized costs, receipts and vehicle-specific defaults.
 - **Analytics you can trust.** Full-to-full fuel consumption, separate purchase/sale values and clear missing-data states.
@@ -59,6 +63,51 @@ docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
 Open **http://localhost:8000**. Your data live in **./data**. Use HTTPS for remote access and iPhone PWA installation.
 
 **[Full deployment & backup guide](docs/self-hosting.md)** · **[macOS Terminal / Windows PowerShell](docs/testing-release.md)**
+
+## Questions from car owners
+
+### How do I track car maintenance?
+
+Add your vehicle, then record each service with its date, odometer reading, parts
+and cost. Attach receipts, review the history and set date or mileage reminders.
+See the [installation guide](docs/self-hosting.md) to start your own garage.
+
+### How do I remember when I last changed my oil?
+
+Save the oil change as a service entry and search your vehicle history for it.
+The recorded date, mileage and parts stay together. Set the next reminder using
+your vehicle's service schedule; estimated mileage is not a measured reading.
+
+### Is this a self-hosted alternative to vehicle maintenance apps?
+
+Yes. MASHINA runs on your own computer or server with Docker. It stores your
+garage in SQLite and local files, supports complete backups and includes a
+phone-friendly PWA. You manage HTTPS and backups. Some actions, including photo
+uploads, require a connection; physical iPhone validation remains open.
+
+### MASHINA and LubeLogger
+
+Both projects cover self-hosted maintenance and fuel tracking. Compare the
+workflows you actually need, rather than assuming feature parity.
+
+| Consideration | MASHINA | LubeLogger |
+|---|---|---|
+| Main stack | React / FastAPI / SQLite | ASP.NET Core; LiteDB and PostgreSQL dependencies |
+| Installation | Docker; see our hosting guide | Docker image or standalone Windows executable |
+| Try it | Isolated fictional demo inside your installation | Public hosted demo linked from its README |
+| License | MIT | MIT |
+
+MASHINA emphasizes a mobile PWA, durable offline entries, a body-damage map and
+dedicated tire history. This does not assert that LubeLogger lacks those features.
+LubeLogger facts were checked against its
+[official repository](https://github.com/hargata/lubelog) on 2026-10-12; consult
+its current documentation before choosing. There is no direct LubeLogger importer
+promised here; review CSV mappings and keep your original data when migrating.
+
+## License
+
+MASHINA's original code is available under the [MIT license](LICENSE).
+Third-party components and assets retain their respective licenses.
 
 ## Under the hood
 

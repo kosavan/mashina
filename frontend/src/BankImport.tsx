@@ -137,7 +137,11 @@ export default function BankImport() {
         );
       await action();
     } catch (err) {
-      setError((err as Error).message);
+      setError(
+        err instanceof TypeError
+          ? "Не удалось связаться с сервером. Повторите запрос: решения остались на экране."
+          : (err as Error).message,
+      );
     } finally {
       setBusy(false);
     }

@@ -156,7 +156,9 @@ test("mobile bank mapping links fuel, creates once, and retries a lost response 
     } else await route.fulfill({ response });
   });
   await sheet.getByRole("button", { name: "Подтвердить импорт" }).click();
-  await expect(sheet.getByRole("alert")).toBeVisible();
+  await expect(sheet.getByRole("alert")).toContainText(
+    "Не удалось связаться с сервером",
+  );
   await sheet.getByRole("button", { name: "Подтвердить импорт" }).click();
   await expect(
     sheet.getByRole("heading", { name: "История обновлена" }),

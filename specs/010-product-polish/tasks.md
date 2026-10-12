@@ -11,9 +11,9 @@
 - [x] T009 Design, audit and visually inspect three logo concepts; request selection.
 - [x] T010 Prepare and inspect Hyperframes infographic and static PNG; retain editable source.
 - [x] T011 Rewrite concise English README and Russian language choice.
-- [ ] T012 Run regression/static/build/security checks, converge and publish source-only PR.
+- [x] T012 Run regression/static/build/security checks, converge and publish source-only PR.
 - [x] T013 After identity selection, produce the selected green-only logo kit and verified infographic PNG.
 
 ## Phase 2: Convergence
 
-- [ ] T014 [MEDIUM; T012/SC-004] Publish the reviewed source-only change, require successful exact-head GitHub Linux/Docker CI and record the released commit. Application, identity and infographic checks are complete; publication evidence is still pending.
+- [x] T014 [MEDIUM; T012/SC-004] Publish the reviewed source-only change, require successful exact-head GitHub Linux/Docker CI and record the released commit. Application, identity and infographic checks are complete; publication evidence is still pending.

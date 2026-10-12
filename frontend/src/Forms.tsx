@@ -81,6 +81,11 @@ export function RecordForm({
       "",
   );
   const vehicle = state.vehicles.find((v) => v.id === vehicleId);
+  const lastFuel = state.events
+    .filter(
+      (e) => !e.deleted && e.kind === "fuel" && e.vehicle_id === vehicleId,
+    )
+    .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))[0];
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -592,17 +597,25 @@ export function RecordForm({
                 </div>
                 <div className="field-grid">
                   <Field
+                    key={`fuel-${vehicleId}`}
                     label="Топливо"
                     name="fuel"
-                    value={record?.fuel || vehicle?.fuel || "АИ-95"}
+                    value={
+                      record?.fuel || lastFuel?.fuel || vehicle?.fuel || "АИ-95"
+                    }
                   />
-                  <Field label="АЗС" name="station" value={record?.station} />
+                  <Field
+                    key={`station-${vehicleId}`}
+                    label="АЗС"
+                    name="station"
+                    value={record?.station ?? lastFuel?.station}
+                  />
                 </div>
                 <label className="check-field">
                   <input
                     name="full"
                     type="checkbox"
-                    defaultChecked={record?.full ?? true}
+                    defaultChecked={record?.full ?? false}
                   />
                   Полный бак
                 </label>
@@ -617,6 +630,16 @@ export function RecordForm({
                 <p className="field-help">
                   Пропуск прерывает расчёт расхода до следующего полного бака.
                 </p>
+                <details>
+                  <summary>Записать по чеку или оплате</summary>
+                  <p className="field-help">
+                    Чек АЗС: перенесите литры и сумму, цену рассчитаем. Скрин
+                    оплаты: перенесите сумму, добавьте литры с колонки или чека.
+                    Пробег и полный бак подтвердите сами. Фото можно прикрепить
+                    ниже; оно останется на вашем сервере. Автоматического
+                    распознавания пока нет.
+                  </p>
+                </details>
               </>
             ) : type === "expense" || type === "maintenance" ? (
               <>
@@ -793,6 +816,25 @@ export function RecordForm({
                   value={record?.vendor}
                 />
                 <Field
+                  label="Адрес сервиса"
+                  name="service_address"
+                  value={record?.service_address}
+                />
+                <Field
+                  label="Широта сервиса"
+                  name="service_latitude"
+                  type="number"
+                  step="any"
+                  value={record?.service_latitude}
+                />
+                <Field
+                  label="Долгота сервиса"
+                  name="service_longitude"
+                  type="number"
+                  step="any"
+                  value={record?.service_longitude}
+                />
+                <Field
                   label="Способ оплаты"
                   name="payment"
                   value={record?.payment}
@@ -804,6 +846,10 @@ export function RecordForm({
                   value={record?.currency || "RUB"}
                 />
               </div>
+              <p className="field-help">
+                Адрес хранится локально. Координаты необязательны: добавьте их
+                парой для просмотра карты. Геокодирование не выполняется.
+              </p>
               <label className="check-field warning-text">
                 <input
                   type="checkbox"

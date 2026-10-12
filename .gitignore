@@ -25,3 +25,6 @@ Thumbs.db
 *.tsbuildinfo
 
 /test-results/
+.hyperframes/
+design/showcase/snapshots/
+design/showcase/meta.json

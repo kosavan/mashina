@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1600,height=900" />
+<title>MASHINA — Your garage. Your history.</title>
+<script src="assets/gsap.min.js"></script>
+<style>
+@font-face { font-family: Manrope; src: url('assets/manrope.woff2') format('woff2'); font-weight: 700; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 1600px; height: 900px; overflow: hidden; background: #101211; }
+#root { position: relative; width: 100%; height: 100%; overflow: hidden; color: #f4f6f1; font: 700 24px Manrope, sans-serif; }
+#scene { position: absolute; inset: 0; }
+.content { position: absolute; inset: 58px 64px; }
+.brand { width: 300px; height: 76px; object-fit: contain; object-position: left; }
+.topline { display: flex; justify-content: space-between; align-items: center; }
+.pill { font-size: 16px; letter-spacing: 3px; color: #c1ee79; border: 1px solid #59694c; padding: 15px 23px; border-radius: 99px; }
+.hero { display: grid; grid-template-columns: 570px 1fr; gap: 60px; margin-top: 50px; height: 398px; }
+h1 { font-size: 88px; line-height: 1.02; letter-spacing: -5px; margin: 0; max-width: 560px; }
+h1 span { color: #c1ee79; display: block; }
+.intro { font-size: 23px; line-height: 1.7; color: #b4beb0; margin: 24px 0 0; max-width: 520px; }
+.product { position: relative; align-self: start; border: 1px solid #45533d; padding: 8px; background: #191e18; border-radius: 20px; }
+.product img { display: block; width: 100%; height: 352px; object-fit: cover; object-position: center; border-radius: 13px; }
+.demo { display: flex; align-items: center; justify-content: space-between; padding: 10px 8px 3px; font-size: 12px; color: #b4beb0; letter-spacing: 1px; }
+.demo b { color: #c1ee79; }
+.stages { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
+.stage { border: 1px solid #414c3b; background: #191d18; border-radius: 20px; padding: 25px 28px; min-height: 158px; display: flex; gap: 22px; }
+.index { font-size: 16px; color: #c1ee79; padding-top: 4px; }
+h2 { font-size: 28px; letter-spacing: -1px; margin: 0 0 12px; }
+.stage p { color: #b4beb0; font-size: 17px; line-height: 1.6; margin: 0; max-width: 340px; }
+.footer { position: absolute; left: 64px; right: 64px; bottom: 36px; display: flex; justify-content: space-between; border-top: 1px solid #414c3b; padding-top: 19px; font-size: 15px; color: #b4beb0; }
+.footer strong { color: #c1ee79; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="mashina" data-width="1600" data-height="900" data-duration="6">
+<section id="scene">
+<div class="content">
+<div class="topline"><img class="brand" src="assets/logo.svg" alt="MASHINA" /><span class="pill">SELF-HOSTED · OPEN SOURCE</span></div>
+<div class="hero">
+<div class="promise"><h1>Your garage.<span>Your history.</span></h1><p class="intro">A personal home for every vehicle, every expense and every mile.</p></div>
+<div class="product"><img src="assets/garage.png" alt="Actual MASHINA garage screen with synthetic demo vehicles" /><div class="demo"><b>ACTUAL PRODUCT</b><span>ISOLATED DEMO · RUSSIAN UI</span></div></div>
+</div>
+<div class="stages">
+<article class="stage"><span class="index">01</span><div><h2>Capture.</h2><p>Fuel, costs and receipts. Record offline; sync when connected.</p></div></article>
+<article class="stage"><span class="index">02</span><div><h2>Understand.</h2><p>Real fuel cycles. Clear expenses. Ownership costs kept separate.</p></div></article>
+<article class="stage"><span class="index">03</span><div><h2>Maintain.</h2><p>Service history, tire measurements and reminders. All together.</p></div></article>
+</div>
+</div>
+<div class="footer"><strong>YOUR SERVER. YOUR DATA. YOUR RULES.</strong><span>Local database + files · Full backup &amp; restore · No required cloud</span></div>
+</section>
+</div>
+<script>
+const tl = gsap.timeline({ paused: true });
+tl.fromTo('.promise', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.6, ease: 'power2.out' }, 0.1);
+tl.fromTo('.product', { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.3);
+tl.fromTo('.stage', { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.15, ease: 'power2.out' }, 0.7);
+window.__timelines['mashina'] = tl;
+</script>
+</body>
+</html>

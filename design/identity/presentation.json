@@ -1,0 +1,40 @@
+{
+  "brand": "MASHINA",
+  "tagline": "Your garage. Your history. Your server.",
+  "brief": "A premium personal garage, local and private. Apex M selected by the owner; green-only final artwork.",
+  "adjectives": [
+    "personal",
+    "precise",
+    "premium",
+    "private"
+  ],
+  "industry": "software",
+  "brand_color": "#c1ee79",
+  "tile_color": "#101211",
+  "greyscale": false,
+  "final": true,
+  "round": 2,
+  "concepts": [
+    {
+      "name": "Apex M",
+      "symbol": "masters/mashina-symbol.svg",
+      "lockup": "masters/mashina-horizontal.svg",
+      "stacked": "masters/mashina-stacked.svg",
+      "avatar": "exports/mashina-symbol-app-icon.svg",
+      "symbol_on_tile": "masters/mashina-symbol.svg",
+      "symbol_on_dark": "masters/mashina-symbol.svg",
+      "lockup_on_dark": "masters/mashina-horizontal.svg",
+      "lockup_on_tile": "masters/mashina-horizontal.svg",
+      "idea": "Two journeys meet in one personal garage.",
+      "rationale": [
+        "One green mark at all sizes",
+        "Filled geometry with strong 45-degree diagonals",
+        "Outlined Manrope wordmark and local app icons"
+      ]
+    }
+  ],
+  "recommendation": "Approved Apex M, green-only artwork.",
+  "next_steps": [
+    "Use the exported green identity and follow usage.md."
+  ]
+}

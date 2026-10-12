@@ -1,4 +1,4 @@
-# Как проверить MASHINA 1.2
+# Как проверить MASHINA 1.3
 
 ## Быстрый осмотр
 
@@ -21,7 +21,7 @@
 ```sh
 docker version
 docker compose version
-git clone --branch v1.2.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.3.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 cd mashina-test
 cp .env.example .env
 mkdir -p data
@@ -64,7 +64,7 @@ Set-Location "$env:USERPROFILE\mashina-testing"
 docker version
 docker compose version
 git --version
-git clone --branch v1.2.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.3.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 Set-Location mashina-test
 Copy-Item .env.example .env
 New-Item -ItemType Directory -Force data | Out-Null
@@ -143,7 +143,7 @@ http://localhost:8000 в браузере ноутбука. `Ctrl+C` закры�
 Нужны Git, Docker Engine и Docker Compose на Linux. Команды выполняются на сервере:
 
 ```sh
-git clone --branch v1.2.0 --depth 1 https://github.com/kosavan/mashina.git
+git clone --branch v1.3.0 --depth 1 https://github.com/kosavan/mashina.git
 cd mashina
 cp .env.example .env
 mkdir -p data
@@ -263,6 +263,14 @@ npm run test:e2e
 включает API только для тестового сервера. CI дополнительно собирает Linux Docker
 и проверяет healthcheck. Успех автотестов не заменяет проверку установки на вашем
 iPhone и доставки внешних уведомлений.
+
+## Новое в 1.3: что проверить
+
+- Экран входа: автомобиль органично встроен в композицию; знак Apex M зелёный.
+- «Заправки → Графики и расход»: выбранный автомобиль и фильтр топлива сохраняются.
+- «Шины»: DOT, замеры, личный порог, редактирование; повторите создание без сети и синхронизацию.
+- «ТО → Дополнительные поля»: адрес и пара координат; карта не загружается до нажатия.
+- [Быстрое внесение заправок](fuel-capture.md), [шины и места обслуживания](tires-and-locations.md).
 
 ## Что пока не готово
 

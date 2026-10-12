@@ -16,6 +16,7 @@ import type { RecordBase, Mutation } from "./types";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { Empty, EventRow, PageHeading } from "./Views";
+import { TireHealth } from "./TireHealth";
 
 const BankImport = lazy(() => import("./BankImport"));
 
@@ -60,6 +61,23 @@ function ToolForm({
     record?.intervals || [],
   );
   const [dirty, setDirty] = useState(false);
+  const [measurements, setMeasurements] = useState<
+    {
+      id: string;
+      measured_at: string;
+      depth_mm: string;
+      notes: string;
+    }[]
+  >(
+    (record?.tread_measurements || []).map(
+      (m: {
+        id: string;
+        measured_at: string;
+        depth_tenths: number;
+        notes: string;
+      }) => ({ ...m, depth_mm: String(m.depth_tenths / 10) }),
+    ),
+  );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const car = state.vehicles.find((v) => v.id === selected);
@@ -93,7 +111,10 @@ function ToolForm({
               ...Object.fromEntries(new FormData(e.currentTarget)),
               vehicle_id: record?.vehicle_id || selected,
             };
-            if (entity === "tire_set") data.intervals = intervals;
+            if (entity === "tire_set") {
+              data.intervals = intervals;
+              data.tread_measurements = measurements;
+            }
             if (entity === "recurring_cost")
               data.enabled = (
                 e.currentTarget.elements.namedItem(
@@ -118,6 +139,117 @@ function ToolForm({
         </p>
         {entity === "tire_set" ? (
           <>
+            <div className="field-grid">
+              <label>
+                DOT самой старой шины
+                <input
+                  name="manufacture_code"
+                  defaultValue={record?.manufacture_code}
+                  pattern="[0-9]{4}"
+                  inputMode="numeric"
+                  maxLength={4}
+                  placeholder="3421 · неделя 34, 2021 год"
+                />
+                <small>
+                  Последние 4 цифры маркировки. Шины комплекта могут иметь
+                  разный возраст.
+                </small>
+              </label>
+              <label>
+                Ваш порог замены, мм
+                <input
+                  name="tread_threshold_mm"
+                  type="number"
+                  min="0.1"
+                  max="20"
+                  step="0.1"
+                  defaultValue={
+                    record?.tread_threshold_tenths
+                      ? record.tread_threshold_tenths / 10
+                      : ""
+                  }
+                  placeholder="По рекомендации производителя"
+                />
+                <small>
+                  Личный порог, не оценка безопасности и не правовой норматив.
+                </small>
+              </label>
+            </div>
+            <section className="tread-editor">
+              <h3>Измерения протектора</h3>
+              <p className="field-help">
+                Запишите наименьшую измеренную глубину по комплекту. Замер не
+                заменяет осмотр повреждений.
+              </p>
+              {measurements.map((m, i) => (
+                <div className="tread-row" key={m.id}>
+                  <label>
+                    Дата замера
+                    <input
+                      type="date"
+                      max={today()}
+                      required
+                      value={m.measured_at}
+                      onChange={(e) =>
+                        setMeasurements((rows) =>
+                          rows.map((r, j) =>
+                            j === i ? { ...r, measured_at: e.target.value } : r,
+                          ),
+                        )
+                      }
+                    />
+                  </label>
+                  <label>
+                    Минимум по комплекту, мм
+                    <input
+                      type="number"
+                      min="0"
+                      max="30"
+                      step="0.1"
+                      required
+                      value={m.depth_mm}
+                      onChange={(e) =>
+                        setMeasurements((rows) =>
+                          rows.map((r, j) =>
+                            j === i ? { ...r, depth_mm: e.target.value } : r,
+                          ),
+                        )
+                      }
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="icon-button"
+                    aria-label={`Удалить замер ${i + 1}`}
+                    onClick={() => {
+                      setDirty(true);
+                      setMeasurements((rows) => rows.filter((_, j) => j !== i));
+                    }}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setDirty(true);
+                  setMeasurements((rows) => [
+                    ...rows,
+                    {
+                      id: crypto.randomUUID(),
+                      measured_at: today(),
+                      depth_mm: "",
+                      notes: "",
+                    },
+                  ]);
+                }}
+              >
+                <Plus size={16} />
+                Добавить замер
+              </Button>
+            </section>
             <div className="field-grid">
               <label>
                 Марка шин
@@ -563,7 +695,13 @@ function CSVImport() {
   );
 }
 
-export default function OwnershipTools({ children }: { children: ReactNode }) {
+export default function OwnershipTools({
+  children,
+  tiresOnly = false,
+}: {
+  children?: ReactNode;
+  tiresOnly?: boolean;
+}) {
   const {
     state,
     selected,
@@ -574,7 +712,7 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
     setPage,
     queue,
   } = useApp();
-  const [tab, setTab] = useState("work");
+  const [tab, setTab] = useState(tiresOnly ? "tires" : "work");
   const visibleTab =
     state.vehicles.find((v) => v.id === selected)?.can_edit === false &&
     ["budget", "import"].includes(tab)
@@ -677,8 +815,10 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
           ]
             .filter(
               ([key]) =>
-                state.vehicles.find((v) => v.id === selected)?.can_edit !==
-                  false || !["budget", "import"].includes(key),
+                (!tiresOnly || key === "tires") &&
+                (state.vehicles.find((v) => v.id === selected)?.can_edit !==
+                  false ||
+                  !["budget", "import"].includes(key)),
             )
             .map(([key, label]) => (
               <button
@@ -775,6 +915,7 @@ export default function OwnershipTools({ children }: { children: ReactNode }) {
                   <h2>
                     {tire.brand} {tire.model}
                   </h2>
+                  <TireHealth tire={tire} />
                   <p className="muted">{tire.size || "Размер не указан"}</p>
                   <div className="tire-distance">
                     <strong>

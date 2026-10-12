@@ -116,6 +116,17 @@ def normalize_event(data):
     r["currency"] = currency(r.get("currency"))
     for key in ("description", "vendor", "payment", "tags", "station", "fuel", "category"):
         r[key] = text(r.get(key), maximum=4000 if key == "description" else 300)
+    r["service_address"] = text(r.get("service_address"), maximum=500)
+    lat, lon = r.get("service_latitude"), r.get("service_longitude")
+    if (lat not in (None, "")) != (lon not in (None, "")):
+        raise ValueError("Для точки сервиса укажите и широту, и долготу")
+    if lat not in (None, ""):
+        lat, lon = decimal(lat, "Широта"), decimal(lon, "Долгота")
+        if not -90 <= lat <= 90 or not -180 <= lon <= 180:
+            raise ValueError("Координаты сервиса вне допустимого диапазона")
+        r["service_latitude"], r["service_longitude"] = str(lat), str(lon)
+    else:
+        r["service_latitude"], r["service_longitude"] = None, None
     r["odometer"] = integer(r["odometer"]) if r.get("odometer") not in (None, "") else None
     if r["kind"] in {"fuel", "odometer"} and r["odometer"] is None:
         raise ValueError("Для этой записи нужен пробег")

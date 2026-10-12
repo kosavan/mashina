@@ -12,7 +12,7 @@ dependency advisories. This is a regression/code review, not an independent pene
 | Initial file swaps were outside recovery handling | A failed second rename could leave the live DB displaced | Guard all swaps; four injected failures preserve original files/history |
 | Partial settings replaced all preferences | Language updates could drop other saved/future settings | Merge allowed fields into stored settings; frontend sends only locale |
 | Startup migration had no pre-upgrade snapshot/explicit future-schema guard | Recovery and downgrade errors were unclear | Snapshot installed schemas before change; refuse unknown/newer/unversioned databases |
-| Reconnect could overlap an unfinished offline sync | Online trigger was discarded, leaving a draft pending | Serialize sync requests; deterministic held-request browser regression |
+| Reconnect could overlap an unfinished offline sync | Online trigger was discarded, leaving a draft pending | Serialize sync requests and reconcile connectivity on session subscription; deterministic held-request browser regression |
 | Small fonts were inlined despite self-only font CSP | Browser blocked some bundled fonts | File assets with unchanged CSP; browser console regression |
 | English README linked to Russian instructions | Inconsistent onboarding language | English guides, separate Russian files, CI Cyrillic/local-link check |
 | Upgrade instructions omitted target selection/complete rollback | Code-only downgrade could be mistaken for safe recovery | Explicit tags, stopped backup, cold directory copy, previous image and checks |
@@ -31,6 +31,8 @@ dependency advisories. This is a regression/code review, not an independent pene
 - A representative earlier v1 IndexedDB cache/outbox envelope is loaded into the
   current client offline, survives reload, synchronizes once and accepts an identical
   replay without creating a second expense.
+- Browser runs use separate synthetic data directories, preserving security rate limits
+  while preventing old preferences/login attempts from contaminating a repeated run.
 - Full npm audit (including development dependencies) and pip-audit of the installed
   Python environment returned no known vulnerabilities on this date. These are
   point-in-time advisory checks, not proof of absence of security defects. Native

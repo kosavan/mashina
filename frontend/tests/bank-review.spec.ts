@@ -25,6 +25,12 @@ test.beforeAll(async () => {
   );
   expect(login.ok()).toBeTruthy();
   csrf = (await login.json()).csrf;
+  // Establish the locale this suite asserts, including after a previous English run.
+  const preferences = await request.post("/api/v1/mutate", {
+    headers: { "X-CSRF-Token": csrf },
+    data: { entity: "settings", action: "create", id: randomUUID(), operation_id: randomUUID(), data: { locale: "ru" } },
+  });
+  expect(preferences.ok()).toBeTruthy();
   cookies = (await request.storageState()).cookies;
   await request.dispose();
 });

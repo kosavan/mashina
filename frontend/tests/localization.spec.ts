@@ -149,6 +149,8 @@ test("real account locale changes offline, persists after sync and preserves veh
   await page.evaluate(() => window.dispatchEvent(new Event("online")));
   release();
   await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("en");
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("ru");
+  await expect.poll(async () => (await (await page.request.get("/api/v1/state")).json()).settings.locale).toBe("ru");
 });
 
 test("previously unvisited settings and analytics modules open offline", async ({ page, context }) => {

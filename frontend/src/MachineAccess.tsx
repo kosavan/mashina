@@ -360,6 +360,16 @@ export default function MachineAccess() {
                         · {key.vehicle_ids.length} авто
                       </span>
                       <span className="tiny muted">
+                        {key.vehicle_ids
+                          .map(
+                            (id) =>
+                              state.vehicles.find(
+                                (vehicle) => vehicle.id === id,
+                              )?.name || "Недоступный автомобиль",
+                          )
+                          .join(" · ")}
+                      </span>
+                      <span className="tiny muted">
                         {key.revoked !== null
                           ? "Ключ отозван"
                           : key.expires * 1000 <= Date.now()

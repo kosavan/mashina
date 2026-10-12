@@ -18,6 +18,7 @@ from backend.machine_models import (
     MutationInput,
     EventInput,
     ReminderInput,
+    CompletionInput,
 )
 
 
@@ -91,7 +92,7 @@ def install_machine(app, session):
         }
         document["security"] = [{"MachineBearer": []}]
         schemas = document["components"].setdefault("schemas", {})
-        for model in (EventInput, ReminderInput):
+        for model in (EventInput, ReminderInput, CompletionInput):
             schema = model.model_json_schema(ref_template="#/components/schemas/{model}")
             schemas.update(schema.pop("$defs", {}))
             schemas[model.__name__] = schema
@@ -100,15 +101,34 @@ def install_machine(app, session):
                 "anyOf": [
                     {"$ref": "#/components/schemas/EventInput"},
                     {"$ref": "#/components/schemas/ReminderInput"},
+                    {"$ref": "#/components/schemas/CompletionInput"},
                 ]
             }
             schemas["MutationInput"]["allOf"] = [
                 {
-                    "if": {"properties": {"entity": {"const": entity}}},
+                    "if": {
+                        "properties": {
+                            "entity": {"const": entity},
+                            "action": {"enum": ["upsert", "delete"]},
+                        }
+                    },
                     "then": {"properties": {"data": {"$ref": "#/components/schemas/" + model}}},
                 }
                 for entity, model in (("event", "EventInput"), ("reminder", "ReminderInput"))
             ]
+            schemas["MutationInput"]["allOf"].append(
+                {
+                    "if": {"properties": {"action": {"const": "complete"}}},
+                    "then": {
+                        "required": ["base_version", "data"],
+                        "properties": {
+                            "entity": {"const": "reminder"},
+                            "base_version": {"minimum": 1},
+                            "data": {"$ref": "#/components/schemas/CompletionInput"},
+                        },
+                    },
+                }
+            )
         return document
 
     def enabled(s):

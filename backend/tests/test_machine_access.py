@@ -43,6 +43,8 @@ def test_machine_secret_once_original_owner_and_revoke(client):
     delegated, user = account(client, "delegated")
     assert grant(client, car, user, "owner").status_code == 200
     assert issue(delegated, [car]).status_code == 403
+    assert grant(client, car, user, "driver").status_code == 200
+    assert issue(delegated, [car]).status_code == 403
     issued = issue(client, [car])
     assert issued.status_code == 200, issued.text
     key = issued.json()
@@ -426,6 +428,81 @@ def test_machine_chunked_body_is_bounded_before_json_parsing(client):
     )
     assert response.status_code == 413
     assert client.get("/api/v1/state").json()["events"] == []
+
+
+def test_machine_reminder_completion_requires_fresh_actual_reading_and_retries_once(client):
+    client.app.state.machine_enabled = True
+    car = mutate(client, "vehicle", {"name": "Invented", "purchase_odometer": 10000}).json()[
+        "record"
+    ]["id"]
+    reminder = mutate(
+        client,
+        "reminder",
+        {
+            "vehicle_id": car,
+            "title": "Oil",
+            "due_date": "2026-10-01",
+            "due_odometer": 15000,
+            "repeat_days": 30,
+            "repeat_km": 5000,
+        },
+    ).json()["record"]
+    bearer = machine(client, issue(client, [car], write_enabled=True).json()["secret"])
+    endpoint = MACHINE + f"/vehicles/{car}/mutations"
+    missing = operation(
+        entity="reminder",
+        action="complete",
+        id=reminder["id"],
+        base_version=1,
+        data={"completion_date": "2026-10-01"},
+    )
+    assert bearer.post(endpoint, json=missing).status_code == 422
+    assert (
+        bearer.post(endpoint, json={**missing, "data": {"completion_odometer": 15001}}).status_code
+        == 422
+    )
+    from datetime import date, timedelta
+
+    future = (date.today() + timedelta(days=1)).isoformat()
+    assert (
+        bearer.post(
+            endpoint,
+            json={**missing, "data": {"completion_date": future, "completion_odometer": 15001}},
+        ).status_code
+        == 422
+    )
+    payload = {**missing, "data": {**missing["data"], "completion_odometer": 15001}}
+    completed = bearer.post(endpoint, json=payload)
+    assert completed.status_code == 200, completed.text
+    result = completed.json()["record"]
+    assert result["due_odometer"] == 20001 and result["due_date"] == "2026-10-31"
+    assert "completion_odometer" not in result
+    assert bearer.post(endpoint, json=payload).json() == completed.json()
+    assert (
+        bearer.post(endpoint, json={**payload, "operation_id": str(uuid.uuid4())}).status_code
+        == 409
+    )
+    assert (
+        bearer.post(
+            endpoint, json={**missing, "operation_id": str(uuid.uuid4()), "base_version": 2}
+        ).status_code
+        == 422
+    )
+    assert (
+        bearer.post(
+            endpoint,
+            json={
+                **payload,
+                "operation_id": str(uuid.uuid4()),
+                "base_version": 2,
+                "data": {**payload["data"], "completed_at": "trusted"},
+            },
+        ).status_code
+        == 422
+    )
+    state = client.get("/api/v1/state").json()
+    assert state["events"] == [] and state["vehicles"][0]["current_odometer"] == 10000
+    assert state["reminders"][0]["version"] == 2
 
 
 @pytest.mark.parametrize(

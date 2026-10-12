@@ -4,6 +4,7 @@ import asyncio
 from datetime import date
 import ipaddress
 import json
+import math
 import os
 import re
 import ssl
@@ -23,6 +24,14 @@ CAPABILITIES_KEY = "io.modelcontextprotocol/clientCapabilities"
 LIMIT = 1024 * 1024
 DEADLINE = 10
 INFO = {"name": "MASHINA", "version": "1.1.0"}
+
+
+def valid_id(value):
+    return (
+        (type(value) is str and len(value) <= 128)
+        or type(value) is int
+        or (type(value) is float and math.isfinite(value))
+    )
 
 
 class EmptyArgs(StrictInput):
@@ -244,12 +253,19 @@ class Adapter:
             if not isinstance(params, dict):
                 raise ProtocolError(-32602, "Параметры должны быть объектом")
             if method == "initialize":
+                info = params.get("clientInfo")
                 if (
-                    params.get("protocolVersion") != LEGACY
+                    not isinstance(params.get("protocolVersion"), str)
                     or not isinstance(params.get("capabilities"), dict)
-                    or not isinstance(params.get("clientInfo"), dict)
+                    or not isinstance(info, dict)
+                    or any(
+                        not isinstance(info.get(field), str) or not 1 <= len(info[field]) <= 200
+                        for field in ("name", "version")
+                    )
                 ):
-                    raise ProtocolError(-32602, "Для initialize поддерживается версия 2025-11-25")
+                    raise ProtocolError(
+                        -32602, "Укажите версию, возможности и имя/версию legacy клиента"
+                    )
                 self.legacy_pending = True
                 result = {
                     "protocolVersion": LEGACY,
@@ -274,7 +290,7 @@ class Adapter:
                             "Неподдерживаемая версия протокола",
                             {"supported": VERSIONS, "requested": meta[VERSION_KEY]},
                         )
-                elif not self.legacy_initialized:
+                elif not self.legacy_initialized and method != "ping":
                     raise ProtocolError(
                         -32602, "Передайте params._meta или завершите legacy initialize"
                     )
@@ -391,13 +407,11 @@ class Adapter:
                         self.legacy_initialized = True
                     elif method == "notifications/cancelled" and isinstance(params, dict):
                         cancelled = params.get("requestId")
-                        if type(cancelled) in (str, int) and cancelled in self.tasks:
+                        if valid_id(cancelled) and cancelled in self.tasks:
                             self.tasks[cancelled].cancel()
                     continue
                 identity = message["id"]
-                if type(identity) not in (str, int) or (
-                    isinstance(identity, str) and len(identity) > 128
-                ):
+                if not valid_id(identity):
                     self.error(None, ProtocolError(-32600, "Недопустимый идентификатор запроса"))
                     continue
                 if identity in self.tasks or len(self.tasks) >= 4:

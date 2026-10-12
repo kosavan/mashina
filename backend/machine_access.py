@@ -182,7 +182,11 @@ def mutate_machine(c, store, key, vehicle_id, body):
         # Projection applies on first response and replay, even to a restored receipt.
         return {"record": project_record(body.entity, json.loads(prior["response"])["record"])}
     action = (
-        "delete" if body.action == "delete" else "create" if body.base_version == 0 else "update"
+        body.action
+        if body.action in {"delete", "complete"}
+        else "create"
+        if body.base_version == 0
+        else "update"
     )
     if action != "create" and not existing:
         raise Denied("Запись недоступна")

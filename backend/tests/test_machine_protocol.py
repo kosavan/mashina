@@ -332,3 +332,71 @@ def test_http_deadline_and_tls_verification(monkeypatch, tmp_path):
                 await upstream.get("/vehicles")
 
     asyncio.run(scenario())
+
+
+def test_stdio_numeric_ids_legacy_negotiation_and_four_request_bound():
+    async def scenario():
+        all_started = asyncio.Event()
+        active = 0
+
+        async def delayed(reader, writer):
+            nonlocal active
+            await reader.readuntil(b"\r\n\r\n")
+            active += 1
+            if active == 4:
+                all_started.set()
+            await reader.read()
+            writer.close()
+
+        server = await asyncio.start_server(delayed, "127.0.0.1", 0)
+        async with server:
+            process = await spawn(f"http://127.0.0.1:{server.sockets[0].getsockname()[1]}")
+            try:
+                await send(process, request("ping", 1.5))
+                assert (await receive(process))["id"] == 1.5
+                await send(process, {"jsonrpc": "2.0", "id": 0.5, "method": "ping"})
+                assert (await receive(process))["result"] == {}
+                await send(
+                    process,
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 2,
+                        "method": "initialize",
+                        "params": {
+                            "protocolVersion": "2024-11-05",
+                            "capabilities": {},
+                            "clientInfo": {},
+                        },
+                    },
+                )
+                assert (await receive(process))["error"]["code"] == -32602
+                await send(
+                    process,
+                    {
+                        "jsonrpc": "2.0",
+                        "id": 3,
+                        "method": "initialize",
+                        "params": {
+                            "protocolVersion": "2024-11-05",
+                            "capabilities": {},
+                            "clientInfo": {"name": "Invented", "version": "1"},
+                        },
+                    },
+                )
+                assert (await receive(process))["result"]["protocolVersion"] == LEGACY
+                for identity in (10, 11, 12, 13):
+                    await send(
+                        process,
+                        request("tools/call", identity, name="mashina_vehicles", arguments={}),
+                    )
+                await asyncio.wait_for(all_started.wait(), 3)
+                await send(process, request("ping", 14))
+                error = await receive(process)
+                assert error["id"] == 14 and error["error"]["code"] == -32600
+                await finish(process)
+                assert await process.stdout.read() == b""
+            finally:
+                if process.returncode is None:
+                    await finish(process)
+
+    asyncio.run(scenario())

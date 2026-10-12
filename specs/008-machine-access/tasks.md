@@ -50,3 +50,9 @@ Independent check: restore revokes all keys while preserving existing bank/notif
 ## Dependencies and delivery
 
 T001→T002→T003→US1→US2; US3 follows stable read contracts, US4 restore follows schema/lifecycle. UI can be developed independently after management contracts stabilize, protocol tests independently after read DTOs; no automatic delegation required. Finish each tested vertical slice before marking its tasks complete. Credential foundation is the first increment, not a claim of the whole 2.0 release.
+
+## Phase 7: Convergence
+
+- [x] T019 [US2] Close C001 (HIGH, partial, US2 acceptance3/SC002): implement strict explicit reminder completion date/actual-odometer input with stable operation/version and shared repeat validation in backend/machine_models.py/backend/machine_access.py; test missing confirmation, repeat advancement, retry and no invented mileage/expense in backend/tests/test_machine_access.py; correct contracts/api.md/docs/machine-access.md to describe the implemented operation.
+- [x] T020 [US1] Close C002 (MEDIUM, partial, US1 acceptance3): show the explicitly granted car names on each key card in frontend/src/MachineAccess.tsx, with a safe unavailable-car fallback, and verify scope visibility plus preservation of a new secret while revoking another key in frontend/tests/machine-access.spec.ts.
+- [x] T021 [US3] Close C003 (MEDIUM, partial, FR005/SC004 protocol accuracy): accept finite numeric JSON-RPC IDs, validate required legacy client identity, negotiate the advertised legacy version and test the four-request concurrency bound in backend/machine_protocol.py/backend/tests/test_machine_protocol.py.

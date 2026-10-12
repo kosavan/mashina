@@ -32,6 +32,13 @@ test("scoped key: 360px copy once, manual fallback, offline and revoke", async (
     },
   });
   expect(car.ok()).toBeTruthy();
+  const carId = (await car.json()).record.id;
+  const olderLabel = name + " прежний клиент";
+  const olderKey = await api.post("/api/v1/machine/credentials", {
+    headers: { "X-CSRF-Token": csrf },
+    data: { label: olderLabel, vehicle_ids: [carId] },
+  });
+  expect(olderKey.ok()).toBeTruthy();
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/");
   await expect(
@@ -66,6 +73,20 @@ test("scoped key: 360px copy once, manual fallback, offline and revoke", async (
   const input = sheet.getByLabel("Ваш новый ключ", { exact: true });
   await expect(input).toBeVisible();
   const secret = await input.inputValue();
+  const keyCard = sheet
+    .locator(".machine-key")
+    .filter({
+      has: page.getByRole("button", { name: `Отозвать ${name}`, exact: true }),
+    });
+  await expect(keyCard.locator("span").filter({ hasText: name })).toContainText(
+    name,
+  );
+  page.once("dialog", (dialog) => dialog.accept());
+  await sheet
+    .getByRole("button", { name: `Отозвать ${olderLabel}`, exact: true })
+    .click();
+  await expect(input).toHaveValue(secret);
+  await input.scrollIntoViewIfNeeded();
   expect(secret.startsWith("msh_")).toBeTruthy();
   await page.evaluate(() =>
     Object.defineProperty(navigator, "clipboard", {

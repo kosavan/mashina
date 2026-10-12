@@ -104,6 +104,7 @@ def create_app(data_path=None, bootstrap_token=None):
                     if received > body_limit:
                         return JSONResponse({"detail": "Запрос слишком большой"}, status_code=413)
                     chunks.append(chunk)
+                # Replay the bounded body through Starlette's cached downstream receive.
                 request._body = b"".join(chunks)
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"

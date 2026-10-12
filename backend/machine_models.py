@@ -1,6 +1,7 @@
 """Strict machine inputs and explicit projections: no generic state serialization."""
 
 from typing import Literal
+from datetime import date
 import uuid
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -50,11 +51,29 @@ class ReminderInput(StrictInput):
     enabled: bool | None = None
 
 
+class CompletionInput(StrictInput):
+    completion_date: str = Field(max_length=10)
+    completion_odometer: int | None = Field(default=None, ge=0, le=3000000)
+
+    @field_validator("completion_date")
+    @classmethod
+    def actual_date(cls, value):
+        try:
+            parsed = date.fromisoformat(value)
+            if parsed.isoformat() != value or parsed > date.today():
+                raise ValueError()
+        except ValueError:
+            raise ValueError(
+                "Укажите фактическую дату выполнения, не позднее сегодняшней"
+            ) from None
+        return value
+
+
 class MutationInput(StrictInput):
     operation_id: str
     entity: Literal["event", "reminder"]
     id: str
-    action: Literal["upsert", "delete"]
+    action: Literal["upsert", "delete", "complete"]
     base_version: int = Field(default=0, ge=0)
     data: dict = Field(default_factory=dict)
 
@@ -65,7 +84,15 @@ class MutationInput(StrictInput):
 
     @model_validator(mode="after")
     def typed_data(self):
-        model = EventInput if self.entity == "event" else ReminderInput
+        if self.action == "complete" and (self.entity != "reminder" or self.base_version < 1):
+            raise ValueError("Выполнение доступно существующему напоминанию с текущей версией")
+        model = (
+            CompletionInput
+            if self.action == "complete"
+            else EventInput
+            if self.entity == "event"
+            else ReminderInput
+        )
         model.model_validate(self.data)
         if self.action == "delete" and self.data:
             raise ValueError("Удаление не принимает изменённые поля")

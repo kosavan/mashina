@@ -3,6 +3,16 @@ import { randomUUID } from "node:crypto";
 
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "198.51.100.61" } });
 
+test("bundled fonts respect the production content security policy", async ({ page }) => {
+  const blocked: string[] = [];
+  page.on("console", message => {
+    if (message.type() === "error" && /font.*Content Security Policy/i.test(message.text())) blocked.push(message.text());
+  });
+  await page.goto("/");
+  await page.evaluate(async () => { await document.fonts.ready; });
+  expect(blocked).toEqual([]);
+});
+
 async function untranslated(page: import("@playwright/test").Page) {
   return page.evaluate(() => {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);

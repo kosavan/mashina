@@ -10,7 +10,9 @@
 <p align="center">
   <a href="README.md">English</a> · Русский ·
   <a href="https://github.com/kosavan/mashina/releases">Релизы</a> ·
-  <a href="docs/testing-release.md">Установка и проверка на Mac / Windows</a>
+  <a href="docs/roadmap.ru.md">Роудмап</a> ·
+  <a href="docs/updating.ru.md">Обновление</a> ·
+  <a href="docs/testing-release.ru.md">Установка и проверка на Mac / Windows</a>
 </p>
 
 ![MASHINA: записывайте, понимайте расходы и обслуживайте автомобили. Реальный интерфейс с изолированными вымышленными данными.](docs/assets/ru/mashina-overview.png)
@@ -54,15 +56,15 @@ docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
 
 Откройте **http://localhost:8000**. Данные находятся в **./data**. Для удалённого доступа и установки на iPhone нужен HTTPS.
 
-**[Mac: Terminal / Windows: PowerShell — пошагово](docs/testing-release.md)** · **[Подробная инструкция](docs/handbook.ru.md)** · **[Развёртывание и бэкапы, EN](docs/self-hosting.md)**
+**[Mac: Terminal / Windows: PowerShell — пошагово](docs/testing-release.ru.md)** · **[Подробная инструкция](docs/handbook.ru.md)** · **[Развёртывание и бэкапы, EN](docs/self-hosting.md)**
 
 ## Подробнее
 
 React + TypeScript + Vite · FastAPI · SQLite/WAL · локальные вложения. Модульный монолит в одном контейнере без root, рассчитанный на домашний сервер.
 
-**[Разработка и тесты](docs/development.md)** · **[Архитектура](specs/001-mashina-platform)** · **[Как быстрее заводить заправки](docs/fuel-capture.md)** · **[Шины и адреса сервисов](docs/tires-and-locations.md)** · **[API / MCP](docs/machine-access.md)**
+**[Разработка и тесты](docs/development.md)** · **[Архитектура](specs/001-mashina-platform)** · **[Как быстрее заводить заправки](docs/fuel-capture.ru.md)** · **[Шины и адреса сервисов](docs/tires-and-locations.ru.md)** · **[API / MCP](docs/machine-access.ru.md)**
 
-[Роудмап](docs/roadmap.md): полностью локальный OCR чеков, счетов мастерских, приборки и произвольных скриншотов; затем поиск по истории, бот внесения расходов и OBD-II. [Локальный текстовый OCR](docs/local-ocr.md) уже включён: проверьте и выберите поля перед сохранением. Многостраничные таблицы и специализированное распознавание приборки остаются в плане.
+[Роудмап](docs/roadmap.ru.md): полностью локальный OCR чеков, счетов мастерских, приборки и произвольных скриншотов; затем поиск по истории, бот внесения расходов и OBD-II. [Локальный текстовый OCR](docs/local-ocr.md) уже включён: проверьте и выберите поля перед сохранением. Многостраничные таблицы и специализированное распознавание приборки остаются в плане.
 
 Разработка через [Spec Kit](https://github.com/github/spec-kit); логотип — с [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), инфографика — с [Hyperframes](https://github.com/heygen-com/hyperframes).
 

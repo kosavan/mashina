@@ -8,8 +8,10 @@
 </p>
 
 <p align="center">
-  English · <a href="README.ru.md">Русский</a> ·
+  English · <a href="README.ru.md">Russian</a> ·
   <a href="https://github.com/kosavan/mashina/releases">Releases</a> ·
+  <a href="docs/roadmap.md">Roadmap</a> ·
+  <a href="docs/updating.md">Update</a> ·
   <a href="docs/self-hosting.md">Install</a> ·
   <a href="docs/testing-release.md">macOS &amp; Windows testing</a>
 </p>
@@ -63,7 +65,10 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · local attachments. A modul
 
 **[Development & tests](docs/development.md)** · **[Architecture](specs/001-mashina-platform)** · **[Fuel capture](docs/fuel-capture.md)** · **[Tires & service locations](docs/tires-and-locations.md)** · **[API & MCP](docs/machine-access.md)**
 
-[Roadmap](docs/roadmap.md): fully local OCR for receipts, workshop invoices, dashboard photos and arbitrary screenshots; then natural-language history search, an expense-entry bot and OBD-II. [Local text OCR](docs/local-ocr.md) is included: inspect and explicitly apply recognized fields before saving. Multi-page workshop tables and specialized dashboard recognition remain follow-ups.
+[Roadmap: shipped, next and research](docs/roadmap.md). Local text OCR is available;
+multi-page invoice tables, specialized dashboard recognition, natural-language search,
+an expense-entry bot, OBD-II and reviewed VIN/parts lookup are planned.
+For existing installations, follow the [backup, update and rollback guide](docs/updating.md).
 
 Built with [Spec Kit](https://github.com/github/spec-kit); identity developed with [logo-design-skill](https://github.com/kaankiziltug/logo-design-skill), infographic authored with [Hyperframes](https://github.com/heygen-com/hyperframes).
 

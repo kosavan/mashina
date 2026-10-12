@@ -1,5 +1,58 @@
 # MASHINA roadmap
 
+English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
+
+Last reviewed: **2026-10-12**. Shipped means implemented and tested; hardware
+validation and future work are separate. Dates are not delivery promises.
+
+## Shipped feature map
+
+| Area | Available | Limits / evidence |
+|---|---|---|
+| Garage | Multiple cars, profiles/photos, ownership, archive/sale, manual VIN | Profile/history tests; automatic VIN lookup is planned |
+| Daily records | Exact expenses, service items/parts, fuel, mileage, notes | Financial invariants, edit/delete/replay tests |
+| Analytics | Period/category/car filters, full-to-full fuel cycles | Missing measurements stay unknown; purchase/sale separate |
+| History / files | Search, filters, private images/PDF, JSON/CSV, full archive | Authorization and restore tests |
+| Reminders | Dates/mileage, repeats, confirmed completion, estimates | Forecasts do not create expenses/readings |
+| Tires | Dedicated section, mounting, DOT, tread measurements, thresholds | No claim of measured technical condition |
+| PWA / offline | Durable queue, reload/replay safety, offline modules | Physical iPhone validation remains open |
+| Ownership tools | Sharing, budgets, regular costs, reviewed CSV, sale PDF | Explicit scope and disclosure |
+| OCR 1.5 | Receipts, invoices, dashboard photos, arbitrary screenshots | Local text OCR, selected PDF page, human review |
+| Optional integrations | Scoped REST, read-only MCP, notifications, opt-in map | Device/external delivery checks remain open |
+| UI | English/Russian setup/settings, themes, isolated demo, localized screenshots | PDF/export/notification localization is incomplete |
+
+## Maintenance 1.5.1
+
+Maintenance changes and their automated coverage; see Releases/Actions for verification:
+
+- Preserve existing preferences on partial settings updates.
+- Repair restore staging in read-only containers and recover failed file swaps.
+- Test real upgrades of every schema 001–006; preserve files, IDs and receipts.
+- Refuse unknown/newer schemas; snapshot before changing an installed schema.
+- Separate English/Russian guides and document backup, update and rollback.
+- Complete regression, production-container restore and release audit.
+- Serve bundled fonts as local files compatible with the existing CSP.
+
+## Prioritized plan
+
+| Priority | Planned work | Acceptance boundary |
+|---|---|---|
+| Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |
+| Next | Output localization | English/Russian PDF/export labels and notifications, unchanged user content |
+| Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
+| Planned | Larger backup archives | Bounded-memory streaming and verified restore beyond the current 200 MiB limit |
+| Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |
+| Later | Natural-language search | Local processing, permissions, measured resource budget |
+| Later | Expense bot and OBD-II | Optional owner-configured components, confirmed writes |
+| Later | Passkeys and more languages | Preserve existing login/data |
+| Research | VIN / compatible parts | Licensed sources and proven fitment; details below |
+
+## Roadmap maintenance
+
+Accepted requests and changed scope MUST update both language versions. Move work
+to shipped only with code/spec/test evidence and a verified release. Keep partial
+work's limits visible. The engineering constitution makes this a review requirement.
+
 Release **1.5.0** adds the first fully local text OCR slice. Core garage, exact expenses/fuel/service, documents,
 reminders, analytics, offline/PWA, backups, sharing, tires, budgets, reviewed CSV,
 sale PDF, optional notifications/API/read-only MCP and Russian/English UI are shipped.

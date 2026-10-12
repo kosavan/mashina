@@ -79,7 +79,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.5.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.5.1", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (

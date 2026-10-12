@@ -1752,7 +1752,7 @@ export function SettingsPage() {
         <section className="panel settings-panel">
           <LanguagePicker
             onChange={(locale) => {
-              void save("settings", { ...state.settings, locale })
+              void save("settings", { locale })
                 .then(() => notify(tr("Язык сохранён")))
                 .catch((error) => notify(tr(error.message)));
             }}

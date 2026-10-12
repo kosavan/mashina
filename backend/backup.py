@@ -46,7 +46,9 @@ def _restore_backup(store, blob):
     if len(blob) > MAX_ARCHIVE:
         raise ValueError("Архив превышает 200 МБ")
     try:
-        with tempfile.TemporaryDirectory(dir=store.path.parent) as work:
+        # Staging must share the writable data volume and filesystem with live files.
+        # The parent is read-only in Compose and may be on another filesystem.
+        with tempfile.TemporaryDirectory(dir=store.path) as work:
             stage = Path(work)
             with zipfile.ZipFile(io.BytesIO(blob)) as archive:
                 info = archive.infolist()
@@ -173,15 +175,16 @@ def _restore_backup(store, blob):
                 # Retain a complete pre-restore snapshot as recovery path.
                 recovery = store.path / "pre-restore.zip"
                 recovery.write_bytes(make_backup(store))
+                recovery.chmod(0o600)
                 with store.engine.connect() as c:
                     c.exec_driver_sql("PRAGMA wal_checkpoint(TRUNCATE)")
                 store.engine.dispose()
                 live = store.path / "mashina.db"
                 previous = stage / "previous.sqlite"
                 previous_uploads = stage / "previous-uploads"
-                os.replace(live, previous)
-                os.replace(store.uploads, previous_uploads)
                 try:
+                    os.replace(live, previous)
+                    os.replace(store.uploads, previous_uploads)
                     os.replace(snapshot, live)
                     os.replace(stage / "uploads", store.uploads)
                     store.migrate()
@@ -194,14 +197,16 @@ def _restore_backup(store, blob):
                         )
                 except Exception:
                     store.engine.dispose()
-                    if store.uploads.exists():
-                        os.replace(store.uploads, stage / "failed-uploads")
-                    for suffix in ("-wal", "-shm"):
-                        sidecar = Path(str(live) + suffix)
-                        if sidecar.exists():
-                            os.replace(sidecar, stage / ("failed" + suffix))
-                    os.replace(previous, live)
-                    os.replace(previous_uploads, store.uploads)
+                    if previous.exists():
+                        for suffix in ("-wal", "-shm"):
+                            sidecar = Path(str(live) + suffix)
+                            if sidecar.exists():
+                                os.replace(sidecar, stage / ("failed" + suffix))
+                        os.replace(previous, live)
+                    if previous_uploads.exists():
+                        if store.uploads.exists():
+                            os.replace(store.uploads, stage / "failed-uploads")
+                        os.replace(previous_uploads, store.uploads)
                     raise
     except (
         zipfile.BadZipFile,

@@ -1,0 +1,137 @@
+# Безопасное обновление MASHINA
+
+Русский · [English](updating.md) · [Роудмап](roadmap.ru.md)
+
+Сохраняйте `./data`, приватный `.env` и прежний Docker-образ. Не переустанавливайте
+приложение, не создавайте администратора заново и не заменяйте `.env` примером.
+Выбирайте существующий опубликованный тег; проверяйте каждую команду и останавливайтесь
+при ошибке. Не запускайте две версии или таймер уведомлений на одной базе.
+
+## Подготовка
+
+Прочитайте [релиз](https://github.com/kosavan/mashina/releases), синхронизируйте
+все устройства и разберите конфликты. Скачайте полный ZIP и скопируйте на другой диск.
+В каталоге установки сохраните показанные Git-версию и ID образа:
+
+```sh
+git status --short
+git describe --tags --always
+docker compose images -q mashina
+```
+
+Приостановите отдельно настроенный таймер уведомлений. Остановите приложение перед
+CLI-бэкапом: CLI работает отдельным процессом, запись в базу и файлы должна прекратиться.
+
+```sh
+docker compose stop mashina
+docker compose run --rm --no-deps mashina /app/.venv/bin/python -m backend.cli backup --backup-dir /app/data/backups --keep 7
+docker image tag PREVIOUS_IMAGE_ID mashina:before-update
+```
+
+Подставьте сохранённый ID вместо `PREVIOUS_IMAGE_ID`. Запишите имя ZIP, скопируйте
+его на другой диск, сохраните `.env` приватно. На Linux может понадобиться `sudo`.
+При ошибке не продолжайте. Текущий предел восстановления ZIP и распакованного
+содержимого — 200 МиБ; большой архив проверьте заранее в отдельном экземпляре.
+
+Дополнительно сохраните **холодную копию всего каталога** для отката при неудачной
+миграции. Целевой каталог не должен существовать; если существует, выберите новое имя.
+Пока приложение/таймеры остановлены, Linux/macOS:
+
+```sh
+sudo cp -a ./data ../mashina-data-before-update
+cp .env ../mashina-env-before-update
+```
+
+Windows PowerShell (сначала убедитесь, что Test-Path вернул False):
+
+```powershell
+Test-Path ../mashina-data-before-update
+Copy-Item -LiteralPath ./data -Destination ../mashina-data-before-update -Recurse
+Copy-Item -LiteralPath .env -Destination ../mashina-env-before-update
+```
+
+Копия остановленного каталога сохраняет базу, WAL и файлы вместе. Храните её приватно;
+дополнительная копия на другом диске нужна от отказа накопителя.
+
+## Обновление
+
+Вместо `TARGET_TAG` — реальный опубликованный тег. Команды одинаковы в трёх ОС.
+Сначала разберите локальные изменения, без принудительного сброса. Сохраняйте том
+данных и окружение; новые необязательные параметры из примера переносите выборочно.
+
+```sh
+git fetch --tags origin
+git switch --detach TARGET_TAG
+docker compose build --pull
+docker compose up -d --no-build
+docker compose ps
+docker compose logs --tail=100 mashina
+```
+
+При ошибке сборки/запуска остановитесь. `create-admin` и смена владельца данных не нужны.
+Linux/macOS: `curl --fail http://localhost:8000/api/v1/health`.
+Windows: `Invoke-RestMethod http://localhost:8000/api/v1/health`.
+Укажите свой порт/origin. Не публикуйте логи с личными данными.
+
+Проверьте машины, настройки, пробеги, суммы, старые записи, фото/PDF, создание/правку
+и удаление тестовой записи. Проверьте офлайн-синхронизацию без дублей. Откройте PWA
+онлайн для обновления service worker, затем без сети. Не очищайте браузер с ожидающими
+записями. После проверки возобновите таймеры.
+
+Пути реальных миграций 001–006 проверяются с сохранением файлов, настроек, ID и квитанций.
+Старые миграции неизменны. Новая/неизвестная или существующая база без версии отклоняется,
+а не сбрасывается. Перед изменением схемы сохраняется приватный ZIP в `data/upgrades/`;
+обычный повторный запуск его не создаёт. Снимки автоматически не удаляются и не заменяют
+копию на другом диске. При ошибке миграции не форсируйте маркер схемы и не удаляйте WAL.
+
+## Откат
+
+Нужны **данные до обновления вместе с прежним образом**. Откат только кода после
+изменения схемы небезопасен. Изменений после копии в ней не будет. Остановите приложение
+и таймеры; каталог `data-failed-update` должен быть новым. Linux/macOS:
+
+```sh
+docker compose stop mashina
+sudo mv ./data ./data-failed-update
+sudo cp -a ../mashina-data-before-update ./data
+cp ../mashina-env-before-update .env
+git switch --detach PREVIOUS_REVISION
+```
+
+Windows PowerShell:
+
+```powershell
+docker compose stop mashina
+Move-Item -LiteralPath ./data -Destination ./data-failed-update
+Copy-Item -LiteralPath ../mashina-data-before-update -Destination ./data -Recurse
+Copy-Item -LiteralPath ../mashina-env-before-update -Destination .env
+git switch --detach PREVIOUS_REVISION
+```
+
+Подставьте сохранённый тег/коммит вместо `PREVIOUS_REVISION`. Сломанные данные
+сохраняйте до проверки восстановления. Создайте приватный `compose.rollback.yml`:
+
+```yaml
+services:
+  mashina:
+    image: mashina:before-update
+```
+
+Запустите сохранённый образ без пересборки:
+
+```sh
+docker compose -f docker-compose.yml -f compose.rollback.yml up -d --no-build
+```
+
+Повторите проверки. Холодный откат возвращает прежние сеансы/ключи; при подозрении
+на компрометацию отзовите их явно. В исправную текущую базу можно вместо этого
+восстановить проверенный ZIP, пока приложение остановлено (укажите имя архива):
+
+```sh
+docker compose run --rm --no-deps mashina /app/.venv/bin/python -m backend.cli restore --file /app/data/backups/ARCHIVE.zip
+```
+
+ZIP сбрасывает сеансы/ключи и приостанавливает уведомления: войдите заново и перевыпустите
+интеграции. CLI тоже проверяет/мигрирует целевую базу; если она не открывается после сбоя,
+используйте холодный откат. Для старых версий с дефектом read-only восстановления также
+подходит холодная копия. `.env`, архивы и файл отката не публикуйте.

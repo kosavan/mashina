@@ -1,3 +1,5 @@
+import { intlLocale } from "./i18n";
+import { tr } from "./i18n";
 import {
   cloneElement,
   useEffect,
@@ -74,7 +76,7 @@ function Field({
   const id = useId();
   return (
     <div className="bank-field">
-      <label htmlFor={id}>{label}</label>
+      <label htmlFor={id}>{tr(label)}</label>
       {cloneElement(children, { id })}
     </div>
   );
@@ -133,13 +135,17 @@ export default function BankImport() {
     try {
       if (!navigator.onLine)
         throw new Error(
-          "Для проверки выписки подключитесь к своему серверу. Файл не сохраняется на устройстве.",
+          tr(
+            "Для проверки выписки подключитесь к своему серверу. Файл не сохраняется на устройстве.",
+          ),
         );
       await action();
     } catch (err) {
       setError(
         err instanceof TypeError
-          ? "Не удалось связаться с сервером. Повторите запрос: решения остались на экране."
+          ? tr(
+              "Не удалось связаться с сервером. Повторите запрос: решения остались на экране.",
+            )
           : (err as Error).message,
       );
     } finally {
@@ -152,7 +158,9 @@ export default function BankImport() {
       !result &&
       (file || count) &&
       !confirm(
-        "Закрыть проверку? Файл, сопоставление и неподтверждённые решения не будут сохранены.",
+        tr(
+          "Закрыть проверку? Файл, сопоставление и неподтверждённые решения не будут сохранены.",
+        ),
       )
     )
       return;
@@ -167,9 +175,9 @@ export default function BankImport() {
     submitted.current = null;
   }
   function uploadData() {
-    if (!file) throw new Error("Выберите CSV-файл");
+    if (!file) throw new Error(tr("Выберите CSV-файл"));
     if (file.size > 2 * 1024 * 1024)
-      throw new Error("CSV не должен превышать 2 МБ");
+      throw new Error(tr("CSV не должен превышать 2 МБ"));
     const data = new FormData();
     data.set("file", file);
     data.set("vehicle_id", selected);
@@ -204,7 +212,9 @@ export default function BankImport() {
   async function buildPreview() {
     if (queue.length)
       throw new Error(
-        "Сначала синхронизируйте ожидающие записи, чтобы проверять актуальную историю.",
+        tr(
+          "Сначала синхронизируйте ожидающие записи, чтобы проверять актуальную историю.",
+        ),
       );
     let sid = sourceId;
     if (!sid) {
@@ -238,15 +248,17 @@ export default function BankImport() {
   }
   const totals = (
     <div className="bank-totals">
-      <span>Новые расходы</span>
+      <span>{tr("Новые расходы")}</span>
       {Object.entries(summary.totals).length ? (
         Object.entries(summary.totals).map(([currency, amount]) => (
           <strong key={currency}>{money(Number(amount), currency)}</strong>
         ))
       ) : (
-        <strong>Не добавляются</strong>
+        <strong>{tr("Не добавляются")}</strong>
       )}
-      <small>Связанные и пропущенные операции не увеличивают расходы.</small>
+      <small>
+        {tr("Связанные и пропущенные операции не увеличивают расходы.")}
+      </small>
     </div>
   );
   return (
@@ -256,11 +268,12 @@ export default function BankImport() {
           <FileSpreadsheet size={24} />
         </div>
         <div>
-          <span className="eyebrow">ВЫПИСКА → ПРОВЕРКА → ИСТОРИЯ</span>
-          <h3>Расходы из банка</h3>
+          <span className="eyebrow">{tr("ВЫПИСКА → ПРОВЕРКА → ИСТОРИЯ")}</span>
+          <h3>{tr("Расходы из банка")}</h3>
           <p className="muted">
-            Сопоставьте CSV с историей машины. Уже записанные заправки и работы
-            можно связать без повторного расхода.
+            {tr(
+              "Сопоставьте CSV с историей машины. Уже записанные заправки и работы можно связать без повторного расхода.",
+            )}
           </p>
         </div>
         <Button
@@ -273,43 +286,48 @@ export default function BankImport() {
             );
           }}
         >
-          Проверить выписку <ArrowRight size={17} />
+          {tr("Проверить выписку ")}
+          <ArrowRight size={17} />
         </Button>
       </section>
-      <Sheet open={open} onClose={close} title="Расходы из банка" wide>
+      <Sheet open={open} onClose={close} title={tr("Расходы из банка")} wide>
         <div className="record-form bank-flow">
-          <div className="bank-steps" aria-label={`Шаг ${step} из 3`}>
-            {["Столбцы", "Операции", "Подтверждение"].map((name, i) => (
-              <span key={name} className={step === i + 1 ? "active" : ""}>
-                <b>{i + 1}</b>
-                {name}
-              </span>
-            ))}
+          <div className="bank-steps" aria-label={tr("Шаг {0} из 3", [step])}>
+            {[tr("Столбцы"), tr("Операции"), tr("Подтверждение")].map(
+              (name, i) => (
+                <span key={name} className={step === i + 1 ? "active" : ""}>
+                  <b>{i + 1}</b>
+                  {name}
+                </span>
+              ),
+            )}
           </div>
           <p className="bank-car">
             <strong>{car.name}</strong>
-            <span>Выписка доступна только вам</span>
+            <span>{tr("Выписка доступна только вам")}</span>
           </p>
           {!online && (
             <p className="form-error" role="status">
-              Нет подключения. Проверка и подтверждение выписки доступны только
-              онлайн; файл и решения не сохраняются на устройстве.
+              {tr(
+                "Нет подключения. Проверка и подтверждение выписки доступны только онлайн; файл и решения не сохраняются на устройстве.",
+              )}
             </p>
           )}
           {!!queue.length && (
             <p className="form-error" role="status">
-              Сначала синхронизируйте ожидающие записи. Это нужно для проверки
-              актуальных совпадений.
+              {tr(
+                "Сначала синхронизируйте ожидающие записи. Это нужно для проверки актуальных совпадений.",
+              )}
             </p>
           )}
           {error && (
             <p className="form-error" role="alert">
-              {error}
+              {tr(error)}
             </p>
           )}
           {busy && (
             <p className="muted" role="status">
-              Проверяем на вашем сервере…
+              {tr("Проверяем на вашем сервере…")}
             </p>
           )}
           {result ? (
@@ -317,17 +335,22 @@ export default function BankImport() {
               <div className="bank-icon">
                 <Check size={28} />
               </div>
-              <h3>История обновлена</h3>
+              <h3>{tr("История обновлена")}</h3>
               <p>
-                Новых расходов: {result.created}. Связано: {result.linked}.
-                Пропущено: {result.ignored}. Уже подтверждено:{" "}
-                {result.processed}.
+                {tr("Новых расходов: ")}
+                {result.created}
+                {tr(". Связано: ")}
+                {result.linked}
+                {tr(". Пропущено: ")}
+                {result.ignored}
+                {tr(". Уже подтверждено:")} {result.processed}.
               </p>
               <p className="muted">
-                Исходный CSV не сохранён. Подтверждения повторного импорта
-                хранятся вместе с резервной копией.
+                {tr(
+                  "Исходный CSV не сохранён. Подтверждения повторного импорта хранятся вместе с резервной копией.",
+                )}
               </p>
-              <Button onClick={close}>Готово</Button>
+              <Button onClick={close}>{tr("Готово")}</Button>
             </div>
           ) : step === 1 ? (
             <form
@@ -339,13 +362,13 @@ export default function BankImport() {
               <div className="bank-privacy">
                 <ShieldCheck size={20} />
                 <p>
-                  Без подключения к банку. Выберите только нужные столбцы.
-                  Остальные значения и оригинал файла не сохраняются;
-                  предпросмотр доступен 30 минут.
+                  {tr(
+                    "Без подключения к банку. Выберите только нужные столбцы. Остальные значения и оригинал файла не сохраняются; предпросмотр доступен 30 минут.",
+                  )}
                 </p>
               </div>
               <div className="field-grid">
-                <Field label="Кодировка">
+                <Field label={tr("Кодировка")}>
                   <select
                     value={encoding}
                     disabled={busy}
@@ -354,11 +377,11 @@ export default function BankImport() {
                       setHeaders([]);
                     }}
                   >
-                    <option value="utf-8">UTF-8 (включая BOM)</option>
+                    <option value="utf-8">{tr("UTF-8 (включая BOM)")}</option>
                     <option value="cp1251">Windows-1251</option>
                   </select>
                 </Field>
-                <Field label="Разделитель">
+                <Field label={tr("Разделитель")}>
                   <select
                     value={delimiter}
                     disabled={busy}
@@ -367,17 +390,17 @@ export default function BankImport() {
                       setHeaders([]);
                     }}
                   >
-                    <option value="semicolon">Точка с запятой</option>
-                    <option value="comma">Запятая</option>
-                    <option value="tab">Табуляция</option>
+                    <option value="semicolon">{tr("Точка с запятой")}</option>
+                    <option value="comma">{tr("Запятая")}</option>
+                    <option value="tab">{tr("Табуляция")}</option>
                   </select>
                 </Field>
               </div>
               <label className="file-picker">
                 <Upload size={22} />
-                <span>{file?.name || "Выбрать банковский CSV"}</span>
+                <span>{file?.name || tr("Выбрать банковский CSV")}</span>
                 <input
-                  aria-label="Банковский CSV"
+                  aria-label={tr("Банковский CSV")}
                   type="file"
                   accept=".csv,text/csv"
                   disabled={busy}
@@ -390,8 +413,9 @@ export default function BankImport() {
                 />
               </label>
               <p className="field-help">
-                До 2 МБ и 1 000 строк. Нужен один столбец со знаком суммы. XLSX,
-                PDF и отдельные столбцы прихода/расхода здесь не поддерживаются.
+                {tr(
+                  "До 2 МБ и 1 000 строк. Нужен один столбец со знаком суммы. XLSX, PDF и отдельные столбцы прихода/расхода здесь не поддерживаются.",
+                )}
               </p>
               <Button
                 type="button"
@@ -413,28 +437,31 @@ export default function BankImport() {
                   })
                 }
               >
-                Прочитать столбцы
+                {tr("Прочитать столбцы")}
               </Button>
               {!!headers.length && (
                 <>
                   <h3 className="bank-section-title">
-                    Какие поля использовать?
+                    {tr("Какие поля использовать?")}
                   </h3>
                   <p className="muted">
-                    Строк в файле: {rowCount}. Значения несопоставленных
-                    столбцов не попадут в приложение.
+                    {tr("Строк в файле: ")}
+                    {rowCount}
+                    {tr(
+                      ". Значения несопоставленных столбцов не попадут в приложение.",
+                    )}
                   </p>
                   <div className="field-grid">
                     {(
                       [
-                        ["date", "Дата операции"],
-                        ["amount", "Сумма операции"],
-                        ["description", "Описание операции"],
-                        ["transaction_id", "ID операции банка"],
-                        ["currency", "Валюта операции"],
+                        ["date", tr("Дата операции")],
+                        ["amount", tr("Сумма операции")],
+                        ["description", tr("Описание операции")],
+                        ["transaction_id", tr("ID операции банка")],
+                        ["currency", tr("Валюта операции")],
                       ] as const
                     ).map(([key, title]) => (
-                      <Field key={key} label={title}>
+                      <Field key={key} label={tr(title)}>
                         <select
                           value={mapping[key] || ""}
                           required={["date", "amount", "description"].includes(
@@ -449,8 +476,8 @@ export default function BankImport() {
                         >
                           <option value="">
                             {["transaction_id", "currency"].includes(key)
-                              ? "Не использовать"
-                              : "Выберите столбец"}
+                              ? tr("Не использовать")
+                              : tr("Выберите столбец")}
                           </option>
                           {headers.map((h) => (
                             <option key={h} value={h}>
@@ -462,7 +489,7 @@ export default function BankImport() {
                     ))}
                   </div>
                   <div className="field-grid">
-                    <Field label="Формат даты">
+                    <Field label={tr("Формат даты")}>
                       <select
                         value={mapping.date_format}
                         onChange={(e) =>
@@ -473,11 +500,11 @@ export default function BankImport() {
                           }))
                         }
                       >
-                        <option value="russian">ДД.ММ.ГГГГ</option>
-                        <option value="iso">ГГГГ-ММ-ДД</option>
+                        <option value="russian">{tr("ДД.ММ.ГГГГ")}</option>
+                        <option value="iso">{tr("ГГГГ-ММ-ДД")}</option>
                       </select>
                     </Field>
-                    <Field label="Как обозначен расход">
+                    <Field label={tr("Как обозначен расход")}>
                       <select
                         value={mapping.outgoing_sign}
                         onChange={(e) =>
@@ -489,14 +516,14 @@ export default function BankImport() {
                         }
                       >
                         <option value="negative">
-                          Отрицательная сумма (−)
+                          {tr("Отрицательная сумма (−)")}
                         </option>
                         <option value="positive">
-                          Положительная сумма (+)
+                          {tr("Положительная сумма (+)")}
                         </option>
                       </select>
                     </Field>
-                    <Field label="Валюта без столбца">
+                    <Field label={tr("Валюта без столбца")}>
                       <select
                         value={mapping.default_currency}
                         disabled={!!mapping.currency}
@@ -514,12 +541,12 @@ export default function BankImport() {
                       </select>
                     </Field>
                   </div>
-                  <Field label="Личный источник выписки">
+                  <Field label={tr("Личный источник выписки")}>
                     <select
                       value={sourceId}
                       onChange={(e) => setSourceId(e.target.value)}
                     >
-                      <option value="">Создать источник</option>
+                      <option value="">{tr("Создать источник")}</option>
                       {sources.map((s) => (
                         <option key={s.id} value={s.id}>
                           {s.label}
@@ -528,23 +555,26 @@ export default function BankImport() {
                     </select>
                   </Field>
                   {!sourceId && (
-                    <Field label="Название источника">
+                    <Field label={tr("Название источника")}>
                       <input
                         value={label}
                         required
                         maxLength={80}
-                        placeholder="Например, основной банк — без номера карты"
+                        placeholder={tr(
+                          "Например, основной банк — без номера карты",
+                        )}
                         onChange={(e) => setLabel(e.target.value)}
                       />
                     </Field>
                   )}
                   <p className="field-help">
-                    Для повторных выгрузок выбирайте тот же источник. Без ID
-                    банка совпадения между разными файлами требуют проверки.
-                    Источники других пользователей изолированы.
+                    {tr(
+                      "Для повторных выгрузок выбирайте тот же источник. Без ID банка совпадения между разными файлами требуют проверки. Источники других пользователей изолированы.",
+                    )}
                   </p>
                   <Button type="submit" disabled={busy || !ready || !rowCount}>
-                    Показать операции <ArrowRight size={17} />
+                    {tr("Показать операции ")}
+                    <ArrowRight size={17} />
                   </Button>
                 </>
               )}
@@ -552,23 +582,23 @@ export default function BankImport() {
           ) : step === 2 && preview ? (
             <>
               <div className="bank-review-heading">
-                <h3>Проверьте каждую операцию</h3>
+                <h3>{tr("Проверьте каждую операцию")}</h3>
                 <span>
-                  {preview.rows.length} строк · до{" "}
+                  {preview.rows.length} {tr(" строк · до")}{" "}
                   {new Date(preview.expires * 1000).toLocaleTimeString(
-                    "ru-RU",
+                    intlLocale(),
                     { hour: "2-digit", minute: "2-digit" },
                   )}
                 </span>
               </div>
               <p className="muted">
-                Ничего не выбрано автоматически. Связь с записью сохраняет её
-                сумму и историю. Не относящиеся к машине операции оставьте без
-                выбора или пропустите.
+                {tr(
+                  "Ничего не выбрано автоматически. Связь с записью сохраняет её сумму и историю. Не относящиеся к машине операции оставьте без выбора или пропустите.",
+                )}
               </p>
               {preview.rows.length === 0 && (
                 <p className="muted">
-                  В файле нет операций. Выберите другой CSV.
+                  {tr("В файле нет операций. Выберите другой CSV.")}
                 </p>
               )}
               <div className="bank-rows">
@@ -579,12 +609,12 @@ export default function BankImport() {
                     <article
                       className={`bank-row ${row.processed ? "processed" : ""}`}
                       key={row.row_id}
-                      aria-label={`Операция ${row.row_id}`}
+                      aria-label={tr("Операция {0}", [row.row_id])}
                     >
                       <header>
                         <span>
                           #{row.row_id} ·{" "}
-                          {data ? dateLabel(data.date) : "Неверные данные"}
+                          {data ? dateLabel(data.date) : tr("Неверные данные")}
                         </span>
                         <strong>
                           {data
@@ -593,27 +623,32 @@ export default function BankImport() {
                         </strong>
                       </header>
                       <p className="bank-description">
-                        {data?.description || "Без описания"}
+                        {data?.description || tr("Без описания")}
                       </p>
                       {row.conflict ? (
                         <p className="form-error">
-                          ID банка уже подтверждён с другими данными. Эта строка
-                          заблокирована.
+                          {tr(
+                            "ID банка уже подтверждён с другими данными. Эта строка заблокирована.",
+                          )}
                         </p>
                       ) : row.processed ? (
                         <p className="bank-linked">
-                          <Check size={15} /> Уже подтверждено — повторного
-                          расхода не будет
+                          <Check size={15} />{" "}
+                          {tr(
+                            " Уже подтверждено — повторного расхода не будет",
+                          )}
                         </p>
                       ) : (
                         <>
                           {row.error && (
-                            <p className="form-error">{row.error}</p>
+                            <p className="form-error">{tr(row.error)}</p>
                           )}
                           {!!data && (
                             <>
                               <Field
-                                label={`Решение для операции ${row.row_id}`}
+                                label={tr("Решение для операции {0}", [
+                                  row.row_id,
+                                ])}
                               >
                                 <select
                                   disabled={busy}
@@ -624,45 +659,56 @@ export default function BankImport() {
                                   }
                                   onChange={(e) => choose(row, e.target.value)}
                                 >
-                                  <option value="">Оставить без выбора</option>
+                                  <option value="">
+                                    {tr("Оставить без выбора")}
+                                  </option>
                                   {!row.error && (
                                     <option value="create">
-                                      Создать новый расход
+                                      {tr("Создать новый расход")}
                                     </option>
                                   )}
                                   {!row.error &&
                                     row.candidates.map((c) => (
                                       <option key={c.id} value={c.id}>
-                                        Связать: {kindNames[c.kind]} ·{" "}
+                                        {tr("Связать: ")}
+                                        {tr(kindNames[c.kind])} ·{" "}
                                         {dateLabel(c.date)} ·{" "}
-                                        {c.description || "без описания"}
+                                        {c.description || tr("без описания")}
                                       </option>
                                     ))}
                                   <option value="ignore">
-                                    Пропустить и запомнить решение
+                                    {tr("Пропустить и запомнить решение")}
                                   </option>
                                 </select>
                               </Field>
                               {!row.error && (
                                 <p className="field-help">
-                                  Совпадений по сумме, валюте и дате ±3 дня:{" "}
+                                  {tr(
+                                    "Совпадений по сумме, валюте и дате ±3 дня:",
+                                  )}{" "}
                                   {row.candidate_count}.
                                   {row.candidate_count > 5 &&
-                                    " Показаны пять ближайших; уточните историю перед выбором."}
+                                    tr(
+                                      " Показаны пять ближайших; уточните историю перед выбором.",
+                                    )}
                                 </p>
                               )}
                               {choice?.action === "link" && (
                                 <div className="bank-linked">
                                   <Link2 size={16} />
                                   <span>
-                                    Связь не изменит существующую запись.
+                                    {tr(
+                                      "Связь не изменит существующую запись.",
+                                    )}
                                   </span>
                                 </div>
                               )}
                               {choice?.action === "create" && (
                                 <div className="bank-edit">
                                   <Field
-                                    label={`Категория операции ${row.row_id}`}
+                                    label={tr("Категория операции {0}", [
+                                      row.row_id,
+                                    ])}
                                   >
                                     <input
                                       value={choice.category ?? "Прочее"}
@@ -675,7 +721,9 @@ export default function BankImport() {
                                     />
                                   </Field>
                                   <Field
-                                    label={`Описание расхода ${row.row_id}`}
+                                    label={tr("Описание расхода {0}", [
+                                      row.row_id,
+                                    ])}
                                   >
                                     <textarea
                                       value={
@@ -691,17 +739,18 @@ export default function BankImport() {
                                     />
                                   </Field>
                                   <p className="field-help">
-                                    Описание нового расхода будет видно в общей
-                                    истории машины. Уберите из него личные
-                                    сведения.
+                                    {tr(
+                                      "Описание нового расхода будет видно в общей истории машины. Уберите из него личные сведения.",
+                                    )}
                                   </p>
                                 </div>
                               )}
                               {row.overlap && (
                                 <div className="bank-overlap">
                                   <p>
-                                    Похожая операция уже встречалась в другой
-                                    выписке без ID банка.
+                                    {tr(
+                                      "Похожая операция уже встречалась в другой выписке без ID банка.",
+                                    )}
                                   </p>
                                   {choice && choice.action !== "ignore" && (
                                     <label className="check-field">
@@ -714,7 +763,9 @@ export default function BankImport() {
                                           })
                                         }
                                       />
-                                      Это отдельная операция, подтверждаю
+                                      {tr(
+                                        "Это отдельная операция, подтверждаю",
+                                      )}
                                     </label>
                                   )}
                                 </div>
@@ -734,29 +785,36 @@ export default function BankImport() {
                     disabled={page === 0 || busy}
                     onClick={() => setPage((p) => p - 1)}
                   >
-                    Назад
+                    {tr("Назад")}
                   </Button>
                   <span>
-                    Страница {page + 1} из {Math.ceil(preview.rows.length / 50)}
+                    {tr("Страница ")}
+                    {page + 1} {tr(" из ")}
+                    {Math.ceil(preview.rows.length / 50)}
                   </span>
                   <Button
                     variant="outline"
                     disabled={(page + 1) * 50 >= preview.rows.length || busy}
                     onClick={() => setPage((p) => p + 1)}
                   >
-                    Далее
+                    {tr("Далее")}
                   </Button>
                 </div>
               )}
               {totals}
               <p className="field-help">
-                Без выбора: {summary.unresolved}. Уже подтверждено:{" "}
-                {summary.processed}. Заблокировано из-за ошибок или конфликтов:{" "}
-                {summary.blocked}. Ничего не запишется до следующего шага.
+                {tr("Без выбора: ")}
+                {summary.unresolved}
+                {tr(". Уже подтверждено:")} {summary.processed}
+                {tr(". Заблокировано из-за ошибок или конфликтов:")}{" "}
+                {summary.blocked}
+                {tr(". Ничего не запишется до следующего шага.")}
               </p>
               {needsAck && (
                 <p className="form-error">
-                  Подтвердите отдельные операции с предупреждением о совпадении.
+                  {tr(
+                    "Подтвердите отдельные операции с предупреждением о совпадении.",
+                  )}
                 </p>
               )}
               <div className="form-footer">
@@ -767,7 +825,9 @@ export default function BankImport() {
                     if (
                       !count ||
                       confirm(
-                        "Вернуться к столбцам? Неподтверждённые решения будут сброшены.",
+                        tr(
+                          "Вернуться к столбцам? Неподтверждённые решения будут сброшены.",
+                        ),
                       )
                     ) {
                       setStep(1);
@@ -776,7 +836,7 @@ export default function BankImport() {
                     }
                   }}
                 >
-                  К столбцам
+                  {tr("К столбцам")}
                 </Button>
                 <Button
                   disabled={busy || !ready || !count || needsAck}
@@ -785,30 +845,36 @@ export default function BankImport() {
                     setStep(3);
                   }}
                 >
-                  Проверить итог
+                  {tr("Проверить итог")}
                 </Button>
               </div>
             </>
           ) : step === 3 && preview ? (
             <>
-              <h3>Только проверенные изменения</h3>
+              <h3>{tr("Только проверенные изменения")}</h3>
               {totals}
               <div className="bank-confirm-grid">
                 <span>
-                  <strong>{summary.created}</strong>новых расходов
+                  <strong>{summary.created}</strong>
+                  {tr("новых расходов")}
                 </span>
                 <span>
-                  <strong>{summary.linked}</strong>связей с историей
+                  <strong>{summary.linked}</strong>
+                  {tr("связей с историей")}
                 </span>
                 <span>
-                  <strong>{summary.ignored}</strong>пропущено
+                  <strong>{summary.ignored}</strong>
+                  {tr("пропущено")}
                 </span>
               </div>
               <p className="muted">
-                Строки без выбора ({summary.unresolved}) останутся нетронутыми.
-                Заблокированные строки ({summary.blocked}) не включены.
-                Связанные заправки и ремонты сохранятся как есть. При ошибке
-                одной операции весь выбранный набор будет отменён.
+                {tr("Строки без выбора (")}
+                {summary.unresolved}
+                {tr(") останутся нетронутыми. Заблокированные строки (")}
+                {summary.blocked}
+                {tr(
+                  ") не включены. Связанные заправки и ремонты сохранятся как есть. При ошибке одной операции весь выбранный набор будет отменён.",
+                )}
               </p>
               <div className="form-footer">
                 <Button
@@ -816,7 +882,7 @@ export default function BankImport() {
                   disabled={busy}
                   onClick={() => setStep(2)}
                 >
-                  К операциям
+                  {tr("К операциям")}
                 </Button>
                 <Button
                   disabled={busy || !ready || !count || needsAck}
@@ -840,13 +906,15 @@ export default function BankImport() {
                         await refresh();
                       } catch {
                         notify(
-                          "Изменения сохранены. Обновите историю после подключения.",
+                          tr(
+                            "Изменения сохранены. Обновите историю после подключения.",
+                          ),
                         );
                       }
                     })
                   }
                 >
-                  {busy ? "Подтверждаем…" : "Подтвердить импорт"}
+                  {busy ? tr("Подтверждаем…") : tr("Подтвердить импорт")}
                 </Button>
               </div>
             </>
@@ -874,11 +942,12 @@ export default function BankImport() {
               }
             >
               <FileDown size={16} />
-              Личный журнал подтверждений
+              {tr("Личный журнал подтверждений")}
             </Button>
             <small>
-              Содержит выбранные банковские поля. Храните файл приватно; обычный
-              экспорт истории их не включает.
+              {tr(
+                "Содержит выбранные банковские поля. Храните файл приватно; обычный экспорт истории их не включает.",
+              )}
             </small>
           </div>
         </div>

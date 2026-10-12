@@ -1,3 +1,8 @@
+import { intlLocale } from "./i18n";
+import { categoryLabel } from "./utils";
+import { LanguagePicker } from "./LanguagePicker";
+import { getLocale } from "./i18n";
+import { tr } from "./i18n";
 import { useState, lazy, Suspense } from "react";
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Sharing = lazy(() => import("./Sharing"));
@@ -67,7 +72,7 @@ export function PageHeading({
   return (
     <header className="page-heading">
       <div>
-        <div className="eyebrow">{eyebrow}</div>
+        <div className="eyebrow">{tr(eyebrow)}</div>
         <h1>{title}</h1>
         <p>{description}</p>
       </div>
@@ -79,7 +84,7 @@ export function Empty({
   title,
   description,
   onClick,
-  label = "Добавить запись",
+  label = tr("Добавить запись"),
   icon: Icon = CarFront,
 }: {
   title: string;
@@ -98,7 +103,7 @@ export function Empty({
       {onClick && (
         <Button onClick={onClick}>
           <Plus size={17} />
-          {label}
+          {tr(label)}
         </Button>
       )}
     </div>
@@ -120,7 +125,7 @@ export function Metric({
   return (
     <div className="metric">
       <div className="metric-label">
-        {label}
+        {tr(label)}
         {Icon && <Icon size={17} />}
       </div>
       <div className="metric-value">
@@ -145,11 +150,11 @@ function VehicleSelect({
     <label className="filter-select">
       <CarFront size={17} />
       <select
-        aria-label="Автомобиль"
+        aria-label={tr("Автомобиль")}
         value={value ?? selected}
         onChange={(e) => (onChange || setSelected)(e.target.value)}
       >
-        {all && <option value="">Все автомобили</option>}
+        {all && <option value="">{tr("Все автомобили")}</option>}
         {state.vehicles.map((v) => (
           <option key={v.id} value={v.id}>
             {v.name}
@@ -182,7 +187,7 @@ export function Garage() {
     d.setMonth(d.getMonth() - 5 + i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     return {
-      name: new Intl.DateTimeFormat("ru-RU", { month: "short" }).format(d),
+      name: new Intl.DateTimeFormat(intlLocale(), { month: "short" }).format(d),
       value: sumEvents(entries.filter((e) => e.occurred_at.startsWith(key))),
     };
   });
@@ -190,13 +195,13 @@ export function Garage() {
   return (
     <>
       <PageHeading
-        eyebrow="ВАШИ АВТОМОБИЛИ. ВАША ИСТОРИЯ."
-        title="Мой гараж"
-        description="Всё важное о ваших автомобилях — в одном месте."
+        eyebrow={tr("ВАШИ АВТОМОБИЛИ. ВАША ИСТОРИЯ.")}
+        title={tr("Мой гараж")}
+        description={tr("Всё важное о ваших автомобилях — в одном месте.")}
         action={
           <Button variant="outline" onClick={() => open("vehicle")}>
             <Plus size={17} />
-            Добавить автомобиль
+            {tr("Добавить автомобиль")}
           </Button>
         }
       />
@@ -206,10 +211,10 @@ export function Garage() {
             <CarFront size={22} />
           </span>
           <div>
-            <small>Автомобилей в гараже</small>
+            <small>{tr("Автомобилей в гараже")}</small>
             <strong>
               {state.vehicles.filter((v) => v.status === "active").length}
-              <span>авто</span>
+              <span>{tr("авто")}</span>
             </strong>
           </div>
         </div>
@@ -218,7 +223,7 @@ export function Garage() {
             <ArrowUpRight size={22} />
           </span>
           <div>
-            <small>Расходы в этом месяце</small>
+            <small>{tr("Расходы в этом месяце")}</small>
             <strong>{money(sumEvents(month))}</strong>
           </div>
         </div>
@@ -227,7 +232,7 @@ export function Garage() {
             <Gauge size={22} />
           </span>
           <div>
-            <small>Пробег за время владения</small>
+            <small>{tr("Пробег за время владения")}</small>
             <strong>
               {number(
                 state.vehicles.reduce(
@@ -236,7 +241,7 @@ export function Garage() {
                   0,
                 ),
               )}
-              <span>км</span>
+              <span>{tr("км")}</span>
             </strong>
           </div>
         </div>
@@ -245,10 +250,12 @@ export function Garage() {
             <Bell size={21} />
           </span>
           <div>
-            <small>Требует внимания</small>
+            <small>{tr("Требует внимания")}</small>
             <strong>
               {reminders.length}
-              <span>{reminders.length ? "напоминания" : "всё спокойно"}</span>
+              <span>
+                {reminders.length ? tr("напоминания") : tr("всё спокойно")}
+              </span>
             </strong>
           </div>
         </div>
@@ -259,7 +266,7 @@ export function Garage() {
             className={tab === "active" ? "active" : ""}
             onClick={() => setTab("active")}
           >
-            В гараже{" "}
+            {tr("В гараже")}{" "}
             <span>
               {state.vehicles.filter((v) => v.status === "active").length}
             </span>
@@ -268,13 +275,15 @@ export function Garage() {
             className={tab === "archive" ? "active" : ""}
             onClick={() => setTab("archive")}
           >
-            Архив{" "}
+            {tr("Архив")}{" "}
             <span>
               {state.vehicles.filter((v) => v.status !== "active").length}
             </span>
           </button>
         </div>
-        <span className="tiny muted">У каждого автомобиля своя история</span>
+        <span className="tiny muted">
+          {tr("У каждого автомобиля своя история")}
+        </span>
       </div>
       <section className="vehicle-grid">
         {cars.map((v) => {
@@ -296,7 +305,7 @@ export function Garage() {
             <article className="vehicle-card" key={v.id}>
               <button
                 className="vehicle-open"
-                aria-label={`Открыть ${v.name}`}
+                aria-label={tr("Открыть {0}", [v.name])}
                 onClick={() => {
                   setSelected(v.id);
                   setPage("vehicle");
@@ -310,15 +319,15 @@ export function Garage() {
                   ) : (
                     <div className="vehicle-placeholder">
                       <CarFront size={80} strokeWidth={1} />
-                      <span>Добавьте любимый ракурс</span>
+                      <span>{tr("Добавьте любимый ракурс")}</span>
                     </div>
                   )}
                   <span className="vehicle-badge">
                     {v.status === "active"
-                      ? "В ГАРАЖЕ"
+                      ? tr("В ГАРАЖЕ")
                       : v.status === "sold"
-                        ? "ПРОДАН"
-                        : "В АРХИВЕ"}
+                        ? tr("ПРОДАН")
+                        : tr("В АРХИВЕ")}
                   </span>
                   <span className="cover-arrow">
                     <ArrowUpRight size={20} />
@@ -326,7 +335,7 @@ export function Garage() {
                   <div className="cover-caption">
                     {v.demo_image
                       ? "MASHINA / DEMO COLLECTION"
-                      : v.brand || "ВАШ АВТОМОБИЛЬ"}
+                      : v.brand || tr("ВАШ АВТОМОБИЛЬ")}
                   </div>
                 </div>
                 <div className="vehicle-content">
@@ -336,22 +345,22 @@ export function Garage() {
                   </div>
                   <div className="vehicle-subtitle">
                     <span className="license-plate">
-                      {v.plate || "Без номера"}
+                      {v.plate || tr("Без номера")}
                     </span>
                     <span>
-                      {v.engine || v.fuel || "Персональный автомобиль"}
+                      {v.engine || v.fuel || tr("Персональный автомобиль")}
                     </span>
                   </div>
                   <div className="vehicle-numbers">
                     <div>
-                      <small>Пробег</small>
+                      <small>{tr("Пробег")}</small>
                       <strong>
                         {number(v.current_odometer)}
-                        <span>км</span>
+                        <span>{tr("км")}</span>
                       </strong>
                     </div>
                     <div>
-                      <small>В этом месяце</small>
+                      <small>{tr("В этом месяце")}</small>
                       <strong>
                         {money(
                           sumEvents(
@@ -368,17 +377,17 @@ export function Garage() {
                   >
                     <span className="status-dot" />
                     <span>
-                      {next ? next.title : "Всё под контролем"}
-                      {v.role === "driver" && <em> · Водитель</em>}
+                      {next ? next.title : tr("Всё под контролем")}
+                      {v.role === "driver" && <em> {tr(" · Водитель")}</em>}
                     </span>
                     <small>
                       {next
                         ? next.remaining_km != null
-                          ? `${number(next.remaining_km)} км`
+                          ? tr("{0} км", [number(next.remaining_km)])
                           : next.due_date
                             ? dateLabel(next.due_date)
-                            : "Запланировано"
-                        : "Нет ближайших работ"}
+                            : tr("Запланировано")
+                        : tr("Нет ближайших работ")}
                     </small>
                   </div>
                 </div>
@@ -386,7 +395,7 @@ export function Garage() {
               {v.can_edit !== false && (
                 <button
                   className="vehicle-more icon-button"
-                  aria-label={`Редактировать ${v.name}`}
+                  aria-label={tr("Редактировать {0}", [v.name])}
                   onClick={() => open("vehicle", v)}
                 >
                   <MoreHorizontal size={20} />
@@ -400,16 +409,18 @@ export function Garage() {
             <Empty
               title={
                 tab === "active"
-                  ? "Здесь начинается ваша история"
-                  : "В архиве пока пусто"
+                  ? tr("Здесь начинается ваша история")
+                  : tr("В архиве пока пусто")
               }
               description={
                 tab === "active"
-                  ? "Добавьте первый автомобиль. Все расходы, поездки и важные детали найдут своё место."
-                  : "Проданные и архивные автомобили сохранят свою историю."
+                  ? tr(
+                      "Добавьте первый автомобиль. Все расходы, поездки и важные детали найдут своё место.",
+                    )
+                  : tr("Проданные и архивные автомобили сохранят свою историю.")
               }
               onClick={tab === "active" ? () => open("vehicle") : undefined}
-              label="Добавить автомобиль"
+              label={tr("Добавить автомобиль")}
             />
           </div>
         )}
@@ -418,17 +429,17 @@ export function Garage() {
         <div className="panel spending-panel">
           <div className="panel-heading">
             <div>
-              <span className="eyebrow">ПОД КОНТРОЛЕМ</span>
-              <h3>Как меняются расходы</h3>
+              <span className="eyebrow">{tr("ПОД КОНТРОЛЕМ")}</span>
+              <h3>{tr("Как меняются расходы")}</h3>
             </div>
             <button className="text-link" onClick={() => setPage("analytics")}>
-              Аналитика
+              {tr("Аналитика")}
               <ArrowUpRight size={16} />
             </button>
           </div>
           <div className="spending-total">
             {money(sumEvents(month))}
-            <span>в этом месяце · RUB</span>
+            <span>{tr("в этом месяце · RUB")}</span>
           </div>
           {entries.length ? (
             <div className="mini-chart">
@@ -445,15 +456,15 @@ export function Garage() {
             </div>
           ) : (
             <p className="chart-empty muted">
-              Добавьте первый расход, и здесь появится ваша динамика.
+              {tr("Добавьте первый расход, и здесь появится ваша динамика.")}
             </p>
           )}
         </div>
         <div className="panel attention-panel">
           <div className="panel-heading">
             <div>
-              <span className="eyebrow">НЕ УПУСТИТЬ ВАЖНОЕ</span>
-              <h3>На горизонте</h3>
+              <span className="eyebrow">{tr("НЕ УПУСТИТЬ ВАЖНОЕ")}</span>
+              <h3>{tr("На горизонте")}</h3>
             </div>
             <Bell size={20} />
           </div>
@@ -477,7 +488,7 @@ export function Garage() {
                   <small>
                     {state.vehicles.find((v) => v.id === r.vehicle_id)?.name} ·{" "}
                     {r.remaining_km != null
-                      ? `${number(r.remaining_km)} км`
+                      ? tr("{0} км", [number(r.remaining_km)])
                       : dateLabel(r.due_date)}
                   </small>
                 </div>
@@ -487,13 +498,13 @@ export function Garage() {
           ) : (
             <div className="calm-state">
               <ShieldCheck size={32} />
-              <p>Можно просто наслаждаться дорогой.</p>
+              <p>{tr("Можно просто наслаждаться дорогой.")}</p>
               <button
                 hidden={!state.vehicles.some((v) => v.can_edit !== false)}
                 className="text-link"
                 onClick={() => open("reminder")}
               >
-                Создать напоминание
+                {tr("Создать напоминание")}
                 <Plus size={14} />
               </button>
             </div>
@@ -502,7 +513,7 @@ export function Garage() {
             className="panel-bottom-link"
             onClick={() => setPage("reminders")}
           >
-            Все напоминания
+            {tr("Все напоминания")}
             <ArrowRight size={16} />
           </button>
         </div>
@@ -510,11 +521,11 @@ export function Garage() {
       <section className="panel recent-panel">
         <div className="panel-heading">
           <div>
-            <span className="eyebrow">ИСТОРИЯ ПРОДОЛЖАЕТСЯ</span>
-            <h3>Последние события</h3>
+            <span className="eyebrow">{tr("ИСТОРИЯ ПРОДОЛЖАЕТСЯ")}</span>
+            <h3>{tr("Последние события")}</h3>
           </div>
           <button className="text-link" onClick={() => setPage("timeline")}>
-            Вся история
+            {tr("Вся история")}
             <ArrowUpRight size={16} />
           </button>
         </div>
@@ -526,8 +537,10 @@ export function Garage() {
         ) : (
           <Empty
             icon={Clock3}
-            title="Ни одна деталь не потеряется"
-            description="Запишите первую заправку, обслуживание или просто важный момент."
+            title={tr("Ни одна деталь не потеряется")}
+            description={tr(
+              "Запишите первую заправку, обслуживание или просто важный момент.",
+            )}
             onClick={() => {
               if (!selected) open("vehicle");
               else open("quick");
@@ -556,13 +569,14 @@ export function EventRow({ entry }: { entry: Entry }) {
   const attachments = state.attachments.filter((a) => a.event_id === entry.id);
   const [preview, setPreview] = useState<Attachment | null>(null);
   async function remove() {
-    if (!confirm("Удалить запись? После удаления её можно отменить.")) return;
+    if (!confirm(tr("Удалить запись? После удаления её можно отменить.")))
+      return;
     try {
       const deleted = await save("event", {}, entry, "delete");
       setView(false);
-      notify("Запись удалена", () => {
+      notify(tr("Запись удалена"), () => {
         save("event", {}, deleted, "restore")
-          .then(() => notify("Запись восстановлена"))
+          .then(() => notify(tr("Запись восстановлена")))
           .catch((e) => notify(e.message));
       });
     } catch (error) {
@@ -583,22 +597,25 @@ export function EventRow({ entry }: { entry: Entry }) {
               {entry.odometer != null && (
                 <>
                   {" "}
-                  <i>·</i> {number(entry.odometer)} км
+                  <i>·</i> {number(entry.odometer)} {tr(" км")}
                 </>
               )}
-              {entry.pending && <em> · На устройстве</em>}
+              {entry.pending && <em> {tr(" · На устройстве")}</em>}
             </span>
           </div>
           <div className="event-amount">
             {entry.kind === "odometer"
-              ? `${number(entry.odometer)} км`
+              ? tr("{0} км", [number(entry.odometer)])
               : entry.kind === "note"
-                ? "Заметка"
+                ? tr("Заметка")
                 : money(entry.amount_minor, entry.currency)}
             <small>
               {entry.kind === "fuel"
-                ? `${number(Number(entry.liters), 2)} л · ${entry.station || entry.fuel}`
-                : entry.category || kindNames[entry.kind]}
+                ? tr("{0} л · {1}", [
+                    number(Number(entry.liters), 2),
+                    entry.station || entry.fuel,
+                  ])
+                : categoryLabel(entry.category || kindNames[entry.kind])}
             </small>
           </div>
           <ChevronRight className="event-chevron" size={16} />
@@ -606,7 +623,9 @@ export function EventRow({ entry }: { entry: Entry }) {
         {entry.can_edit !== false && (
           <button
             className="icon-button row-edit"
-            aria-label={`Редактировать ${entry.description || kindNames[entry.kind]}`}
+            aria-label={tr("Редактировать {0}", [
+              entry.description || kindNames[entry.kind],
+            ])}
             onClick={() => open(entry.kind, entry)}
           >
             <Pencil size={15} />
@@ -633,23 +652,27 @@ export function EventRow({ entry }: { entry: Entry }) {
           <dl>
             {[
               [
-                "Пробег",
+                tr("Пробег"),
                 entry.odometer != null
-                  ? `${number(entry.odometer)} км`
-                  : "Не указан",
+                  ? tr("{0} км", [number(entry.odometer)])
+                  : tr("Не указан"),
               ],
-              ["Категория", entry.category],
-              ["Сервис / продавец", entry.vendor],
-              ["АЗС", entry.station],
-              ["Топливо", entry.fuel],
-              ["Литры", entry.liters],
-              ["Цена литра", entry.price],
+              [tr("Категория"), entry.category],
+              [tr("Сервис / продавец"), entry.vendor],
+              [tr("АЗС"), entry.station],
+              [tr("Топливо"), entry.fuel],
+              [tr("Литры"), entry.liters],
+              [tr("Цена литра"), entry.price],
               [
-                "Полный бак",
-                entry.kind === "fuel" ? (entry.full ? "Да" : "Нет") : null,
+                tr("Полный бак"),
+                entry.kind === "fuel"
+                  ? entry.full
+                    ? tr("Да")
+                    : tr("Нет")
+                  : null,
               ],
-              ["Теги", entry.tags],
-              ["Оплата", entry.payment],
+              [tr("Теги"), entry.tags],
+              [tr("Оплата"), entry.payment],
             ]
               .filter(([, v]) => v)
               .map(([k, v]) => (
@@ -662,13 +685,13 @@ export function EventRow({ entry }: { entry: Entry }) {
           <ServiceLocation entry={entry} />
           {entry.items?.length > 0 && (
             <div className="detail-items">
-              <h4>Запчасти и работы</h4>
+              <h4>{tr("Запчасти и работы")}</h4>
               {entry.items.map((i, index) => (
                 <div key={index}>
                   <span>
                     {i.name}
                     <small>
-                      {i.part_number} · {i.quantity} шт.
+                      {i.part_number} · {i.quantity} {tr(" шт.")}
                     </small>
                   </span>
                   <strong>{money(i.amount_minor || 0, entry.currency)}</strong>
@@ -678,7 +701,7 @@ export function EventRow({ entry }: { entry: Entry }) {
           )}
           {attachments.length > 0 && (
             <div className="detail-attachments">
-              <h4>Вложения</h4>
+              <h4>{tr("Вложения")}</h4>
               {attachments.map((a) => (
                 <button key={a.id} onClick={() => setPreview(a)}>
                   <FileText size={18} />
@@ -691,7 +714,7 @@ export function EventRow({ entry }: { entry: Entry }) {
           {entry.can_edit !== false && (
             <label className="file-attach">
               <Upload size={17} />
-              Добавить вложение
+              {tr("Добавить вложение")}
               <input
                 type="file"
                 onChange={async (e) => {
@@ -708,7 +731,7 @@ export function EventRow({ entry }: { entry: Entry }) {
                         (await api<{ csrf: string }>("/session")).csrf,
                       );
                       await refresh();
-                      notify("Файл добавлен");
+                      notify(tr("Файл добавлен"));
                     } catch (error) {
                       notify((error as Error).message);
                     }
@@ -727,11 +750,11 @@ export function EventRow({ entry }: { entry: Entry }) {
                 }}
               >
                 <Pencil size={16} />
-                Редактировать
+                {tr("Редактировать")}
               </Button>
               <Button variant="destructive" onClick={remove}>
                 <Trash2 size={16} />
-                Удалить
+                {tr("Удалить")}
               </Button>
             </div>
           )}
@@ -750,8 +773,8 @@ export function VehiclePage() {
   if (!v)
     return (
       <Empty
-        title="Выберите автомобиль"
-        description="Вернитесь в гараж, чтобы открыть историю."
+        title={tr("Выберите автомобиль")}
+        description={tr("Вернитесь в гараж, чтобы открыть историю.")}
       />
     );
   const events = activeEvents(state, v.id);
@@ -765,14 +788,14 @@ export function VehiclePage() {
     <>
       <button className="back-link" onClick={() => setPage("garage")}>
         <ChevronLeft size={17} />
-        Мой гараж
+        {tr("Мой гараж")}
       </button>
       <PageHeading
-        eyebrow={`${v.brand || "МОЙ АВТОМОБИЛЬ"} · ${v.year || ""}`}
+        eyebrow={`${v.brand || tr("МОЙ АВТОМОБИЛЬ")} · ${v.year || ""}`}
         title={v.name}
         description={
           [v.engine, v.transmission, v.drive].filter(Boolean).join(" · ") ||
-          "Вся история вашего автомобиля"
+          tr("Вся история вашего автомобиля")
         }
         action={
           v.can_edit !== false && (
@@ -780,7 +803,7 @@ export function VehiclePage() {
               {" "}
               <Button variant="outline" onClick={() => open("vehicle", v)}>
                 <Pencil size={16} />
-                Редактировать
+                {tr("Редактировать")}
               </Button>
               <Suspense fallback={null}>
                 <Sharing vehicleId={v.id} />
@@ -799,27 +822,30 @@ export function VehiclePage() {
           )}
         </div>
         <aside>
-          <span className="license-plate">{v.plate || "Без номера"}</span>
-          <span className="eyebrow">ТЕКУЩИЙ ПРОБЕГ</span>
+          <span className="license-plate">{v.plate || tr("Без номера")}</span>
+          <span className="eyebrow">{tr("ТЕКУЩИЙ ПРОБЕГ")}</span>
           <strong>
             {number(v.current_odometer)}
-            <small>км</small>
+            <small>{tr("км")}</small>
           </strong>
           <button className="text-link" onClick={() => open("odometer")}>
-            Обновить показание
+            {tr("Обновить показание")}
             <ArrowUpRight size={16} />
           </button>
           <dl>
             {[
               ["VIN", v.vin],
-              ["Поколение", v.generation],
-              ["Комплектация", v.trim],
+              [tr("Поколение"), v.generation],
+              [tr("Комплектация"), v.trim],
               [
-                "Приобретён",
-                v.purchase_date ? dateLabel(v.purchase_date) : "Не указано",
+                tr("Приобретён"),
+                v.purchase_date ? dateLabel(v.purchase_date) : tr("Не указано"),
               ],
-              ["Цена покупки", money(v.purchase_minor || 0, v.currency)],
-              ["Пробег при покупке", number(v.purchase_odometer) + " км"],
+              [tr("Цена покупки"), money(v.purchase_minor || 0, v.currency)],
+              [
+                tr("Пробег при покупке"),
+                number(v.purchase_odometer) + tr(" км"),
+              ],
             ]
               .filter(([, value]) => value)
               .map(([key, value]) => (
@@ -833,23 +859,23 @@ export function VehiclePage() {
       </section>
       <section className="metrics-grid">
         <Metric
-          label="За всё время"
+          label={tr("За всё время")}
           value={money(sumEvents(events))}
-          detail="Эксплуатационные расходы"
+          detail={tr("Эксплуатационные расходы")}
         />
-        <Metric label="В этом месяце" value={money(month)} />
-        <Metric label="В этом году" value={money(year)} />
+        <Metric label={tr("В этом месяце")} value={money(month)} />
+        <Metric label={tr("В этом году")} value={money(year)} />
         <Metric
-          label="Пробег владения"
+          label={tr("Пробег владения")}
           value={number(Math.max(0, v.current_odometer - v.purchase_odometer))}
-          unit="км"
+          unit={tr("км")}
         />
       </section>
       <div className="section-heading">
-        <h3>Последние события</h3>
+        <h3>{tr("Последние события")}</h3>
         <Button size="sm" onClick={() => open("quick")}>
           <Plus size={16} />
-          Новая запись
+          {tr("Новая запись")}
         </Button>
       </div>
       <div className="panel">
@@ -860,20 +886,20 @@ export function VehiclePage() {
             .map((e) => <EventRow key={e.id} entry={e} />)
         ) : (
           <Empty
-            title="Напишем первую главу?"
-            description="Начните с заправки, покупки или обслуживания."
+            title={tr("Напишем первую главу?")}
+            description={tr("Начните с заправки, покупки или обслуживания.")}
             onClick={() => open("quick")}
           />
         )}
       </div>
       <div className="section-heading">
-        <h3>Ближайшие работы</h3>
+        <h3>{tr("Ближайшие работы")}</h3>
         <button
           hidden={!state.vehicles.some((v) => v.can_edit !== false)}
           className="text-link"
           onClick={() => open("reminder")}
         >
-          Добавить
+          {tr("Добавить")}
           <Plus size={16} />
         </button>
       </div>
@@ -887,7 +913,7 @@ export function VehiclePage() {
       {v.can_edit !== false && (
         <div className="vehicle-archive">
           <p className="muted">
-            История сохраняется даже после продажи автомобиля.
+            {tr("История сохраняется даже после продажи автомобиля.")}
           </p>
           <Button
             variant="outline"
@@ -900,8 +926,8 @@ export function VehiclePage() {
                 );
                 notify(
                   v.status === "active"
-                    ? "Автомобиль перенесён в архив"
-                    : "Автомобиль возвращён в гараж",
+                    ? tr("Автомобиль перенесён в архив")
+                    : tr("Автомобиль возвращён в гараж"),
                 );
               } catch (error) {
                 notify((error as Error).message);
@@ -913,7 +939,7 @@ export function VehiclePage() {
             ) : (
               <RotateCcw size={17} />
             )}{" "}
-            {v.status === "active" ? "Архивировать" : "Вернуть в гараж"}
+            {v.status === "active" ? tr("Архивировать") : tr("Вернуть в гараж")}
           </Button>
         </div>
       )}
@@ -952,13 +978,15 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
     <>
       {!fixedKind && (
         <PageHeading
-          eyebrow="КАЖДАЯ ДЕТАЛЬ НА СВОЁМ МЕСТЕ"
-          title="История автомобиля"
-          description="Заправки, обслуживание и моменты, которые стоит сохранить."
+          eyebrow={tr("КАЖДАЯ ДЕТАЛЬ НА СВОЁМ МЕСТЕ")}
+          title={tr("История автомобиля")}
+          description={tr(
+            "Заправки, обслуживание и моменты, которые стоит сохранить.",
+          )}
           action={
             <Button onClick={() => open("quick")}>
               <Plus size={17} />
-              Добавить запись
+              {tr("Добавить запись")}
             </Button>
           }
         />
@@ -975,8 +1003,8 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
         <label className="search">
           <Search size={17} />
           <input
-            aria-label="Поиск по истории"
-            placeholder="Событие, деталь, артикул…"
+            aria-label={tr("Поиск по истории")}
+            placeholder={tr("Событие, деталь, артикул…")}
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -986,14 +1014,14 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
         </label>
         {!fixedKind && (
           <select
-            aria-label="Тип события"
+            aria-label={tr("Тип события")}
             value={kind}
             onChange={(e) => {
               setKind(e.target.value);
               setPage(0);
             }}
           >
-            <option value="">Все события</option>
+            <option value="">{tr("Все события")}</option>
             {Object.entries(kindNames).map(([k, v]) => (
               <option key={k} value={k}>
                 {v}
@@ -1002,27 +1030,29 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
           </select>
         )}
         <select
-          aria-label="Категория"
+          aria-label={tr("Категория")}
           value={category}
           onChange={(e) => {
             setCategory(e.target.value);
             setPage(0);
           }}
         >
-          <option value="">Все категории</option>
+          <option value="">{tr("Все категории")}</option>
           {[
             ...categories,
             ...state.categories.filter((c) => !c.deleted).map((c) => c.name),
           ].map((c) => (
-            <option key={c}>{c}</option>
+            <option key={c} value={c}>
+              {categoryLabel(c)}
+            </option>
           ))}
         </select>
       </div>
       <div className="period-filters">
         <label>
-          С{" "}
+          {tr("С")}{" "}
           <input
-            aria-label="Начало периода"
+            aria-label={tr("Начало периода")}
             type="date"
             value={start}
             onChange={(e) => {
@@ -1032,9 +1062,9 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
           />
         </label>
         <label>
-          По{" "}
+          {tr("По")}{" "}
           <input
-            aria-label="Конец периода"
+            aria-label={tr("Конец периода")}
             type="date"
             value={end}
             onChange={(e) => {
@@ -1044,14 +1074,16 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
           />
         </label>
         <select
-          aria-label="Сортировка"
+          aria-label={tr("Сортировка")}
           value={sort}
           onChange={(e) => setSort(e.target.value)}
         >
-          <option value="desc">Сначала новые</option>
-          <option value="asc">Сначала старые</option>
+          <option value="desc">{tr("Сначала новые")}</option>
+          <option value="asc">{tr("Сначала старые")}</option>
         </select>
-        <span>{filtered.length} записей</span>
+        <span>
+          {filtered.length} {tr(" записей")}
+        </span>
       </div>
       <div className="panel timeline-panel">
         {visible.length ? (
@@ -1059,8 +1091,8 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
         ) : (
           <Empty
             icon={Clock3}
-            title="Пока нет событий"
-            description="Добавьте запись или измените фильтры поиска."
+            title={tr("Пока нет событий")}
+            description={tr("Добавьте запись или измените фильтры поиска.")}
             onClick={() =>
               open(
                 fixedKind === "fuel"
@@ -1081,7 +1113,7 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
             onClick={() => setPage((p) => p - 1)}
           >
             <ChevronLeft size={17} />
-            Назад
+            {tr("Назад")}
           </Button>
           <span>
             {page + 1} / {Math.ceil(filtered.length / 50)}
@@ -1091,7 +1123,7 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
             disabled={(page + 1) * 50 >= filtered.length}
             onClick={() => setPage((p) => p + 1)}
           >
-            Далее
+            {tr("Далее")}
             <ChevronRight size={17} />
           </Button>
         </div>
@@ -1106,13 +1138,15 @@ export function FuelPage() {
   return (
     <>
       <PageHeading
-        eyebrow="ДО СЛЕДУЮЩЕЙ ПОЕЗДКИ"
-        title="Заправки"
-        description="Литры, стоимость и реальный расход. Без предположений."
+        eyebrow={tr("ДО СЛЕДУЮЩЕЙ ПОЕЗДКИ")}
+        title={tr("Заправки")}
+        description={tr(
+          "Литры, стоимость и реальный расход. Без предположений.",
+        )}
         action={
           <Button onClick={() => open("fuel")}>
             <Plus size={17} />
-            Заправить историю
+            {tr("Заправить историю")}
           </Button>
         }
       />
@@ -1121,29 +1155,36 @@ export function FuelPage() {
           <Fuel size={34} />
         </span>
         <div>
-          <h3>От полного бака до полного бака</h3>
+          <h3>{tr("От полного бака до полного бака")}</h3>
           <p>
-            Считаем расход только по завершённым циклам, включая частичные
-            заправки. Если была пропущена запись, отметьте это в форме.
+            {tr(
+              "Считаем расход только по завершённым циклам, включая частичные заправки. Если была пропущена запись, отметьте это в форме.",
+            )}
           </p>
         </div>
         <button className="text-link" onClick={() => setPage("fuel-analytics")}>
-          Графики и расход
+          {tr("Графики и расход")}
           <ArrowUpRight size={17} />
         </button>
       </section>
       <section className="metrics-grid three">
-        <Metric label="Заправок в истории" value={number(events.length)} />
-        <Metric label="Потрачено на топливо" value={money(sumEvents(events))} />
         <Metric
-          label="Заправлено"
+          label={tr("Заправок в истории")}
+          value={number(events.length)}
+        />
+        <Metric
+          label={tr("Потрачено на топливо")}
+          value={money(sumEvents(events))}
+        />
+        <Metric
+          label={tr("Заправлено")}
           value={number(
             events
               .filter((e) => e.currency === "RUB")
               .reduce((s, e) => s + Number(e.liters), 0),
             1,
           )}
-          unit="л"
+          unit={tr("л")}
         />
       </section>
       <Timeline fixedKind="fuel" />
@@ -1152,7 +1193,9 @@ export function FuelPage() {
 }
 export function Maintenance() {
   return (
-    <Suspense fallback={<p className="muted">Открываем обслуживание…</p>}>
+    <Suspense
+      fallback={<p className="muted">{tr("Открываем обслуживание…")}</p>}
+    >
       <OwnershipTools>
         <MaintenanceHistory />
       </OwnershipTools>
@@ -1164,13 +1207,15 @@ function MaintenanceHistory() {
   return (
     <>
       <PageHeading
-        eyebrow="ЗАБОТА, КОТОРАЯ ОКУПАЕТСЯ"
-        title="Обслуживание"
-        description="Работы, запчасти и их история. Машина в хороших руках."
+        eyebrow={tr("ЗАБОТА, КОТОРАЯ ОКУПАЕТСЯ")}
+        title={tr("Обслуживание")}
+        description={tr(
+          "Работы, запчасти и их история. Машина в хороших руках.",
+        )}
         action={
           <Button onClick={() => open("maintenance")}>
             <Plus size={17} />
-            Записать обслуживание
+            {tr("Записать обслуживание")}
           </Button>
         }
       />
@@ -1189,13 +1234,13 @@ function MaintenanceHistory() {
           ))}
       </div>
       <div className="section-heading">
-        <h3>История работ</h3>
+        <h3>{tr("История работ")}</h3>
         <button
           hidden={!state.vehicles.some((v) => v.can_edit !== false)}
           className="text-link"
           onClick={() => open("reminder")}
         >
-          Настроить интервал
+          {tr("Настроить интервал")}
           <Plus size={16} />
         </button>
       </div>
@@ -1224,11 +1269,11 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
           )
         : 100;
   const names: Record<string, string> = {
-    normal: "Всё по плану",
-    soon: "Скоро потребуется",
-    overdue: "Просрочено",
-    disabled: "Отключено",
-    completed: "Выполнено",
+    normal: tr("Всё по плану"),
+    soon: tr("Скоро потребуется"),
+    overdue: tr("Просрочено"),
+    disabled: tr("Отключено"),
+    completed: tr("Выполнено"),
   };
   return (
     <article className={`reminder-card panel ${r.status}`}>
@@ -1242,7 +1287,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
         {r.can_edit !== false && (
           <button
             className="icon-button"
-            aria-label={`Редактировать ${r.title}`}
+            aria-label={tr("Редактировать {0}", [r.title])}
             onClick={() => open("reminder", r)}
           >
             <Pencil size={15} />
@@ -1254,12 +1299,12 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
       <div className="reminder-resource">
         <strong>
           {remaining != null ? number(remaining) : number(r.remaining_days)}
-          <small>{remaining != null ? "км" : "дней"}</small>
+          <small>{remaining != null ? tr("км") : tr("дней")}</small>
         </strong>
         <span>
-          до обслуживания
+          {tr("до обслуживания")}
           <br />
-          расчётный остаток
+          {tr("расчётный остаток")}
         </span>
       </div>
       <div className="resource-bar">
@@ -1275,7 +1320,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
         {r.due_odometer != null && (
           <span>
             <Gauge size={14} />
-            {number(r.due_odometer)} км
+            {number(r.due_odometer)} {tr(" км")}
           </span>
         )}
       </div>
@@ -1288,7 +1333,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
             disabled={r.status === "completed"}
           >
             <Check size={15} />
-            Выполнено
+            {tr("Выполнено")}
           </Button>
           <button
             className="text-link"
@@ -1296,21 +1341,23 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
               try {
                 await save("reminder", { enabled: !r.enabled }, r);
                 notify(
-                  r.enabled ? "Напоминание отключено" : "Напоминание включено",
+                  r.enabled
+                    ? tr("Напоминание отключено")
+                    : tr("Напоминание включено"),
                 );
               } catch (e) {
                 notify((e as Error).message);
               }
             }}
           >
-            {r.enabled ? "Отключить" : "Включить"}
+            {r.enabled ? tr("Отключить") : tr("Включить")}
           </button>
         </div>
       )}
       <Sheet
         open={complete}
         onClose={() => setComplete(false)}
-        title="Обслуживание выполнено"
+        title={tr("Обслуживание выполнено")}
       >
         <form
           className="record-form"
@@ -1320,7 +1367,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
             try {
               const values = Object.fromEntries(new FormData(e.currentTarget));
               await save("reminder", values, r, "complete");
-              notify("Обслуживание отмечено. Интервалы обновлены.");
+              notify(tr("Обслуживание отмечено. Интервалы обновлены."));
               setComplete(false);
             } catch (e) {
               notify((e as Error).message);
@@ -1330,7 +1377,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
           }}
         >
           <label>
-            Дата выполнения
+            {tr("Дата выполнения")}
             <input
               name="completion_date"
               type="date"
@@ -1339,21 +1386,22 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
             />
           </label>
           <label>
-            Подтверждённый пробег, км
+            {tr("Подтверждённый пробег, км")}
             <input
               name="completion_odometer"
               type="number"
               placeholder={
-                r.repeat_km ? "Пробег при выполнении" : "Необязательно"
+                r.repeat_km ? tr("Пробег при выполнении") : tr("Необязательно")
               }
               required={!!r.repeat_km}
             />
           </label>
           <p className="field-help">
-            Повторяющееся напоминание будет отсчитано от этих значений. Пробег
-            автомобиля автоматически не изменяется.
+            {tr(
+              "Повторяющееся напоминание будет отсчитано от этих значений. Пробег автомобиля автоматически не изменяется.",
+            )}
           </p>
-          <Button disabled={busy}>Подтвердить</Button>
+          <Button disabled={busy}>{tr("Подтвердить")}</Button>
         </form>
       </Sheet>
     </article>
@@ -1368,16 +1416,18 @@ export function Reminders() {
   return (
     <>
       <PageHeading
-        eyebrow="СПОКОЙСТВИЕ В ДЕТАЛЯХ"
-        title="Напоминания"
-        description="Меньше держать в голове. Больше наслаждаться дорогой."
+        eyebrow={tr("СПОКОЙСТВИЕ В ДЕТАЛЯХ")}
+        title={tr("Напоминания")}
+        description={tr(
+          "Меньше держать в голове. Больше наслаждаться дорогой.",
+        )}
         action={
           <Button
             hidden={!state.vehicles.some((v) => v.can_edit !== false)}
             onClick={() => open("reminder")}
           >
             <Plus size={17} />
-            Новое напоминание
+            {tr("Новое напоминание")}
           </Button>
         }
       />
@@ -1387,17 +1437,17 @@ export function Reminders() {
             className={filter === "active" ? "active" : ""}
             onClick={() => setFilter("active")}
           >
-            Активные
+            {tr("Активные")}
           </button>
           <button
             className={filter === "all" ? "active" : ""}
             onClick={() => setFilter("all")}
           >
-            Все напоминания
+            {tr("Все напоминания")}
           </button>
         </div>
         <span className="tiny muted">
-          Дата или пробег — что наступит раньше
+          {tr("Дата или пробег — что наступит раньше")}
         </span>
       </div>
       <div className="reminder-grid">
@@ -1409,8 +1459,10 @@ export function Reminders() {
         <div className="panel">
           <Empty
             icon={Bell}
-            title="Важное не забудется"
-            description="Настройте замену масла, страховку или другую регулярную заботу."
+            title={tr("Важное не забудется")}
+            description={tr(
+              "Настройте замену масла, страховку или другую регулярную заботу.",
+            )}
             onClick={
               state.vehicles.some((v) => v.can_edit !== false)
                 ? () => open("reminder")
@@ -1444,18 +1496,18 @@ function Preview({
         ) : (
           <Empty
             icon={FileText}
-            title="Файл готов к скачиванию"
-            description="Предпросмотр этого формата не поддерживается."
+            title={tr("Файл готов к скачиванию")}
+            description={tr("Предпросмотр этого формата не поддерживается.")}
           />
         )}
         <p className="muted tiny">
-          {a.document_type} · {number(a.size / 1024)} КБ
-          {a.expires && ` · до ${dateLabel(a.expires)}`}
+          {a.document_type} · {number(a.size / 1024)} {tr(" КБ")}
+          {a.expires && tr(" · до {0}", [dateLabel(a.expires)])}
         </p>
         {a.notes && <p>{a.notes}</p>}
         <Button onClick={() => download(fileURL(a.id) + "?download=1")}>
           <Download size={17} />
-          Скачать файл
+          {tr("Скачать файл")}
         </Button>
       </div>
     </Sheet>
@@ -1477,14 +1529,16 @@ export function Documents() {
   return (
     <>
       <PageHeading
-        eyebrow="ВСЁ НА СВОЁМ МЕСТЕ"
-        title="Документы"
-        description="От первого договора до последнего чека. Только для вас."
+        eyebrow={tr("ВСЁ НА СВОЁМ МЕСТЕ")}
+        title={tr("Документы")}
+        description={tr(
+          "От первого договора до последнего чека. Только для вас.",
+        )}
         action={
           state.vehicles.some((v) => v.can_edit !== false) && (
             <Button onClick={() => open("document")}>
               <Upload size={17} />
-              Добавить документ
+              {tr("Добавить документ")}
             </Button>
           )
         }
@@ -1494,8 +1548,8 @@ export function Documents() {
         <label className="search">
           <Search size={17} />
           <input
-            aria-label="Поиск документов"
-            placeholder="Название, тип или заметка…"
+            aria-label={tr("Поиск документов")}
+            placeholder={tr("Название, тип или заметка…")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -1517,8 +1571,8 @@ export function Documents() {
                   {a.media_type === "application/pdf"
                     ? "PDF"
                     : a.media_type.startsWith("image/")
-                      ? "ФОТО"
-                      : "ФАЙЛ"}
+                      ? tr("ФОТО")
+                      : tr("ФАЙЛ")}
                 </span>
               </div>
               <div>
@@ -1526,11 +1580,12 @@ export function Documents() {
                 <h3>{a.title}</h3>
                 <p>
                   {state.vehicles.find((v) => v.id === a.vehicle_id)?.name} ·{" "}
-                  {number(a.size / 1024)} КБ
+                  {number(a.size / 1024)} {tr(" КБ")}
                 </p>
                 {a.expires && (
                   <span className="document-expires">
-                    Действует до {dateLabel(a.expires)}
+                    {tr("Действует до ")}
+                    {dateLabel(a.expires)}
                   </span>
                 )}
               </div>
@@ -1539,12 +1594,12 @@ export function Documents() {
               {a.can_edit !== false && (
                 <button className="text-link" onClick={() => setEdit(a)}>
                   <Pencil size={14} />
-                  Изменить
+                  {tr("Изменить")}
                 </button>
               )}
               <button
                 className="icon-button"
-                aria-label={`Скачать ${a.title}`}
+                aria-label={tr("Скачать {0}", [a.title])}
                 onClick={() => download(fileURL(a.id) + "?download=1")}
               >
                 <Download size={17} />
@@ -1552,11 +1607,13 @@ export function Documents() {
               {a.can_edit !== false && (
                 <button
                   className="icon-button"
-                  aria-label={`Удалить ${a.title}`}
+                  aria-label={tr("Удалить {0}", [a.title])}
                   onClick={async () => {
                     if (
                       confirm(
-                        "Удалить документ? Копия останется только в ваших резервных архивах.",
+                        tr(
+                          "Удалить документ? Копия останется только в ваших резервных архивах.",
+                        ),
                       )
                     ) {
                       try {
@@ -1566,7 +1623,7 @@ export function Documents() {
                           session.csrf,
                         );
                         await refresh();
-                        notify("Документ удалён");
+                        notify(tr("Документ удалён"));
                       } catch (e) {
                         notify((e as Error).message);
                       }
@@ -1584,14 +1641,16 @@ export function Documents() {
         <div className="panel">
           <Empty
             icon={FolderOpen}
-            title="Важные бумаги — всегда рядом"
-            description="Загрузите страховку, заказ-наряд или фото. Файлы хранятся на вашем сервере."
+            title={tr("Важные бумаги — всегда рядом")}
+            description={tr(
+              "Загрузите страховку, заказ-наряд или фото. Файлы хранятся на вашем сервере.",
+            )}
             onClick={
               state.vehicles.some((v) => v.can_edit !== false)
                 ? () => open("document")
                 : undefined
             }
-            label="Добавить документ"
+            label={tr("Добавить документ")}
           />
         </div>
       )}
@@ -1606,7 +1665,7 @@ export function Documents() {
           )
         }
         onClose={() => setEdit(null)}
-        title="Данные документа"
+        title={tr("Данные документа")}
       >
         {edit && (
           <form
@@ -1622,7 +1681,7 @@ export function Documents() {
                 );
                 await refresh();
                 setEdit(null);
-                notify("Документ обновлён");
+                notify(tr("Документ обновлён"));
               } catch (error) {
                 notify((error as Error).message);
               }
@@ -1634,11 +1693,11 @@ export function Documents() {
               <label key={key}>
                 {
                   {
-                    title: "Название",
+                    title: tr("Название"),
                     document_type: "Тип",
-                    issued: "Дата выдачи",
-                    expires: "Действует до",
-                    notes: "Заметка",
+                    issued: tr("Дата выдачи"),
+                    expires: tr("Действует до"),
+                    notes: tr("Заметка"),
                   }[key]
                 }
                 <input
@@ -1651,20 +1710,24 @@ export function Documents() {
             ))}
             {edit.can_share && (
               <label>
-                Доступ к документу
+                {tr("Доступ к документу")}
                 <select
                   name="visibility"
                   defaultValue={edit.visibility || "owner"}
                 >
-                  <option value="owner">Личный — владельцы и автор</option>
-                  <option value="shared">Общий — участники автомобиля</option>
+                  <option value="owner">
+                    {tr("Личный — владельцы и автор")}
+                  </option>
+                  <option value="shared">
+                    {tr("Общий — участники автомобиля")}
+                  </option>
                 </select>
                 <small>
-                  Обложка автомобиля всегда доступна его участникам.
+                  {tr("Обложка автомобиля всегда доступна его участникам.")}
                 </small>
               </label>
             )}
-            <Button>Сохранить</Button>
+            <Button>{tr("Сохранить")}</Button>
           </form>
         )}
       </Sheet>
@@ -1679,32 +1742,50 @@ export function SettingsPage() {
   return (
     <>
       <PageHeading
-        eyebrow="ВАШ ГАРАЖ. ВАШИ ПРАВИЛА."
-        title="Настройки"
-        description="Приватность, сохранность данных и немного заботы о будущем."
+        eyebrow={tr("ВАШ ГАРАЖ. ВАШИ ПРАВИЛА.")}
+        title={tr("Настройки")}
+        description={tr(
+          "Приватность, сохранность данных и немного заботы о будущем.",
+        )}
       />
       <div className="settings-grid">
         <section className="panel settings-panel">
+          <LanguagePicker
+            onChange={(locale) => {
+              void save("settings", { ...state.settings, locale })
+                .then(() => notify(tr("Язык сохранён")))
+                .catch((error) => notify(tr(error.message)));
+            }}
+          />
+        </section>
+        <section className="panel settings-panel">
           <ShieldCheck size={27} />
-          <h3>Данные принадлежат вам</h3>
+          <h3>{tr("Данные принадлежат вам")}</h3>
           <p>
-            Все автомобили, документы и история находятся на вашем сервере. Без
-            скрытой телеметрии и обязательных облаков.
+            {tr(
+              "Все автомобили, документы и история находятся на вашем сервере. Без скрытой телеметрии и обязательных облаков.",
+            )}
           </p>
           <dl>
             <div>
-              <dt>Аккаунт</dt>
-              <dd>{session.username}</dd>
+              <dt>{tr("Аккаунт")}</dt>
+              <dd>{session.demo ? tr("Демо-гараж") : session.username}</dd>
             </div>
             <div>
-              <dt>Режим</dt>
+              <dt>{tr("Режим")}</dt>
               <dd>
-                {session.demo ? "Изолированный демогараж" : "Личный гараж"}
+                {session.demo
+                  ? tr("Изолированный демогараж")
+                  : tr("Личный гараж")}
               </dd>
             </div>
             <div>
-              <dt>Язык и единицы</dt>
-              <dd>Русский · ₽ · км · л</dd>
+              <dt>{tr("Язык и единицы")}</dt>
+              <dd>
+                {getLocale() === "en"
+                  ? "English · ₽ · km · L"
+                  : "Русский · ₽ · км · л"}
+              </dd>
             </div>
           </dl>
           <Suspense fallback={null}>
@@ -1715,7 +1796,7 @@ export function SettingsPage() {
           {session.demo && (
             <Button variant="outline" onClick={resetDemo}>
               <RotateCcw size={16} />
-              Сбросить демонстрацию
+              {tr("Сбросить демонстрацию")}
             </Button>
           )}
           <Button
@@ -1723,82 +1804,87 @@ export function SettingsPage() {
             onClick={() => logout().catch((e) => notify(e.message))}
           >
             <LogOut size={16} />
-            Выйти из гаража
+            {tr("Выйти из гаража")}
           </Button>
         </section>
-        {session.is_admin ||
-          (session.demo && (
-            <section className="panel settings-panel">
-              <HardDrive size={27} />
-              <h3>Резервная копия</h3>
-              <p>
-                Полный архив содержит базу и все загруженные файлы. Он позволяет
-                восстановить весь гараж.
-              </p>
-              <div className="info-box">
-                Скачайте архив на другой физический диск. Копия рядом с базой не
-                защитит от поломки накопителя.
-              </div>
-              <Button
-                disabled={session.demo}
-                onClick={() => download("/api/v1/backup")}
-              >
-                <Download size={17} />
-                Скачать полный архив
-              </Button>
-              <label
-                className={`restore-file ${session.demo ? "disabled" : ""}`}
-              >
-                <Upload size={16} />
-                Восстановить из архива
-                <input
-                  type="file"
-                  accept=".zip"
-                  disabled={session.demo || busy}
-                  onChange={async (e) => {
-                    const f = e.target.files?.[0];
-                    if (!f) return;
-                    if (
-                      !confirm(
-                        "Восстановление заменит текущие данные архивом. Скачайте текущий бэкап перед продолжением. Продолжить?",
-                      )
-                    )
-                      return;
-                    setBusy(true);
-                    try {
-                      const body = new FormData();
-                      body.append("file", f);
-                      await api(
-                        "/restore",
-                        { method: "POST", body },
-                        session.csrf,
-                      );
-                      notify("Архив восстановлен. Войдите заново.");
-                      location.reload();
-                    } catch (error) {
-                      notify((error as Error).message);
-                    } finally {
-                      setBusy(false);
-                      e.target.value = "";
-                    }
-                  }}
-                />
-              </label>
-              {busy && <p role="status">Проверяем и восстанавливаем архив…</p>}
-              {session.demo && (
-                <small className="muted">
-                  Архивы доступны в личном гараже. Реальные данные недоступны из
-                  демо.
-                </small>
+        {(session.is_admin || session.demo) && (
+          <section className="panel settings-panel">
+            <HardDrive size={27} />
+            <h3>{tr("Резервная копия")}</h3>
+            <p>
+              {tr(
+                "Полный архив содержит базу и все загруженные файлы. Он позволяет восстановить весь гараж.",
               )}
-            </section>
-          ))}
+            </p>
+            <div className="info-box">
+              {tr(
+                "Скачайте архив на другой физический диск. Копия рядом с базой не защитит от поломки накопителя.",
+              )}
+            </div>
+            <Button
+              disabled={session.demo}
+              onClick={() => download("/api/v1/backup")}
+            >
+              <Download size={17} />
+              {tr("Скачать полный архив")}
+            </Button>
+            <label className={`restore-file ${session.demo ? "disabled" : ""}`}>
+              <Upload size={16} />
+              {tr("Восстановить из архива")}
+              <input
+                type="file"
+                accept=".zip"
+                disabled={session.demo || busy}
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  if (
+                    !confirm(
+                      tr(
+                        "Восстановление заменит текущие данные архивом. Скачайте текущий бэкап перед продолжением. Продолжить?",
+                      ),
+                    )
+                  )
+                    return;
+                  setBusy(true);
+                  try {
+                    const body = new FormData();
+                    body.append("file", f);
+                    await api(
+                      "/restore",
+                      { method: "POST", body },
+                      session.csrf,
+                    );
+                    notify(tr("Архив восстановлен. Войдите заново."));
+                    location.reload();
+                  } catch (error) {
+                    notify((error as Error).message);
+                  } finally {
+                    setBusy(false);
+                    e.target.value = "";
+                  }
+                }}
+              />
+            </label>
+            {busy && (
+              <p role="status">{tr("Проверяем и восстанавливаем архив…")}</p>
+            )}
+            {session.demo && (
+              <small className="muted">
+                {tr(
+                  "Архивы доступны в личном гараже. Реальные данные недоступны из демо.",
+                )}
+              </small>
+            )}
+          </section>
+        )}
         <section className="panel settings-panel">
           <FileText size={27} />
-          <h3>Экспорт истории</h3>
+          <h3>{tr("Экспорт истории")}</h3>
           <p>
-            Связанные автомобили, операции, позиции и документы в открытых
-            форматах. Идентификаторы сохраняются.
+            {tr(
+              "Связанные автомобили, операции, позиции и документы в открытых форматах. Идентификаторы сохраняются.",
+            )}
           </p>
           <div className="settings-actions">
             <Button
@@ -1821,31 +1907,33 @@ export function SettingsPage() {
         </section>
         <section className="panel settings-panel">
           <CarFront size={27} />
-          <h3>Всегда под рукой</h3>
+          <h3>{tr("Всегда под рукой")}</h3>
           <p>
-            Добавьте MASHINA на домашний экран. Ранее загруженный гараж и новые
-            записи доступны без сети.
+            {tr(
+              "Добавьте MASHINA на домашний экран. Ранее загруженный гараж и новые записи доступны без сети.",
+            )}
           </p>
           <Button variant="outline" onClick={() => setInstall(true)}>
             <Plus size={16} />
-            Как установить
+            {tr("Как установить")}
           </Button>
           <p className="tiny muted">
-            Синхронизация происходит при открытом приложении. Вложения требуют
-            подключения.
+            {tr(
+              "Синхронизация происходит при открытом приложении. Вложения требуют подключения.",
+            )}
           </p>
         </section>
       </div>
       <div className="section-heading">
-        <h3>Ваши категории расходов</h3>
+        <h3>{tr("Ваши категории расходов")}</h3>
         <Button variant="outline" size="sm" onClick={() => open("category")}>
           <Plus size={16} />
-          Новая категория
+          {tr("Новая категория")}
         </Button>
       </div>
       <div className="panel category-list">
         {categories.map((c) => (
-          <span key={c}>{c}</span>
+          <span key={c}>{categoryLabel(c)}</span>
         ))}
         {state.categories
           .filter((c) => !c.deleted)
@@ -1856,7 +1944,7 @@ export function SettingsPage() {
                 : ""}
               {c.name}
               <button
-                aria-label={`Удалить категорию ${c.name}`}
+                aria-label={tr("Удалить категорию {0}", [c.name])}
                 onClick={() =>
                   save("category", {}, c, "delete").catch((e) =>
                     notify(e.message),
@@ -1871,27 +1959,30 @@ export function SettingsPage() {
       <Sheet
         open={install}
         onClose={() => setInstall(false)}
-        title="MASHINA на домашнем экране"
+        title={tr("MASHINA на домашнем экране")}
       >
         <div className="record-detail">
-          <h3>На iPhone</h3>
+          <h3>{tr("На iPhone")}</h3>
           <p>
-            Откройте приложение в Safari по HTTPS. Нажмите «Поделиться» → «На
-            экран Домой» → «Добавить».
+            {tr(
+              "Откройте приложение в Safari по HTTPS. Нажмите «Поделиться» → «На экран Домой» → «Добавить».",
+            )}
           </p>
-          <h3>На Android</h3>
+          <h3>{tr("На Android")}</h3>
           <p>
-            Откройте меню браузера и выберите «Установить приложение» или
-            «Добавить на главный экран».
+            {tr(
+              "Откройте меню браузера и выберите «Установить приложение» или «Добавить на главный экран».",
+            )}
           </p>
           <div className="info-box">
-            Один раз войдите и дождитесь загрузки гаража. Записи без сети
-            сохраняются на этом устройстве. Не очищайте данные браузера до
-            синхронизации.
+            {tr(
+              "Один раз войдите и дождитесь загрузки гаража. Записи без сети сохраняются на этом устройстве. Не очищайте данные браузера до синхронизации.",
+            )}
           </div>
           <p>
-            На общем устройстве выходите из гаража: локальный кэш и очередь
-            будут удалены.
+            {tr(
+              "На общем устройстве выходите из гаража: локальный кэш и очередь будут удалены.",
+            )}
           </p>
         </div>
       </Sheet>

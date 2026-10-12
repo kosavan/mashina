@@ -232,6 +232,11 @@ class Store:
                     raise Conflict("Этот идентификатор операции уже использован с другими данными")
                 return json.loads(prior["response"])
             if entity == "settings":
+                if "locale" in payload["data"] and (
+                    not isinstance(payload["data"]["locale"], str)
+                    or payload["data"]["locale"] not in {"ru", "en"}
+                ):
+                    raise ValueError("Неподдерживаемый язык интерфейса")
                 settings = {
                     k: v
                     for k, v in payload["data"].items()

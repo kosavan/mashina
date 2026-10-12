@@ -1,3 +1,4 @@
+import { tr } from "./i18n";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Users, LockKeyhole, Plus, UserRound, ShieldCheck } from "lucide-react";
@@ -75,18 +76,18 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
       {vehicleId ? (
         <Button variant="outline" onClick={() => open("access")}>
           <Users size={16} />
-          Доступ
+          {tr("Доступ")}
         </Button>
       ) : (
         <div className="settings-actions">
           <Button variant="outline" onClick={() => open("password")}>
             <LockKeyhole size={16} />
-            Изменить пароль
+            {tr("Изменить пароль")}
           </Button>
           {session.is_admin && (
             <Button variant="outline" onClick={() => open("accounts")}>
               <Users size={16} />
-              Пользователи
+              {tr("Пользователи")}
             </Button>
           )}
         </div>
@@ -98,16 +99,16 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
         }}
         title={
           sheet === "access"
-            ? "Вместе в одном гараже"
+            ? tr("Вместе в одном гараже")
             : sheet === "accounts"
-              ? "Близкие и водители"
-              : "Новый пароль"
+              ? tr("Близкие и водители")
+              : tr("Новый пароль")
         }
       >
         <div className="sharing-content">
           {error && (
             <div className="error-box" role="alert">
-              {error}
+              {tr(error)}
             </div>
           )}
           {((access.error && sheet === "access") ||
@@ -122,12 +123,13 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
           {sheet === "access" && (
             <div className="form-stack">
               <p className="muted">
-                Водитель видит историю и добавляет свои записи. Владелец
-                управляет автомобилем, всеми записями и доступом. Личные
-                документы остаются закрытыми, пока владелец явно не поделится
-                ими.
+                {tr(
+                  "Водитель видит историю и добавляет свои записи. Владелец управляет автомобилем, всеми записями и доступом. Личные документы остаются закрытыми, пока владелец явно не поделится ими.",
+                )}
               </p>
-              {access.isLoading && <p role="status">Загружаем участников…</p>}
+              {access.isLoading && (
+                <p role="status">{tr("Загружаем участников…")}</p>
+              )}
               {access.data && (
                 <>
                   <div className="sharing-member">
@@ -137,7 +139,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                     <div>
                       <strong>{access.data.original_owner.username}</strong>
                       <small>
-                        Исходный владелец · доступ сохраняется всегда
+                        {tr("Исходный владелец · доступ сохраняется всегда")}
                       </small>
                     </div>
                   </div>
@@ -150,14 +152,14 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                         <strong>{member.username}</strong>
                         <small>
                           {member.disabled
-                            ? "Аккаунт отключён"
+                            ? tr("Аккаунт отключён")
                             : member.role === "owner"
-                              ? "Владелец"
-                              : "Водитель"}
+                              ? tr("Владелец")
+                              : tr("Водитель")}
                         </small>
                       </div>
                       <select
-                        aria-label={`Роль ${member.username}`}
+                        aria-label={tr("Роль {0}", [member.username])}
                         value={member.role}
                         disabled={busy || member.disabled}
                         onChange={(e) => {
@@ -168,8 +170,8 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                           );
                         }}
                       >
-                        <option value="driver">Водитель</option>
-                        <option value="owner">Владелец</option>
+                        <option value="driver">{tr("Водитель")}</option>
+                        <option value="owner">{tr("Владелец")}</option>
                       </select>
                       <Button
                         size="sm"
@@ -178,7 +180,10 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                         onClick={() => {
                           if (
                             confirm(
-                              `Отозвать доступ ${member.username}? Уже сохранённые данные на отключённом устройстве удалённо не стираются.`,
+                              tr(
+                                "Отозвать доступ {0}? Уже сохранённые данные на отключённом устройстве удалённо не стираются.",
+                                [member.username],
+                              ),
                             )
                           )
                             void change(
@@ -187,7 +192,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                             );
                         }}
                       >
-                        Отозвать
+                        {tr("Отозвать")}
                       </Button>
                     </div>
                   ))}
@@ -205,16 +210,16 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                         )
                       ) {
                         form.reset();
-                        notify("Доступ предоставлен");
+                        notify(tr("Доступ предоставлен"));
                       }
                     }}
                   >
-                    <h3>Пригласить в автомобиль</h3>
+                    <h3>{tr("Пригласить в автомобиль")}</h3>
                     <label>
-                      Пользователь
+                      {tr("Пользователь")}
                       <select name="user" required defaultValue="">
                         <option value="" disabled>
-                          Выберите аккаунт
+                          {tr("Выберите аккаунт")}
                         </option>
                         {access.data.candidates
                           .filter(
@@ -232,21 +237,24 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                       </select>
                     </label>
                     <label>
-                      Права
+                      {tr("Права")}
                       <select name="role" defaultValue="driver">
-                        <option value="driver">Водитель — свои записи</option>
+                        <option value="driver">
+                          {tr("Водитель — свои записи")}
+                        </option>
                         <option value="owner">
-                          Владелец — управление автомобилем
+                          {tr("Владелец — управление автомобилем")}
                         </option>
                       </select>
                     </label>
                     <Button disabled={busy}>
                       <Plus size={16} />
-                      Предоставить доступ
+                      {tr("Предоставить доступ")}
                     </Button>
                     <small className="muted">
-                      Новый аккаунт создаёт администратор в настройках. Пароль
-                      передайте человеку лично.
+                      {tr(
+                        "Новый аккаунт создаёт администратор в настройках. Пароль передайте человеку лично.",
+                      )}
                     </small>
                   </form>
                 </>
@@ -256,10 +264,13 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
           {sheet === "accounts" && (
             <div className="form-stack">
               <p className="muted">
-                Регистрация закрыта. Создайте локальный аккаунт, затем
-                предоставьте ему доступ на странице нужного автомобиля.
+                {tr(
+                  "Регистрация закрыта. Создайте локальный аккаунт, затем предоставьте ему доступ на странице нужного автомобиля.",
+                )}
               </p>
-              {accounts.isLoading && <p role="status">Загружаем аккаунты…</p>}
+              {accounts.isLoading && (
+                <p role="status">{tr("Загружаем аккаунты…")}</p>
+              )}
               {accounts.data?.map((user) => (
                 <div className="sharing-member" key={user.id}>
                   <span className="event-icon">
@@ -269,10 +280,10 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                     <strong>{user.username}</strong>
                     <small>
                       {user.is_admin
-                        ? "Администратор установки"
+                        ? tr("Администратор установки")
                         : user.disabled
-                          ? "Отключён"
-                          : "Локальный аккаунт"}
+                          ? tr("Отключён")
+                          : tr("Локальный аккаунт")}
                     </small>
                   </div>
                   {user.id !== session.id && (
@@ -283,7 +294,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                         disabled={busy}
                         onClick={() => setReset(user)}
                       >
-                        Новый пароль
+                        {tr("Новый пароль")}
                       </Button>
                       <Button
                         size="sm"
@@ -292,7 +303,13 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                         onClick={() => {
                           if (
                             confirm(
-                              `${user.disabled ? "Включить" : "Отключить"} аккаунт ${user.username}? Все его сеансы будут завершены.`,
+                              tr(
+                                "{0} аккаунт {1}? Все его сеансы будут завершены.",
+                                [
+                                  user.disabled ? "Включить" : "Отключить",
+                                  user.username,
+                                ],
+                              ),
                             )
                           )
                             void change(`/users/${user.id}`, "PATCH", {
@@ -300,7 +317,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                             });
                         }}
                       >
-                        {user.disabled ? "Включить" : "Отключить"}
+                        {user.disabled ? tr("Включить") : tr("Отключить")}
                       </Button>
                     </div>
                   )}
@@ -318,19 +335,22 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                       })
                     ) {
                       setReset(null);
-                      notify("Пароль заменён, старые сеансы завершены");
+                      notify(tr("Пароль заменён, старые сеансы завершены"));
                     }
                   }}
                 >
-                  <h3>Пароль для {reset.username}</h3>
+                  <h3>
+                    {tr("Пароль для ")}
+                    {reset.username}
+                  </h3>
                   <PasswordField />
-                  <Button disabled={busy}>Заменить пароль</Button>
+                  <Button disabled={busy}>{tr("Заменить пароль")}</Button>
                   <Button
                     type="button"
                     variant="ghost"
                     onClick={() => setReset(null)}
                   >
-                    Отмена
+                    {tr("Отмена")}
                   </Button>
                 </form>
               ) : (
@@ -342,13 +362,13 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                     const values = Object.fromEntries(new FormData(form));
                     if (await change("/users", "POST", values)) {
                       form.reset();
-                      notify("Аккаунт создан");
+                      notify(tr("Аккаунт создан"));
                     }
                   }}
                 >
-                  <h3>Новый аккаунт</h3>
+                  <h3>{tr("Новый аккаунт")}</h3>
                   <label>
-                    Имя пользователя
+                    {tr("Имя пользователя")}
                     <input
                       name="username"
                       minLength={3}
@@ -360,7 +380,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                   <PasswordField />
                   <Button disabled={busy}>
                     <Plus size={16} />
-                    Создать аккаунт
+                    {tr("Создать аккаунт")}
                   </Button>
                 </form>
               )}
@@ -378,7 +398,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                     new FormData(e.currentTarget),
                   );
                   if (values.password !== values.confirm)
-                    throw new Error("Новые пароли не совпадают");
+                    throw new Error(tr("Новые пароли не совпадают"));
                   delete values.confirm;
                   const next = await api<Session>(
                     "/password",
@@ -387,7 +407,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                   );
                   updateSession(next);
                   open(null);
-                  notify("Пароль изменён. Остальные сеансы завершены.");
+                  notify(tr("Пароль изменён. Остальные сеансы завершены."));
                 } catch (err) {
                   setError((err as Error).message);
                 } finally {
@@ -396,11 +416,12 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
               }}
             >
               <p className="muted">
-                Другие устройства выйдут из аккаунта. Текущий гараж останется
-                открыт.
+                {tr(
+                  "Другие устройства выйдут из аккаунта. Текущий гараж останется открыт.",
+                )}
               </p>
               <label>
-                Текущий пароль
+                {tr("Текущий пароль")}
                 <input
                   name="current_password"
                   type="password"
@@ -411,7 +432,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
               </label>
               <PasswordField />
               <label>
-                Повторите новый пароль
+                {tr("Повторите новый пароль")}
                 <input
                   name="confirm"
                   type="password"
@@ -421,7 +442,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
                   required
                 />
               </label>
-              <Button disabled={busy}>Сохранить пароль</Button>
+              <Button disabled={busy}>{tr("Сохранить пароль")}</Button>
             </form>
           )}
         </div>
@@ -432,7 +453,7 @@ export default function Sharing({ vehicleId }: { vehicleId?: string }) {
 function PasswordField() {
   return (
     <label>
-      Новый пароль
+      {tr("Новый пароль")}
       <input
         name="password"
         type="password"
@@ -442,7 +463,7 @@ function PasswordField() {
         required
       />
       <small>
-        Минимум 12 символов. Пароль не сохраняется в журнале действий.
+        {tr("Минимум 12 символов. Пароль не сохраняется в журнале действий.")}
       </small>
     </label>
   );

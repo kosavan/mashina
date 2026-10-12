@@ -8,12 +8,5 @@
   },
   "media": {
     "autoProxy": true
-  },
-  "registryItems": [
-    {
-      "name": "chart-story",
-      "type": "hyperframes:component",
-      "target": "compositions/components/chart-story.html"
-    }
-  ]
+  }
 }

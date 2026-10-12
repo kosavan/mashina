@@ -1,3 +1,5 @@
+import { intlLocale } from "./i18n";
+import { tr } from "./i18n";
 import { useEffect, useState } from "react";
 import { Cable, Check, Copy, KeyRound, ShieldCheck, X } from "lucide-react";
 import { useApp } from "./context";
@@ -56,7 +58,9 @@ export default function MachineAccess() {
     } catch (e) {
       setError(
         e instanceof TypeError
-          ? "Не удалось связаться с сервером. Проверьте подключение и повторите запрос."
+          ? tr(
+              "Не удалось связаться с сервером. Проверьте подключение и повторите запрос.",
+            )
           : (e as Error).message,
       );
     } finally {
@@ -71,7 +75,9 @@ export default function MachineAccess() {
       !secret &&
       dirty &&
       !window.confirm(
-        "Закрыть без создания ключа? Выбранные параметры подключения будут потеряны.",
+        tr(
+          "Закрыть без создания ключа? Выбранные параметры подключения будут потеряны.",
+        ),
       )
     )
       return;
@@ -79,7 +85,9 @@ export default function MachineAccess() {
       secret &&
       !copied &&
       !window.confirm(
-        "Ключ больше не будет показан. Вы сохранили его в безопасном месте?",
+        tr(
+          "Ключ больше не будет показан. Вы сохранили его в безопасном месте?",
+        ),
       )
     )
       return;
@@ -149,66 +157,77 @@ export default function MachineAccess() {
         }}
       >
         <Cable size={17} />
-        API и интеграции
+        {tr("API и интеграции")}
       </Button>
-      <Sheet open={open} title="Доступ под вашим контролем" onClose={close}>
+      <Sheet
+        open={open}
+        title={tr("Доступ под вашим контролем")}
+        onClose={close}
+      >
         <div className="machine-access">
           <div className="machine-intro">
             <span className="machine-symbol">
               <KeyRound size={25} />
             </span>
             <div>
-              <span className="eyebrow">ТОЛЬКО ТО, ЧТО ВЫ РАЗРЕШИЛИ</span>
-              <h3>Ваш гараж. Ваши подключения.</h3>
+              <span className="eyebrow">
+                {tr("ТОЛЬКО ТО, ЧТО ВЫ РАЗРЕШИЛИ")}
+              </span>
+              <h3>{tr("Ваш гараж. Ваши подключения.")}</h3>
               <p className="muted">
-                Ограниченные ключи для собственного API-клиента и MCP.
-                Документы, банковские связи и настройки остаются закрыты.
+                {tr(
+                  "Ограниченные ключи для собственного API-клиента и MCP. Документы, банковские связи и настройки остаются закрыты.",
+                )}
               </p>
             </div>
           </div>
           {!online && (
             <div className="info-box" role="status">
-              Управление ключами доступно при подключении к серверу.
-              Офлайн-изменения доступа не сохраняются.
+              {tr(
+                "Управление ключами доступно при подключении к серверу. Офлайн-изменения доступа не сохраняются.",
+              )}
             </div>
           )}
           {error && (
             <div className="error-box" role="alert">
-              {error}
+              {tr(error)}
             </div>
           )}
           {!status && !busy && online && (
             <Button variant="outline" onClick={() => void perform(load)}>
-              Повторить загрузку
+              {tr("Повторить загрузку")}
             </Button>
           )}
           {busy && (
             <p className="muted" role="status">
-              Связываемся с сервером…
+              {tr("Связываемся с сервером…")}
             </p>
           )}
           {status && !status.enabled && (
             <div className="info-box">
               {session.demo ? (
-                "Демогараж изолирован: реальные ключи здесь не создаются."
+                tr("Демогараж изолирован: реальные ключи здесь не создаются.")
               ) : (
                 <>
-                  Интеграции выключены по умолчанию. Владелец сервера может
-                  задать <code>MASHINA_API_ENABLED=1</code> и перезапустить
-                  приложение.
+                  {tr(
+                    "Интеграции выключены по умолчанию. Владелец сервера может задать ",
+                  )}
+                  <code>MASHINA_API_ENABLED=1</code>{" "}
+                  {tr(" и перезапустить приложение.")}
                 </>
               )}
             </div>
           )}
           {secret && (
-            <section className="machine-secret" aria-label="Новый ключ">
+            <section className="machine-secret" aria-label={tr("Новый ключ")}>
               <ShieldCheck size={23} />
-              <h3>Сохраните ключ сейчас</h3>
+              <h3>{tr("Сохраните ключ сейчас")}</h3>
               <p>
-                Он показывается один раз. Храните его как пароль; не вставляйте
-                в адрес страницы или публичные файлы.
+                {tr(
+                  "Он показывается один раз. Храните его как пароль; не вставляйте в адрес страницы или публичные файлы.",
+                )}
               </p>
-              <label htmlFor="machine-secret">Ваш новый ключ</label>
+              <label htmlFor="machine-secret">{tr("Ваш новый ключ")}</label>
               <textarea
                 id="machine-secret"
                 value={secret}
@@ -220,12 +239,13 @@ export default function MachineAccess() {
               />
               <Button onClick={() => void copy()}>
                 <Copy size={16} />
-                {copied ? "Ключ скопирован" : "Скопировать ключ"}
+                {copied ? tr("Ключ скопирован") : tr("Скопировать ключ")}
               </Button>
               {manual && (
                 <p role="status">
-                  Выделите ключ в поле и скопируйте вручную: браузер не разрешил
-                  доступ к буферу.
+                  {tr(
+                    "Выделите ключ в поле и скопируйте вручную: браузер не разрешил доступ к буферу.",
+                  )}
                 </p>
               )}
               <Button
@@ -234,7 +254,7 @@ export default function MachineAccess() {
                   if (
                     copied ||
                     window.confirm(
-                      "Ключ больше не будет показан. Вы сохранили его?",
+                      tr("Ключ больше не будет показан. Вы сохранили его?"),
                     )
                   ) {
                     setSecret("");
@@ -242,7 +262,7 @@ export default function MachineAccess() {
                   }
                 }}
               >
-                Я сохранил ключ
+                {tr("Я сохранил ключ")}
               </Button>
             </section>
           )}
@@ -254,17 +274,19 @@ export default function MachineAccess() {
                 if (valid && online && !busy) void create();
               }}
             >
-              <h3>Новое подключение</h3>
-              <label htmlFor="machine-label">Название подключения</label>
+              <h3>{tr("Новое подключение")}</h3>
+              <label htmlFor="machine-label">
+                {tr("Название подключения")}
+              </label>
               <input
                 id="machine-label"
                 value={label}
                 onChange={(e) => setLabel(e.target.value)}
-                placeholder="Например, мой MCP-клиент"
+                placeholder={tr("Например, мой MCP-клиент")}
                 maxLength={80}
               />
               <fieldset>
-                <legend>Разрешённые автомобили</legend>
+                <legend>{tr("Разрешённые автомобили")}</legend>
                 {owned.map((v) => (
                   <label className="machine-option" key={v.id}>
                     <input
@@ -281,18 +303,22 @@ export default function MachineAccess() {
                     />
                     <span>
                       {v.name}
-                      <small className="muted">Только этот автомобиль</small>
+                      <small className="muted">
+                        {tr("Только этот автомобиль")}
+                      </small>
                     </span>
                     {cars.includes(v.id) && <Check size={16} />}
                   </label>
                 ))}
                 {!owned.length && (
                   <p className="muted">
-                    Ключ можно выдать только для автомобиля, который создали вы.
+                    {tr(
+                      "Ключ можно выдать только для автомобиля, который создали вы.",
+                    )}
                   </p>
                 )}
               </fieldset>
-              <label htmlFor="machine-days">Срок действия, дней</label>
+              <label htmlFor="machine-days">{tr("Срок действия, дней")}</label>
               <input
                 id="machine-days"
                 type="number"
@@ -309,17 +335,17 @@ export default function MachineAccess() {
                   onChange={(e) => setWrite(e.target.checked)}
                 />
                 <span>
-                  Разрешить создание и изменение записей
+                  {tr("Разрешить создание и изменение записей")}
                   <small className="muted">
-                    По умолчанию доступно только чтение
+                    {tr("По умолчанию доступно только чтение")}
                   </small>
                 </span>
               </label>
               {write && (
                 <div className="info-box">
-                  Клиент сможет менять расходы, заправки, обслуживание и
-                  напоминания выбранных автомобилей. Профили, документы и права
-                  доступа изменять нельзя.
+                  {tr(
+                    "Клиент сможет менять расходы, заправки, обслуживание и напоминания выбранных автомобилей. Профили, документы и права доступа изменять нельзя.",
+                  )}
                 </div>
               )}
               <label className="machine-option">
@@ -329,23 +355,23 @@ export default function MachineAccess() {
                   onChange={(e) => setConsent(e.target.checked)}
                 />
                 <span>
-                  Доверяю этому клиенту историю выбранных автомобилей
+                  {tr("Доверяю этому клиенту историю выбранных автомобилей")}
                   <small className="muted">
-                    Описания, названия деталей и заметки в записях могут
-                    содержать личные сведения. Новые автомобили автоматически не
-                    добавляются.
+                    {tr(
+                      "Описания, названия деталей и заметки в записях могут содержать личные сведения. Новые автомобили автоматически не добавляются.",
+                    )}
                   </small>
                 </span>
               </label>
               <Button type="submit" disabled={!valid || !online || busy}>
                 <KeyRound size={17} />
-                Создать ключ
+                {tr("Создать ключ")}
               </Button>
             </form>
           )}
           {!!status?.credentials.length && (
             <section className="machine-list">
-              <h3>Подключения</h3>
+              <h3>{tr("Подключения")}</h3>
               {status.credentials.map((key) => {
                 const inactive =
                   key.revoked !== null || key.expires * 1000 <= Date.now();
@@ -355,9 +381,9 @@ export default function MachineAccess() {
                       <strong>{key.label}</strong>
                       <span className="tiny muted">
                         {key.write_enabled
-                          ? "Чтение и запись"
-                          : "Только чтение"}{" "}
-                        · {key.vehicle_ids.length} авто
+                          ? tr("Чтение и запись")
+                          : tr("Только чтение")}{" "}
+                        · {key.vehicle_ids.length} {tr(" авто")}
                       </span>
                       <span className="tiny muted">
                         {key.vehicle_ids
@@ -365,26 +391,33 @@ export default function MachineAccess() {
                             (id) =>
                               state.vehicles.find(
                                 (vehicle) => vehicle.id === id,
-                              )?.name || "Недоступный автомобиль",
+                              )?.name || tr("Недоступный автомобиль"),
                           )
                           .join(" · ")}
                       </span>
                       <span className="tiny muted">
                         {key.revoked !== null
-                          ? "Ключ отозван"
+                          ? tr("Ключ отозван")
                           : key.expires * 1000 <= Date.now()
-                            ? "Срок истёк"
-                            : `До ${new Date(key.expires * 1000).toLocaleDateString("ru-RU")}`}
+                            ? tr("Срок истёк")
+                            : tr("До {0}", [
+                                new Date(key.expires * 1000).toLocaleDateString(
+                                  intlLocale(),
+                                ),
+                              ])}
                       </span>
                     </div>
                     <Button
                       variant="ghost"
                       disabled={inactive || busy || !online}
-                      aria-label={`Отозвать ${key.label}`}
+                      aria-label={tr("Отозвать {0}", [key.label])}
                       onClick={() => {
                         if (
                           window.confirm(
-                            `Отозвать доступ «${key.label}»? Клиент больше не сможет обращаться к гаражу.`,
+                            tr(
+                              "Отозвать доступ «{0}»? Клиент больше не сможет обращаться к гаражу.",
+                              [key.label],
+                            ),
                           )
                         )
                           void perform(async () => {
@@ -399,7 +432,7 @@ export default function MachineAccess() {
                       }}
                     >
                       <X size={17} />
-                      {inactive ? "Закрыт" : "Отозвать"}
+                      {inactive ? tr("Закрыт") : tr("Отозвать")}
                     </Button>
                   </article>
                 );

@@ -1,4 +1,15 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+import { tr } from "./i18n";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  lazy,
+  Suspense,
+} from "react";
+import { getLocale, isLocale, setLocale, useLocale } from "./i18n";
+import { localizeDemo } from "./demoLocale";
+import { LanguagePicker } from "./LanguagePicker";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ArrowUpRight,
@@ -79,14 +90,17 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
   useEffect(() => {
     api<{ required: boolean }>("/setup")
       .then((r) => setSetup(r.required))
-      .catch(() => setError("Сервер недоступен. Проверьте соединение."));
+      .catch(() => setError(tr("Сервер недоступен. Проверьте соединение.")));
   }, []);
   async function submit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setBusy(true);
     setError("");
     try {
-      const data = Object.fromEntries(new FormData(e.currentTarget));
+      const data = {
+        ...Object.fromEntries(new FormData(e.currentTarget)),
+        locale: getLocale(),
+      };
       onSession(
         await api<Session>(setup ? "/setup" : "/login", {
           method: "POST",
@@ -120,48 +134,55 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
           MASHINA
         </a>
         <div className="auth-copy">
-          <span className="eyebrow">ДЛЯ ТЕХ, КТО ЛЮБИТ СВОЮ МАШИНУ</span>
+          <span className="eyebrow">
+            {tr("ДЛЯ ТЕХ, КТО ЛЮБИТ СВОЮ МАШИНУ")}
+          </span>
           <h1>
-            Больше, чем
+            {tr("Больше, чем")}
             <br />
-            просто <em>гараж.</em>
+            {tr("просто ")}
+            <em>{tr("гараж.")}</em>
           </h1>
           <p>
-            Каждая поездка. Каждая деталь.
+            {tr("Каждая поездка. Каждая деталь.")}
             <br />
-            Вся история ваших автомобилей — в одном месте.
+            {tr("Вся история ваших автомобилей — в одном месте.")}
           </p>
           <div className="auth-car">
-            <img src="/volvo-demo.webp" alt="Иллюстрация автомобиля" />
+            <img src="/volvo-demo.webp" alt={tr("Иллюстрация автомобиля")} />
           </div>
           <div className="auth-bottom">
-            <ShieldCheck size={17} /> Ваш сервер. Ваши данные. Ваши правила.
+            <ShieldCheck size={17} />{" "}
+            {tr(" Ваш сервер. Ваши данные. Ваши правила.")}
           </div>
         </div>
       </section>
       <section className="auth-panel">
         <div>
-          <span className="label-pill">ПЕРСОНАЛЬНЫЙ ЦИФРОВОЙ ГАРАЖ</span>
-          <h2>{setup ? "Добро пожаловать." : "С возвращением."}</h2>
+          <span className="label-pill">
+            {tr("ПЕРСОНАЛЬНЫЙ ЦИФРОВОЙ ГАРАЖ")}
+          </span>
+          <h2>{setup ? tr("Добро пожаловать.") : tr("С возвращением.")}</h2>
           <p className="muted">
             {setup
-              ? "Создайте свой гараж. Всё остальное уже продумано."
-              : "Ваши автомобили и их истории ждут вас."}
+              ? tr("Создайте свой гараж. Всё остальное уже продумано.")
+              : tr("Ваши автомобили и их истории ждут вас.")}
           </p>
+          <LanguagePicker />
           <form onSubmit={submit} className="form-stack">
             <label>
-              Имя пользователя
+              {tr("Имя пользователя")}
               <input
                 name="username"
                 autoComplete="username"
                 minLength={3}
                 maxLength={64}
                 required
-                placeholder="Как к вам обращаться"
+                placeholder={tr("Как к вам обращаться")}
               />
             </label>
             <label>
-              Пароль
+              {tr("Пароль")}
               <input
                 name="password"
                 type="password"
@@ -169,12 +190,12 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
                 minLength={12}
                 maxLength={256}
                 required
-                placeholder="Не менее 12 символов"
+                placeholder={tr("Не менее 12 символов")}
               />
             </label>
             {setup && (
               <label>
-                Одноразовый код установки
+                {tr("Одноразовый код установки")}
                 <input
                   name="bootstrap_token"
                   type="password"
@@ -182,43 +203,43 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
                   required
                 />
                 <small>
-                  Код из файла .bootstrap-token на вашем сервере.
+                  {tr("Код из файла .bootstrap-token на вашем сервере.")}
                   <br />
-                  Создайте его командой из инструкции установки.
+                  {tr("Создайте его командой из инструкции установки.")}
                 </small>
               </label>
             )}
             {error && (
               <div role="alert" className="error-box">
-                {error}
+                {tr(error)}
               </div>
             )}
             <Button disabled={busy} type="submit">
               {busy
-                ? "Подождите…"
+                ? tr("Подождите…")
                 : setup
-                  ? "Создать мой гараж"
-                  : "Войти в гараж"}
+                  ? tr("Создать мой гараж")
+                  : tr("Войти в гараж")}
               <ArrowRight size={18} />
             </Button>
           </form>
-          <div className="divider-label">СНАЧАЛА ПОЗНАКОМИМСЯ?</div>
+          <div className="divider-label">{tr("СНАЧАЛА ПОЗНАКОМИМСЯ?")}</div>
           <Button
             variant="outline"
             className="full"
             disabled={busy}
             onClick={demo}
           >
-            Посмотреть демогараж
+            {tr("Посмотреть демогараж")}
             <ArrowUpRight size={18} />
           </Button>
           <p className="tiny muted centered">
-            Вымышленные автомобили. Настоящие возможности.
+            {tr("Вымышленные автомобили. Настоящие возможности.")}
             <br />
-            Демо полностью изолировано от ваших данных.
+            {tr("Демо полностью изолировано от ваших данных.")}
           </p>
           <div className="auth-private">
-            <LockKeyhole size={14} /> Без облаков и скрытой телеметрии
+            <LockKeyhole size={14} /> {tr(" Без облаков и скрытой телеметрии")}
           </div>
         </div>
       </section>
@@ -227,6 +248,8 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
 }
 
 export default function App() {
+  useLocale();
+  const localeOwner = useRef("");
   const client = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [boot, setBoot] = useState(true);
@@ -248,7 +271,8 @@ export default function App() {
     action?: () => void;
   } | null>(null);
   const notify = useCallback(
-    (message: string, action?: () => void) => setToast({ message, action }),
+    (message: string, action?: () => void) =>
+      setToast({ message: tr(message), action }),
     [],
   );
   useEffect(() => {
@@ -287,7 +311,14 @@ export default function App() {
     queryFn: () => loadState(session!),
     enabled: !!session,
   });
-  const state = query.data;
+  const state =
+    session?.demo && query.data ? localizeDemo(query.data) : query.data;
+  useEffect(() => {
+    if (state && session && localeOwner.current !== session.id) {
+      localeOwner.current = session.id;
+      if (isLocale(state.settings.locale)) setLocale(state.settings.locale);
+    }
+  }, [state, session]);
   const refresh = useCallback(async () => {
     if (session) {
       client.setQueryData(["state", session.id], await loadState(session));
@@ -368,7 +399,7 @@ export default function App() {
     record?: RecordBase,
     action: Mutation["action"] = record ? "update" : "create",
   ) {
-    if (!session || !state) throw new Error("Гараж ещё загружается");
+    if (!session || !state) throw new Error(tr("Гараж ещё загружается"));
     const operation: Mutation = {
       operation_id: crypto.randomUUID(),
       id: record?.id || crypto.randomUUID(),
@@ -395,7 +426,7 @@ export default function App() {
     const next = await enqueue(session, state, operation);
     client.setQueryData(["state", session.id], next);
     setQueue(await queueFor(session.id));
-    notify("Сохранено на устройстве · ожидает синхронизации");
+    notify(tr("Сохранено на устройстве · ожидает синхронизации"));
     sync();
     return {
       ...data,
@@ -407,7 +438,9 @@ export default function App() {
   async function upload(file: File, data: Record<string, string>) {
     if (!navigator.onLine)
       throw new Error(
-        "Файлы можно загрузить при подключении к серверу. Запись уже сохранена.",
+        tr(
+          "Файлы можно загрузить при подключении к серверу. Запись уже сохранена.",
+        ),
       );
     const body = new FormData();
     body.append("file", file);
@@ -425,13 +458,17 @@ export default function App() {
     if (
       queue.length &&
       !confirm(
-        "Есть несинхронизированные записи. При выходе локальные данные будут удалены. Выйти?",
+        tr(
+          "Есть несинхронизированные записи. При выходе локальные данные будут удалены. Выйти?",
+        ),
       )
     )
       return;
     if (!navigator.onLine)
       throw new Error(
-        "Для завершения сеанса и отключения уведомлений подключитесь к серверу.",
+        tr(
+          "Для завершения сеанса и отключения уведомлений подключитесь к серверу.",
+        ),
       );
     const subscription =
       !session!.demo &&
@@ -462,14 +499,14 @@ export default function App() {
       localStorage.setItem(`mashina-selected:${session.id}`, selected);
   }, [session, selected]);
   async function resetDemo() {
-    if (!confirm("Сбросить изменения демонстрационного гаража?")) return;
+    if (!confirm(tr("Сбросить изменения демонстрационного гаража?"))) return;
     const next = await api<Session>("/demo", { method: "POST" });
     await clearLocal();
     client.clear();
     setSelected("");
     setSession(next);
     setPage("garage");
-    notify("Демогараж восстановлен");
+    notify(tr("Демогараж восстановлен"));
   }
   if (boot)
     return (
@@ -486,15 +523,17 @@ export default function App() {
         <CarFront size={32} />
         {query.error ? (
           <>
-            <p role="alert">{(query.error as Error).message}</p>
-            <Button onClick={() => query.refetch()}>Попробовать снова</Button>
+            <p role="alert">{tr((query.error as Error).message)}</p>
+            <Button onClick={() => query.refetch()}>
+              {tr("Попробовать снова")}
+            </Button>
             <Button variant="ghost" onClick={() => setSession(null)}>
-              Войти заново
+              {tr("Войти заново")}
             </Button>
           </>
         ) : (
           <>
-            <span>Открываем гараж…</span>
+            <span>{tr("Открываем гараж…")}</span>
             <div className="loading-line" />
           </>
         )}
@@ -542,13 +581,13 @@ export default function App() {
           </a>
           <button
             className="mobile-menu-close icon-button"
-            aria-label="Закрыть меню"
+            aria-label={tr("Закрыть меню")}
             onClick={() => setMenu(false)}
           >
             <X />
           </button>
-          <div className="sidebar-caption">ВАШ ЛИЧНЫЙ ГАРАЖ</div>
-          <nav aria-label="Главная навигация">
+          <div className="sidebar-caption">{tr("ВАШ ЛИЧНЫЙ ГАРАЖ")}</div>
+          <nav aria-label={tr("Главная навигация")}>
             {navigation.map(([id, label, Icon]) => (
               <button
                 key={id}
@@ -559,7 +598,7 @@ export default function App() {
                 }}
               >
                 <Icon size={19} />
-                <span>{label}</span>
+                <span>{tr(label)}</span>
                 {id === "reminders" &&
                   state.reminders.some(
                     (r) => r.status === "soon" || r.status === "overdue",
@@ -571,7 +610,8 @@ export default function App() {
             <div className="owner-note">
               <ShieldCheck size={19} />
               <div>
-                Полностью под контролем<small>Данные на вашем сервере</small>
+                {tr("Полностью под контролем")}
+                <small>{tr("Данные на вашем сервере")}</small>
               </div>
             </div>
             <button
@@ -582,24 +622,24 @@ export default function App() {
               }}
             >
               <Settings size={19} />
-              Настройки
+              {tr("Настройки")}
             </button>
             <div className="profile">
               <span className="avatar">
                 {session.demo ? "D" : session.username[0].toUpperCase()}
               </span>
               <div>
-                {session.username}
+                {session.demo ? tr("Демо-гараж") : session.username}
                 <small>
                   {session.demo
-                    ? "Изолированный деморежим"
+                    ? tr("Изолированный деморежим")
                     : session.is_admin
-                      ? "Администратор"
-                      : "Личный аккаунт"}
+                      ? tr("Администратор")
+                      : tr("Личный аккаунт")}
                 </small>
               </div>
               <button
-                aria-label="Сменить тему"
+                aria-label={tr("Сменить тему")}
                 className="icon-button"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               >
@@ -611,7 +651,7 @@ export default function App() {
         {menu && (
           <button
             className="menu-backdrop"
-            aria-label="Закрыть меню"
+            aria-label={tr("Закрыть меню")}
             onClick={() => setMenu(false)}
           />
         )}
@@ -620,27 +660,30 @@ export default function App() {
             <div className="breadcrumb">
               <button
                 className="mobile-menu icon-button"
-                aria-label="Открыть меню"
+                aria-label={tr("Открыть меню")}
                 onClick={() => setMenu(true)}
               >
                 <Menu size={21} />
               </button>
               <CarFront size={17} />
-              <span>Личное пространство</span>
+              <span>{tr("Личное пространство")}</span>
               <span className="breadcrumb-slash">/</span>
               <strong>
                 {page === "vehicle"
-                  ? "Автомобиль"
+                  ? tr("Автомобиль")
                   : page === "fuel-analytics"
-                    ? "Аналитика топлива"
-                    : navigation.find((n) => n[0] === page)?.[1] || "Настройки"}
+                    ? tr("Аналитика топлива")
+                    : tr(
+                        navigation.find((n) => n[0] === page)?.[1] ||
+                          "Настройки",
+                      )}
               </strong>
             </div>
             <div className="topbar-right">
               <button
                 className={`sync-badge ${!online || queue.length ? "pending" : ""}`}
                 onClick={sync}
-                title="Синхронизировать"
+                title={tr("Синхронизировать")}
               >
                 {syncing ? (
                   <RefreshCw size={13} className="spin" />
@@ -651,15 +694,15 @@ export default function App() {
                 )}
                 <span>
                   {!online
-                    ? "Офлайн"
+                    ? tr("Офлайн")
                     : queue.length
-                      ? `${queue.length} в очереди`
-                      : "Всё сохранено"}
+                      ? tr("{0} в очереди", [queue.length])
+                      : tr("Всё сохранено")}
                 </span>
               </button>
               <button
                 className="icon-button"
-                aria-label="Напоминания"
+                aria-label={tr("Напоминания")}
                 onClick={() => setPage("reminders")}
               >
                 <Bell size={19} />
@@ -670,13 +713,15 @@ export default function App() {
             <div className="demo-banner">
               <span>
                 <i />
-                ДЕМО-ГАРАЖ{" "}
+                {tr("ДЕМО-ГАРАЖ")}{" "}
                 <span className="demo-description">
-                  · Вымышленные данные, полностью изолированные от личных
+                  {tr(
+                    "· Вымышленные данные, полностью изолированные от личных",
+                  )}
                 </span>
               </span>
               <button onClick={resetDemo}>
-                Сбросить демо
+                {tr("Сбросить демо")}
                 <RefreshCw size={12} />
               </button>
             </div>
@@ -685,14 +730,14 @@ export default function App() {
             <div className="conflict-box" role="alert">
               {failed.map((o) => (
                 <div key={o.operation_id}>
-                  <strong>Не удалось синхронизировать</strong>
-                  <p>{o.error}</p>
+                  <strong>{tr("Не удалось синхронизировать")}</strong>
+                  <p>{tr(o.error || "")}</p>
                   <p className="tiny muted">
-                    Сохранённый черновик:{" "}
+                    {tr("Сохранённый черновик:")}{" "}
                     {o.data.description ||
                       o.data.title ||
                       o.data.name ||
-                      "запись автомобиля"}
+                      tr("запись автомобиля")}
                   </p>
                   <Button
                     size="sm"
@@ -710,7 +755,7 @@ export default function App() {
                       setTimeout(() => URL.revokeObjectURL(url), 1000);
                     }}
                   >
-                    Скачать черновик
+                    {tr("Скачать черновик")}
                   </Button>
                   <Button
                     size="sm"
@@ -730,10 +775,10 @@ export default function App() {
                     }}
                   >
                     {o.status === 401
-                      ? "Войти заново"
+                      ? tr("Войти заново")
                       : o.status === 403
-                        ? "Проверить доступ и повторить"
-                        : "Повторить с моей версией"}
+                        ? tr("Проверить доступ и повторить")
+                        : tr("Повторить с моей версией")}
                   </Button>
                   <Button
                     size="sm"
@@ -741,7 +786,9 @@ export default function App() {
                     onClick={async () => {
                       if (
                         confirm(
-                          "Удалить локальный черновик? Несохранённые изменения будут потеряны.",
+                          tr(
+                            "Удалить локальный черновик? Несохранённые изменения будут потеряны.",
+                          ),
                         )
                       ) {
                         await resolveOperation(session, o, false);
@@ -750,8 +797,8 @@ export default function App() {
                     }}
                   >
                     {o.status === 403
-                      ? "Удалить черновик"
-                      : "Оставить серверную"}
+                      ? tr("Удалить черновик")
+                      : tr("Оставить серверную")}
                   </Button>
                 </div>
               ))}
@@ -770,7 +817,7 @@ export default function App() {
               <Maintenance />
             ) : page === "tires" ? (
               <Suspense
-                fallback={<p role="status">Открываем комплекты шин…</p>}
+                fallback={<p role="status">{tr("Открываем комплекты шин…")}</p>}
               >
                 <OwnershipTools key="tires" tiresOnly />
               </Suspense>
@@ -779,7 +826,7 @@ export default function App() {
                 fallback={
                   <div
                     className="skeleton-panel"
-                    aria-label="Загрузка аналитики"
+                    aria-label={tr("Загрузка аналитики")}
                   />
                 }
               >
@@ -794,33 +841,33 @@ export default function App() {
             )}
           </main>
           <footer className="main-footer">
-            <span>MASHINA · с заботой о каждой детали</span>
+            <span>{tr("MASHINA · с заботой о каждой детали")}</span>
             <span>
               <span className="status-dot" />
               {session.demo
-                ? "Демонстрационный гараж"
-                : "Ваш сервер · ваши данные"}
+                ? tr("Демонстрационный гараж")
+                : tr("Ваш сервер · ваши данные")}
             </span>
           </footer>
         </div>
-        <nav className="bottom-nav" aria-label="Мобильная навигация">
+        <nav className="bottom-nav" aria-label={tr("Мобильная навигация")}>
           <button
             className={page === "garage" || page === "vehicle" ? "active" : ""}
             onClick={() => setPage("garage")}
           >
             <LayoutGrid size={21} />
-            <span>Гараж</span>
+            <span>{tr("Гараж")}</span>
           </button>
           <button
             className={page === "timeline" ? "active" : ""}
             onClick={() => setPage("timeline")}
           >
             <Clock3 size={21} />
-            <span>История</span>
+            <span>{tr("История")}</span>
           </button>
           <button
             className="quick-add-mobile"
-            aria-label="Добавить запись"
+            aria-label={tr("Добавить запись")}
             onClick={() => setModal({ type: "quick" })}
           >
             <Plus size={27} />
@@ -832,11 +879,11 @@ export default function App() {
             onClick={() => setPage("analytics")}
           >
             <ChartNoAxesCombined size={21} />
-            <span>Аналитика</span>
+            <span>{tr("Аналитика")}</span>
           </button>
           <button onClick={() => setMenu(true)}>
             <Menu size={21} />
-            <span>Ещё</span>
+            <span>{tr("Ещё")}</span>
           </button>
         </nav>
         <button
@@ -844,34 +891,44 @@ export default function App() {
           onClick={() => setModal({ type: "quick" })}
         >
           <Plus size={20} />
-          Добавить запись
+          {tr("Добавить запись")}
         </button>
         {modal?.type === "quick" ? (
-          <Sheet open onClose={() => setModal(null)} title="Что запишем?">
+          <Sheet open onClose={() => setModal(null)} title={tr("Что запишем?")}>
             <p className="muted sheet-intro">
-              Каждая деталь становится частью истории.
+              {tr("Каждая деталь становится частью истории.")}
             </p>
             <div className="quick-actions">
               {(
                 [
-                  ["fuel", "Заправка", "Литры, стоимость и пробег", Fuel],
-                  ["expense", "Расход", "Любая покупка для автомобиля", Plus],
+                  [
+                    "fuel",
+                    tr("Заправка"),
+                    tr("Литры, стоимость и пробег"),
+                    Fuel,
+                  ],
+                  [
+                    "expense",
+                    tr("Расход"),
+                    tr("Любая покупка для автомобиля"),
+                    Plus,
+                  ],
                   [
                     "maintenance",
-                    "ТО / ремонт",
-                    "Работы, запчасти и документы",
+                    tr("ТО / ремонт"),
+                    tr("Работы, запчасти и документы"),
                     Wrench,
                   ],
                   [
                     "odometer",
-                    "Обновить пробег",
-                    "Зафиксировать показание одометра",
+                    tr("Обновить пробег"),
+                    tr("Зафиксировать показание одометра"),
                     CarFront,
                   ],
                   [
                     "note",
-                    "Заметка / событие",
-                    "Важное, что хочется сохранить",
+                    tr("Заметка / событие"),
+                    tr("Важное, что хочется сохранить"),
                     Clock3,
                   ],
                 ] as const
@@ -881,7 +938,7 @@ export default function App() {
                     <Icon size={22} />
                   </span>
                   <span>
-                    <strong>{title}</strong>
+                    <strong>{tr(title)}</strong>
                     <small>{desc}</small>
                   </span>
                   <ArrowUpRight size={18} />
@@ -909,11 +966,11 @@ export default function App() {
                   setToast(null);
                 }}
               >
-                Отменить
+                {tr("Отменить")}
               </button>
             )}
             <button
-              aria-label="Закрыть уведомление"
+              aria-label={tr("Закрыть уведомление")}
               onClick={() => setToast(null)}
             >
               <X size={15} />

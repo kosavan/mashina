@@ -1,3 +1,4 @@
+import { tr } from "../../i18n";
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import type { ReactNode } from "react";
@@ -33,7 +34,7 @@ export function Sheet({
             <button
               type="button"
               className="icon-button"
-              aria-label="Закрыть"
+              aria-label={tr("Закрыть")}
               onClick={onClose}
             >
               <X size={21} />

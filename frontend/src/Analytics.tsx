@@ -1,3 +1,5 @@
+import { categoryLabel } from "./utils";
+import { tr } from "./i18n";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -70,7 +72,7 @@ function ChartEmpty() {
   return (
     <div className="chart-no-data">
       <ChartNoAxesCombined size={26} />
-      <span>Недостаточно данных для графика</span>
+      <span>{tr("Недостаточно данных для графика")}</span>
     </div>
   );
 }
@@ -124,17 +126,19 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
   return (
     <>
       <PageHeading
-        eyebrow="ЦИФРЫ СТАНОВЯТСЯ ПОНЯТНЕЕ"
-        title="Аналитика"
-        description="Понимайте стоимость каждой поездки и картину целиком."
+        eyebrow={tr("ЦИФРЫ СТАНОВЯТСЯ ПОНЯТНЕЕ")}
+        title={tr("Аналитика")}
+        description={tr(
+          "Понимайте стоимость каждой поездки и картину целиком.",
+        )}
       />
       <div className="analytics-filters">
         <select
-          aria-label="Автомобиль аналитики"
+          aria-label={tr("Автомобиль аналитики")}
           value={car}
           onChange={(e) => setCar(e.target.value)}
         >
-          <option value="">Все автомобили</option>
+          <option value="">{tr("Все автомобили")}</option>
           {state.vehicles.map((v) => (
             <option key={v.id} value={v.id}>
               {v.name}
@@ -143,10 +147,10 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
         </select>
         <div className="segmented">
           {[
-            ["month", "Месяц"],
-            ["year", "Год"],
-            ["all", "Всё время"],
-            ["custom", "Период"],
+            ["month", tr("Месяц")],
+            ["year", tr("Год")],
+            ["all", tr("Всё время")],
+            ["custom", tr("Период")],
           ].map(([k, v]) => (
             <button
               key={k}
@@ -158,51 +162,55 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
           ))}
         </div>
         <select
-          aria-label="Валюта аналитики"
+          aria-label={tr("Валюта аналитики")}
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
         >
           {Array.from(
             new Set(["RUB", ...state.events.map((e) => e.currency)]),
           ).map((c) => (
-            <option key={c}>{c}</option>
+            <option key={c} value={c}>
+              {categoryLabel(c)}
+            </option>
           ))}
         </select>
       </div>
       <div className="filters compact">
         <select
-          aria-label="Категория аналитики"
+          aria-label={tr("Категория аналитики")}
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
-          <option value="">Все категории</option>
+          <option value="">{tr("Все категории")}</option>
           {[
             ...categories,
             ...state.categories.filter((c) => !c.deleted).map((c) => c.name),
           ].map((c) => (
-            <option key={c}>{c}</option>
+            <option key={c} value={c}>
+              {categoryLabel(c)}
+            </option>
           ))}
         </select>
         <select
-          aria-label="Тип расходов"
+          aria-label={tr("Тип расходов")}
           value={kind}
           onChange={(e) => setKind(e.target.value)}
         >
-          <option value="">Все расходы</option>
-          <option value="fuel">Топливо</option>
-          <option value="maintenance">Обслуживание</option>
-          <option value="expense">Прочие расходы</option>
+          <option value="">{tr("Все расходы")}</option>
+          <option value="fuel">{tr("Топливо")}</option>
+          <option value="maintenance">{tr("Обслуживание")}</option>
+          <option value="expense">{tr("Прочие расходы")}</option>
         </select>
         {period === "custom" && (
           <>
             <input
-              aria-label="С даты"
+              aria-label={tr("С даты")}
               type="date"
               value={start}
               onChange={(e) => setStart(e.target.value)}
             />
             <input
-              aria-label="До даты"
+              aria-label={tr("До даты")}
               type="date"
               value={end}
               onChange={(e) => setEnd(e.target.value)}
@@ -214,9 +222,9 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
         <div className="skeleton-panel" />
       ) : query.error ? (
         <div className="error-box" role="alert">
-          {(query.error as Error).message}
+          {tr((query.error as Error).message)}
           <button className="text-link" onClick={() => query.refetch()}>
-            Повторить
+            {tr("Повторить")}
           </button>
         </div>
       ) : (
@@ -224,45 +232,47 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
           <>
             <section className="analytics-metrics">
               <Metric
-                label="Расходы за период"
+                label={tr("Расходы за период")}
                 value={money(d.total_minor, currency)}
                 icon={Wallet}
-                detail="Только эксплуатационные затраты"
+                detail={tr("Только эксплуатационные затраты")}
               />
               <Metric
-                label="На топливо"
+                label={tr("На топливо")}
                 value={money(d.fuel_minor, currency)}
                 icon={Fuel}
                 detail={
                   d.average_liter_price != null
-                    ? `${number(d.average_liter_price, 2)} за литр в среднем`
-                    : "Заправки появятся здесь"
+                    ? tr("{0} за литр в среднем", [
+                        number(d.average_liter_price, 2),
+                      ])
+                    : tr("Заправки появятся здесь")
                 }
               />
               <Metric
-                label="Стоимость километра"
+                label={tr("Стоимость километра")}
                 value={number(d.cost_per_km, 2)}
-                unit={currency === "RUB" ? "₽/км" : currency + "/км"}
+                unit={currency === "RUB" ? tr("₽/км") : currency + tr("/км")}
                 icon={Gauge}
                 detail={
                   d.cost_per_km == null
-                    ? "Нужны подтверждённые показания"
-                    : "По пробегу за период владения"
+                    ? tr("Нужны подтверждённые показания")
+                    : tr("По пробегу за период владения")
                 }
               />
               <Metric
-                label="В месяц в среднем"
+                label={tr("В месяц в среднем")}
                 value={money(d.average_month_minor, currency)}
                 icon={ArrowUpRight}
-                detail="С учётом длительности периода"
+                detail={tr("С учётом длительности периода")}
               />
             </section>
             <div className="analytics-chart-grid">
               <section className="panel chart-panel chart-main">
                 <div className="panel-heading">
                   <div>
-                    <span className="eyebrow">ДИНАМИКА</span>
-                    <h3>Расходы по месяцам</h3>
+                    <span className="eyebrow">{tr("ДИНАМИКА")}</span>
+                    <h3>{tr("Расходы по месяцам")}</h3>
                   </div>
                   <span className="chart-unit">{currency}</span>
                 </div>
@@ -303,14 +313,16 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                           {...axis}
                           width={55}
                           tickFormatter={(v) =>
-                            v >= 1000 ? `${number(v / 1000)}к` : number(v)
+                            v >= 1000
+                              ? tr("{0}к", [number(v / 1000)])
+                              : number(v)
                           }
                         />
                         <Tooltip {...tooltip} />
                         <Area
                           type="monotone"
                           dataKey="amount"
-                          name="Расходы"
+                          name={tr("Расходы")}
                           stroke="#b9e87a"
                           fill="url(#areaFill)"
                           strokeWidth={2.5}
@@ -327,8 +339,8 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               <section className="panel chart-panel">
                 <div className="panel-heading">
                   <div>
-                    <span className="eyebrow">СТРУКТУРА</span>
-                    <h3>Куда уходят деньги</h3>
+                    <span className="eyebrow">{tr("СТРУКТУРА")}</span>
+                    <h3>{tr("Куда уходят деньги")}</h3>
                   </div>
                 </div>
                 {d.categories.length ? (
@@ -337,7 +349,10 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
                           <Pie
-                            data={d.categories}
+                            data={d.categories.map((c) => ({
+                              ...c,
+                              name: categoryLabel(c.name),
+                            }))}
                             dataKey="amount"
                             nameKey="name"
                             innerRadius="66%"
@@ -354,7 +369,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         </PieChart>
                       </ResponsiveContainer>
                       <div className="donut-center">
-                        <span>Всего</span>
+                        <span>{tr("Всего")}</span>
                         <strong>{number(d.total_minor / 100)}</strong>
                         <small>{currency}</small>
                       </div>
@@ -365,7 +380,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                           <i
                             style={{ background: colors[i % colors.length] }}
                           />
-                          <span>{c.name}</span>
+                          <span>{categoryLabel(c.name)}</span>
                           <strong>
                             {money(Math.round(c.amount * 100), currency)}
                           </strong>
@@ -380,57 +395,58 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             </div>
             <div className="analytics-detail-strip">
               <div>
-                <span>Пробег за период</span>
+                <span>{tr("Пробег за период")}</span>
                 <strong>
-                  {number(d.mileage)} <small>км</small>
+                  {number(d.mileage)} <small>{tr("км")}</small>
                 </strong>
               </div>
               <div>
-                <span>Ремонт и обслуживание</span>
+                <span>{tr("Ремонт и обслуживание")}</span>
                 <strong>{money(d.maintenance_minor, currency)}</strong>
               </div>
               <div>
-                <span>Среднегодовые расходы</span>
+                <span>{tr("Среднегодовые расходы")}</span>
                 <strong>{money(d.average_year_minor, currency)}</strong>
               </div>
             </div>
             {d.missing_reason && (
               <div className="info-box inline">
                 <Info size={17} />
-                {d.missing_reason}. Нулевой показатель не подставляется.
+                {tr(d.missing_reason)}
+                {tr(". Нулевой показатель не подставляется.")}
               </div>
             )}
             <section className="section-heading">
-              <h3>Топливо в деталях</h3>
+              <h3>{tr("Топливо в деталях")}</h3>
               <span className="tiny muted">
-                Только завершённые достоверные циклы
+                {tr("Только завершённые достоверные циклы")}
               </span>
             </section>
             <section className="metrics-grid three">
               <Metric
-                label="Средний расход"
+                label={tr("Средний расход")}
                 value={number(d.consumption, 2)}
-                unit="л/100 км"
+                unit={tr("л/100 км")}
                 detail={
                   d.consumption == null
-                    ? "Нужны два полных бака без пропусков"
-                    : "Полный бак → полный бак"
+                    ? tr("Нужны два полных бака без пропусков")
+                    : tr("Полный бак → полный бак")
                 }
               />
               <Metric
-                label="Средняя цена литра"
+                label={tr("Средняя цена литра")}
                 value={number(d.average_liter_price, 2)}
                 unit={currency}
               />
               <Metric
-                label="Топливо на километр"
+                label={tr("Топливо на километр")}
                 value={number(d.fuel_cost_per_km, 2)}
-                unit={`${currency}/км`}
+                unit={tr("{0}/км", [currency])}
               />
             </section>
             <div className="analytics-chart-grid equal">
               <section className="panel chart-panel">
-                <h3>Динамика расхода</h3>
+                <h3>{tr("Динамика расхода")}</h3>
                 {d.cycles.length ? (
                   <div className="chart-container small">
                     <ResponsiveContainer>
@@ -444,7 +460,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         <Tooltip {...tooltip} />
                         <Line
                           dataKey="consumption"
-                          name="л/100 км"
+                          name={tr("л/100 км")}
                           stroke="#b9e87a"
                           strokeWidth={2}
                           dot={{ r: 3 }}
@@ -458,7 +474,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                 )}
               </section>
               <section className="panel chart-panel">
-                <h3>Цена литра топлива</h3>
+                <h3>{tr("Цена литра топлива")}</h3>
                 {d.fuel_prices.length ? (
                   <div className="chart-container small">
                     <ResponsiveContainer>
@@ -472,7 +488,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         <Tooltip {...tooltip} />
                         <Line
                           dataKey="price"
-                          name={currency + "/л"}
+                          name={currency + tr("/л")}
                           stroke="#a4b5c9"
                           strokeWidth={2}
                           dot={false}
@@ -488,8 +504,8 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             </div>
             <div className="analytics-chart-grid equal">
               {[
-                ["Сравнение автомобилей", d.cars],
-                ["Сравнение годов", d.years],
+                [tr("Сравнение автомобилей"), d.cars],
+                [tr("Сравнение годов"), d.years],
               ].map(([title, data]) => (
                 <section className="panel chart-panel" key={String(title)}>
                   <h3>{String(title)}</h3>
@@ -505,12 +521,12 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                           <YAxis
                             {...axis}
                             width={55}
-                            tickFormatter={(v) => number(v / 1000) + "к"}
+                            tickFormatter={(v) => number(v / 1000) + tr("к")}
                           />
                           <Tooltip {...tooltip} />
                           <Bar
                             dataKey="amount"
-                            name="Расходы"
+                            name={tr("Расходы")}
                             fill="#b9e87a"
                             radius={[5, 5, 0, 0]}
                             maxBarSize={75}
@@ -526,10 +542,11 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               ))}
             </div>
             <section className="panel chart-panel">
-              <h3>Динамика стоимости километра</h3>
+              <h3>{tr("Динамика стоимости километра")}</h3>
               <p className="muted">
-                Накопленные расходы и подтверждённый пробег с начала выбранного
-                периода. Пробел означает недостаток показаний.
+                {tr(
+                  "Накопленные расходы и подтверждённый пробег с начала выбранного периода. Пробел означает недостаток показаний.",
+                )}
               </p>
               {d.cost_trend?.some((row) => row.cost !== null) ? (
                 <div className="chart-container small">
@@ -541,7 +558,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                       <Tooltip {...tooltip} />
                       <Line
                         dataKey="cost"
-                        name={currency + "/км"}
+                        name={currency + tr("/км")}
                         stroke="#c1ee79"
                         dot={false}
                         strokeWidth={2}
@@ -557,14 +574,20 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             </section>
             {d.cycles.length > 0 && (
               <section className="panel chart-panel">
-                <h3>Расстояния между полными баками</h3>
+                <h3>{tr("Расстояния между полными баками")}</h3>
                 <div className="cycle-list">
                   {d.cycles.map((c, i) => (
                     <div key={i}>
                       <span>{c.date}</span>
-                      <strong>{number(c.distance)} км</strong>
-                      <span>{number(c.liters, 2)} л</span>
-                      <span>{number(c.consumption, 2)} л/100 км</span>
+                      <strong>
+                        {number(c.distance)} {tr(" км")}
+                      </strong>
+                      <span>
+                        {number(c.liters, 2)} {tr(" л")}
+                      </span>
+                      <span>
+                        {number(c.consumption, 2)} {tr(" л/100 км")}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -573,29 +596,30 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             <section className="panel ownership-panel">
               <div>
                 <span className="eyebrow">
-                  СТОИМОСТЬ ВЛАДЕНИЯ · ВЫБРАННЫЕ АВТОМОБИЛИ
+                  {tr("СТОИМОСТЬ ВЛАДЕНИЯ · ВЫБРАННЫЕ АВТОМОБИЛИ")}
                 </span>
-                <h3>Эксплуатация и капитал — отдельно</h3>
+                <h3>{tr("Эксплуатация и капитал — отдельно")}</h3>
                 <p className="muted">
-                  Покупка и продажа не включены в эксплуатационные графики.
-                  Изменение рыночной стоимости без оценки не рассчитывается.
+                  {tr(
+                    "Покупка и продажа не включены в эксплуатационные графики. Изменение рыночной стоимости без оценки не рассчитывается.",
+                  )}
                 </p>
               </div>
               <dl>
                 <div>
-                  <dt>Покупка автомобилей</dt>
+                  <dt>{tr("Покупка автомобилей")}</dt>
                   <dd>{money(d.purchase_minor, currency)}</dd>
                 </div>
                 <div>
-                  <dt>Продажа автомобилей</dt>
+                  <dt>{tr("Продажа автомобилей")}</dt>
                   <dd>{money(d.sale_minor, currency)}</dd>
                 </div>
                 <div>
-                  <dt>Эксплуатация за выбранный период</dt>
+                  <dt>{tr("Эксплуатация за выбранный период")}</dt>
                   <dd>{money(d.total_minor, currency)}</dd>
                 </div>
                 <div>
-                  <dt>Покупка − продажа + выбранная эксплуатация</dt>
+                  <dt>{tr("Покупка − продажа + выбранная эксплуатация")}</dt>
                   <dd>{money(d.ownership_minor, currency)}</dd>
                 </div>
               </dl>

@@ -8,6 +8,8 @@ import "@fontsource/manrope/700.css";
 import "@fontsource/manrope/800.css";
 import "./style.css";
 import App from "./App";
+import { getLocale, setLocale } from "./i18n";
+setLocale(getLocale());
 const client = new QueryClient({
   defaultOptions: {
     queries: { retry: false, refetchOnWindowFocus: false, staleTime: 60000 },

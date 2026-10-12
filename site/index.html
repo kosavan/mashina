@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MASHINA — Self-hosted car maintenance tracker &amp; vehicle logbook</title>
+  <meta name="description" content="Track car maintenance, repairs, mileage, fuel and expenses on your own server. MASHINA is a mobile-friendly vehicle logbook with private files and offline entries.">
+  <link rel="canonical" href="https://kosavan.github.io/mashina/">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="MASHINA — Your garage. Your history. Your server.">
+  <meta property="og:description" content="A self-hosted vehicle maintenance tracker for service history, repairs, fuel, mileage and expenses.">
+  <meta property="og:url" content="https://kosavan.github.io/mashina/">
+  <meta property="og:image" content="https://kosavan.github.io/mashina/assets/mashina-overview.png">
+  <meta property="og:image:alt" content="MASHINA vehicle logbook with fictional demo data">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="style.css">
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"MASHINA","url":"https://kosavan.github.io/mashina/","description":"Self-hosted vehicle maintenance tracker for service history, repairs, mileage, fuel and expenses.","applicationCategory":"LifestyleApplication","operatingSystem":"Docker; Web browser","downloadUrl":"https://github.com/kosavan/mashina","license":"https://github.com/kosavan/mashina/blob/main/LICENSE","screenshot":"https://kosavan.github.io/mashina/assets/mashina-overview.png","inLanguage":["en","ru"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header><a class="wordmark" href="./" aria-label="MASHINA home">MASHINA<span>●</span></a><nav aria-label="Main"><a href="#features">Features</a><a href="#faq">FAQ</a><a href="https://github.com/kosavan/mashina">GitHub ↗</a></nav></header>
+  <main id="main">
+    <section class="hero">
+      <p class="eyebrow">SELF-HOSTED VEHICLE LOGBOOK</p>
+      <h1>Your garage.<br>Your history.<br><em>Your server.</em></h1>
+      <p class="intro">Remember every oil change. Understand every expense. Keep your car’s maintenance history in a beautiful, private app you host yourself.</p>
+      <div class="actions"><a class="button" href="https://github.com/kosavan/mashina#self-host-in-a-few-commands">Install MASHINA ↗</a><a href="https://github.com/kosavan/mashina/blob/main/README.ru.md">Читать по-русски</a></div>
+      <p class="note">MIT licensed · Docker · English &amp; Russian · No required cloud</p>
+    </section>
+    <figure class="showcase"><img src="assets/mashina-overview.png" alt="MASHINA mobile interface showing vehicle records, costs and maintenance" fetchpriority="high"><figcaption>Actual product screens. All vehicles and records shown are fictional demo data.</figcaption></figure>
+    <section id="features"><p class="eyebrow">ONE PLACE FOR THE WHOLE STORY</p><h2>From the first fill-up<br>to the next service.</h2>
+      <div class="features"><article><span>01 / RECORD</span><h3>A history you can find</h3><p>Log service, repairs, parts, fuel and odometer readings. Keep receipts and vehicle documents alongside the records they explain.</p></article><article><span>02 / UNDERSTAND</span><h3>Know where it goes</h3><p>Review expenses by vehicle, category and period. Calculate full-to-full fuel consumption from recorded measurements.</p></article><article><span>03 / MAINTAIN</span><h3>Keep the next job in view</h3><p>Set date and mileage reminders. Track tire mounting and tread measurements, and document body damage and repairs.</p></article></div>
+    </section>
+    <section class="privacy"><p class="eyebrow">A PERSONAL GARAGE, ON YOUR TERMS</p><h2>Your records stay<br>on your server.</h2><p>SQLite and local attachments. Complete backup and restore. Durable offline entries with synchronization when you reconnect. No required paid API or telemetry.</p><p>Install it as a PWA on your phone. Some actions, including photo uploads, need a connection. Physical iPhone validation remains in progress.</p><a href="https://github.com/kosavan/mashina/blob/main/docs/self-hosting.md">Read the hosting &amp; backup guide →</a></section>
+    <section id="faq"><p class="eyebrow">BEFORE YOU START</p><h2>A few useful answers.</h2>
+      <details open><summary>How do I track car maintenance?</summary><p>Create a vehicle, record service with its date and odometer reading, add parts and costs, and attach the receipt. Use the history to find previous repairs and set a reminder for the next service.</p></details>
+      <details><summary>How do I remember when I last changed my oil?</summary><p>Record each oil change as a service entry. Search your vehicle’s history for it to see the recorded date, mileage, parts and cost. Add a date or mileage reminder based on your vehicle’s service schedule.</p></details>
+      <details><summary>Is MASHINA an alternative to vehicle maintenance apps?</summary><p>Yes, if you want to run your own vehicle logbook. It combines service history, mileage, fuel and expenses in a mobile-friendly interface. You manage installation, HTTPS and backups yourself.</p></details>
+      <details><summary>How does it compare with LubeLogger?</summary><p>Both track vehicle maintenance and fuel on your own server. MASHINA uses React, FastAPI and SQLite, with a phone-oriented PWA and an isolated demo inside your installation. LubeLogger offers Docker and a standalone Windows executable, plus a hosted demo. Both use the MIT license. Compare their current documentation and try their workflows; this is not a claim that either has every feature of the other.</p><p><a href="https://github.com/hargata/lubelog">LubeLogger’s repository and documentation ↗</a></p></details>
+      <details><summary>Can I try it without adding personal data?</summary><p>After installation, choose “Explore the demo garage” on the welcome screen. The fictional garage uses a separate temporary database and files. This website is a product introduction, not a hosted instance of your garage.</p></details>
+      <details><summary>Is MASHINA free and open source?</summary><p>MASHINA’s own code is available under the MIT license. You provide the hosting. Third-party components retain their own licenses.</p></details>
+    </section>
+    <section class="closing"><h2>Give your car<br>a memory.</h2><a class="button" href="https://github.com/kosavan/mashina">Explore MASHINA on GitHub ↗</a></section>
+  </main>
+  <footer><span>MASHINA · Your garage. Your history. Your server.</span><a href="https://github.com/kosavan/mashina/blob/main/docs/roadmap.md">Roadmap &amp; known limits</a></footer>
+</body>
+</html>

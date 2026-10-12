@@ -28,6 +28,7 @@ jobs:
       - run: uv run python tools/check_secrets.py
       - run: uv run python tools/check_docs.py
       - run: uv run python tools/check_migrations.py
+      - run: python tools/build_site.py && python tools/check_site.py
       - name: Local OCR engine and PDF renderer
         run: sudo apt-get update && sudo apt-get install -y tesseract-ocr tesseract-ocr-rus tesseract-ocr-eng poppler-utils
       - run: uv run ruff check backend && uv run pytest -q

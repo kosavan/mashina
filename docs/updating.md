@@ -2,6 +2,14 @@
 
 English · [Russian](updating.ru.md) · [Roadmap](roadmap.md)
 
+The public product website is a separate static GitHub Pages deployment; see
+[search discovery](discoverability.md). It does not change the app image, schema,
+data or offline queues. Before replacing a published site, retain its deployed
+commit SHA. Verify the page, screenshot, canonical and sitemap after deployment.
+For a site rollback, revert the site source to the previously deployed version
+and publish only after CI passes for that exact source. App rollback still
+requires the matching image and complete data backup described below.
+
 Preserve `./data`, private `.env` and the previous image. Never reinstall, rerun
 account setup or replace `.env` with its example during an update. Use an existing
 verified release tag. Check every command and stop on errors. Never run two app

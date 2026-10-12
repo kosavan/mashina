@@ -37,6 +37,12 @@ Maintenance changes and their automated coverage; see Releases/Actions for verif
 
 ## Prioritized plan
 
+Search discovery preparation (2026-10-12): MIT license, owner-question README,
+HTML product page with SoftwareApplication metadata, sitemap and a Pages workflow
+gated on successful CI for the exact source. Publication, GitHub metadata, search
+console verification, indexing and directory acceptance remain externally
+unverified. See [the discovery guide](discoverability.md).
+
 | Priority | Planned work | Acceptance boundary |
 |---|---|---|
 | Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |

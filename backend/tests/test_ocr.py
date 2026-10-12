@@ -7,6 +7,9 @@ import subprocess
 from fastapi.testclient import TestClient
 from PIL import Image, ImageDraw, ImageFont
 import pytest
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen.canvas import Canvas
 
 from backend.ocr import LOCK, recognize, suggestions
 from backend.tests.test_api import mutate
@@ -88,9 +91,16 @@ def test_real_local_engine_image_and_pdf(pdf, russian):
     ImageDraw.Draw(image).multiline_text((60, 40), printed, fill="black", font=font, spacing=24)
     output = io.BytesIO()
     if pdf:
-        first_page = Image.new("RGB", image.size, "white")
-        ImageDraw.Draw(first_page).text((60, 40), "TOTAL 9.99", fill="black", font=font)
-        first_page.save(output, format="PDF", save_all=True, append_images=[image], resolution=150)
+        # Native printed PDF, not a lossy JPEG hidden inside a PDF container.
+        pdfmetrics.registerFont(TTFont("OcrFixture", str(font_path)))
+        document = Canvas(output, pagesize=(672, 240))
+        document.setFont("OcrFixture", 19.2)
+        document.drawString(28.8, 200, "TOTAL 9.99")
+        document.showPage()
+        document.setFont("OcrFixture", 19.2)
+        for index, line in enumerate(printed.splitlines()):
+            document.drawString(28.8, 200 - index * 32, line)
+        document.save()
     else:
         image.save(output, format="PNG")
     result = recognize(output.getvalue(), "receipt", 2 if pdf else 1)
@@ -99,6 +109,25 @@ def test_real_local_engine_image_and_pdf(pdf, russian):
     assert result["fields"].get("odometer") == "123456", result
     assert result["fields"].get("occurred_at") == "2026-10-12", result
     assert ("ИТОГО" if russian else "TOTAL") in result["text"]
+
+
+def test_real_scanned_pdf_retains_reviewable_text_without_inventing_date():
+    require_engine()
+    image = Image.new("RGB", (1400, 500), "white")
+    font = ImageFont.truetype("backend/assets/fonts/Manrope-Regular.ttf", 40)
+    ImageDraw.Draw(image).multiline_text(
+        (60, 40), "ИТОГО: 1234.56\nОдометр: 123456 км\n12.10.2026",
+        fill="black", font=font, spacing=24,
+    )
+    output = io.BytesIO()
+    image.save(output, format="PDF", resolution=150)
+    result = recognize(output.getvalue(), "receipt", 1)
+    assert result["fields"]["amount"] == "1234.56", result
+    assert "ИТОГО" in result["text"]
+    # A compressed scan can lose punctuation. Missing dates must remain unknown;
+    # this is not permission to guess a separator or create an invalid date.
+    assert result["fields"].get("occurred_at") in (None, "2026-10-12"), result
+    assert "full" not in result["fields"]
 
 
 def test_native_failure_cleans_up_and_releases_lock():

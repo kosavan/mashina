@@ -1,3 +1,22 @@
+# MASHINA 1.6.0
+
+A bodywork history for every car.
+
+- Five interactive body views with panel/point markers and multiple issues per panel.
+- Damage types, owner-assessed severity, discovery/repair dates, notes and optional contextual mileage.
+- Status filters, dated repair/reopening history, soft deletion and undo.
+- Local before/after photos, existing image reuse and same-car service links. Estimates remain separate from actual costs; damage never creates an expense or odometer reading.
+- Mobile English/Russian dark/light UI, keyboard controls, accessible list and isolated fictional demo issues.
+- Durable offline text/marker create/edit and idempotent synchronization. New photo files require an online upload and stay only in the open editor until uploaded.
+- JSON/CSV and full database/file backup include damage history. Additive schema 007 preserves supported installations and snapshots older schemas before upgrade.
+- Fix sequential create/photo-link saves to check authorization against the latest client state.
+
+[Body condition guide](docs/body-damage.md) · [Russian guide](docs/body-damage.ru.md) · [Update / rollback](docs/updating.md) · [Roadmap](docs/roadmap.md)
+
+Read the update guide first. Older images cannot open schema 007: rollback requires the matching pre-upgrade data and image. No new dependencies, external services or infrastructure changes. Generic diagrams and owner observations; physical iPhone/arm64 validation remains open.
+
+---
+
 # MASHINA 1.5.1
 
 Maintenance audit, safe updates and a living bilingual roadmap.

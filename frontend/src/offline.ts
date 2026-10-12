@@ -144,6 +144,7 @@ function project(state: State, operation: Mutation): State {
       tire_set: "tire_sets",
       budget: "budgets",
       recurring_cost: "recurring_costs",
+      body_damage: "body_damages",
     } as const
   )[operation.entity as "vehicle"];
   if (operation.entity === "settings") {
@@ -171,6 +172,20 @@ function project(state: State, operation: Mutation): State {
     }
     record.items ||= [];
     record.description ||= "";
+  }
+  if (operation.entity === "body_damage") {
+    record.status ||= "observed";
+    record.damage_type ||= "scratch";
+    record.severity ||= "minor";
+    record.photos ||= [];
+    record.status_history ||= [];
+    record.currency ||= "RUB";
+    if ("estimate" in operation.data) {
+      record.estimate_minor =
+        operation.data.estimate === ""
+          ? null
+          : pendingMoney({ amount: operation.data.estimate });
+    }
   }
   if (operation.entity === "tire_set") {
     record.tread_measurements = (record.tread_measurements || []).map(
@@ -339,6 +354,7 @@ export async function resolveOperation(
         tire_set: "tire_sets",
         budget: "budgets",
         recurring_cost: "recurring_costs",
+        body_damage: "body_damages",
       } as const
     )[operation.entity as "vehicle"];
     const row = (state[table] as any[]).find((r) => r.id === operation.id);

@@ -13,6 +13,7 @@ export function permissionError(
     tire_set: "tire_sets",
     budget: "budgets",
     recurring_cost: "recurring_costs",
+    body_damage: "body_damages",
   } as const;
   const rows = state[tables[operation.entity]] || [];
   const row = rows.find((r) => r.id === operation.id);

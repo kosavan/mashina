@@ -55,6 +55,26 @@ def main():
                     owner,
                 ),
             )
+        damage = store.mutate(
+            owner,
+            {
+                "operation_id": str(uuid.uuid4()),
+                "id": str(uuid.uuid4()),
+                "entity": "body_damage",
+                "action": "create",
+                "data": {
+                    "vehicle_id": car["id"],
+                    "title": "Preserved scratch",
+                    "view": "left",
+                    "panel": "left_front_door",
+                    "x": 0.4,
+                    "y": 0.55,
+                    "discovered_on": "2026-01-01",
+                    "status": "needs_repair",
+                    "photos": [{"attachment_id": aid, "phase": "before"}],
+                },
+            },
+        )["record"]
         blob = make_backup(store)
         restore_backup(store, blob)
         assert store.state(owner)["vehicles"][0]["id"] == car["id"]
@@ -62,6 +82,11 @@ def main():
         store.close()
         reopened = Store(Path(work) / "garage")
         assert reopened.state(owner)["vehicles"][0]["name"] == "CI preserved"
+        restored = reopened.state(owner)["body_damages"][0]
+        assert restored["id"] == damage["id"]
+        assert restored["photos"] == damage["photos"]
+        assert restored["status_history"] == damage["status_history"]
+        assert (reopened.uploads / filename).read_bytes() == picture.getvalue()
         reopened.close()
     print("Read-only non-root production container: backup, restore and restart passed.")
 

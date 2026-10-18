@@ -15,6 +15,17 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.8.1: lighter vehicle profile photos
+
+Target tag: `v1.8.1`, after publication. Profiles now use the existing private WebP
+card preview, including for previously uploaded photos. Original files, downloads,
+report images, IDs, exact amounts and offline queues are preserved. There is no
+schema/API/configuration/dependency change from 1.8.0. Follow the complete backup,
+image replacement, verification and matching rollback below. After synchronizing,
+reopen the PWA online; do not clear browser storage or reinstall it. Verify an
+existing large photo in the profile and its original download. First use can build
+the rebuildable preview cache; private images still require a server connection.
+
 ## Release 1.8.0: preserve existing installations
 
 Target tag: `v1.8.0`, after publication in Releases. Release 1.8.0 adds safe-area-aware installed-PWA headers, private card previews, five more UI languages and local OCR crop/rotation, up to three selected PDF pages and reviewed simple line items. No schema change from 1.6/1.7 (007), dependency or required configuration change. Update the server and frontend together: old servers reject new language/OCR options. Original photos, IDs, hashes, exact amounts, settings and offline queues are preserved. Preview files in data/previews are rebuildable caches and are excluded from full operational backups. Existing photos receive previews on their first authorized card request. Original downloads and report photos remain unchanged.
@@ -174,3 +185,27 @@ if a failed migration makes it unopenable, use the cold rollback above. Old
 releases with the read-only restore bug also require the cold-copy path.
 Keep `.env`, rollback files and archives out of Git. Disk failure/power loss and
 unsupported manual edits require recovery procedures, not forced downgrades.
+
+## Private HTTPS certificates on iPhone
+
+A private installation can use an owner-controlled root CA and a separate server
+certificate. The server certificate needs the actual hostnames/IPs in SAN,
+`serverAuth` extended key usage, SHA-256 signatures and a supported validity period.
+Keep the CA private key outside the gateway's mounted TLS directory; never put
+private keys, personal certificates or installation profiles in Git.
+
+Install the public certificate-only profile on the iPhone, then explicitly enable
+the named CA in **Settings → General → About → Certificate Trust Settings**.
+Installation alone does not enable HTTPS trust. See
+[Apple's certificate trust instructions](https://support.apple.com/en-us/102390).
+Keep using the existing PWA address and preserve browser storage/offline queues.
+This changes TLS trust, not the account password or application data.
+
+Before replacing TLS files, preserve the previous certificate/key and gateway
+configuration in a private server backup. Verify both private and public addresses
+against the new CA, run `nginx -t`, reload the gateway and repeat health checks with
+certificate verification enabled. Record certificate expiry and renew the server
+certificate with the same CA before expiry; devices retain their installed root.
+For a TLS-only rollback, restore matching TLS files/configuration and reload the
+gateway. Keep the current database/files; restoring old application data is not
+part of a certificate rollback.

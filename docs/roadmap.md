@@ -5,6 +5,10 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-10-18**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
+## Profile photo performance 1.8.1
+
+Vehicle profiles use the same private WebP preview as garage cards, including existing large photos. Original bytes, downloads and report images remain unchanged. A mobile browser regression verifies rendering, byte reduction and original downloads; release publication requires exact-source CI. No schema/API/configuration change.
+
 ## Release 1.8
 
 Release 1.8.0 adds safe-area-aware installed-PWA headers, private card previews, five more UI languages and local OCR crop/rotation, up to three selected PDF pages and reviewed simple line items. No schema change from 1.6/1.7 (007), dependency or required configuration change. Update the server and frontend together: old servers reject new language/OCR options. Original photos, IDs, hashes, exact amounts, settings and offline queues are preserved. Preview files in data/previews are rebuildable caches and are excluded from full operational backups. Existing photos receive previews on their first authorized card request. Original downloads and report photos remain unchanged. Automated Chromium/WebKit and legacy upgrade/offline/restore coverage is required before publication. [OCR guide](local-ocr.md) · [Validation](release-validation-1.8.md).

@@ -1,3 +1,19 @@
+# MASHINA 1.8.1
+
+Vehicle profiles now display the same compact, authorized WebP preview as garage
+cards, avoiding another full-size download when opening a car. Existing photos work
+without uploading them again. Original attachment bytes, downloads and report photos
+are unchanged. Images decode asynchronously.
+
+A browser regression uploads a large synthetic photo, opens the mobile profile,
+verifies that the image renders through the preview endpoint and confirms that the
+download still returns the original. No schema, API, dependency or configuration
+change; preserve browser storage and offline queues when updating.
+
+[Update and rollback](docs/updating.md) · [Russian update guide](docs/updating.ru.md)
+
+---
+
 # MASHINA 1.8.0
 
 A clearer installed PWA, lighter garage photos, eight languages and more capable local OCR.

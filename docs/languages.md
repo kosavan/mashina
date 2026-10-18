@@ -9,7 +9,8 @@ the default. Choose a language before setup/sign-in/demo, or under
 The local browser preference survives reload. Account language is saved through
 the existing durable offline queue and synchronizes when connected. Changes send
 only the language field and preserve other account preferences. Update frontend
-and backend together; older servers accept only Russian/English preferences.
+and backend together: servers before 1.7 accept Russian/English, 1.7 additionally
+accepts German, and 1.8 accepts all eight preferences.
 Previously supported payloads and pending financial operations remain compatible.
 
 Bundled resources cover navigation, forms, accessibility labels, known validation
@@ -20,8 +21,8 @@ never rewrites its stored records or canonical financial categories.
 
 PDF/CSV output labels and external notification payloads retain their existing
 language; full output localization remains planned in the [roadmap](roadmap.md).
-OCR still uses the bundled Russian/English Tesseract data; choosing German does
-not add German recognition. No external translation service is used.
+OCR still uses the bundled Russian/English Tesseract data; changing the interface
+language does not add recognition languages. No runtime translation service is used.
 
 [English update/rollback](updating.md) · [German update/rollback](updating.de.md) ·
 [Validation](release-validation-1.7.md)

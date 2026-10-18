@@ -9,7 +9,8 @@ Local evidence on Windows:
   and offline-operation contracts, eight locale validators and private preview tests.
 - 34 frontend unit tests pass. All eight catalogs cover 1,502 UI keys; new demo
   catalogs retain the 30 canonical fixture keys. Parameter indices and user text
-  are preserved. Five additional language/offline/mobile journeys pass.
+  are preserved. Five additional language/offline/mobile journeys pass, plus offline
+  switching to every previously unvisited language catalog and final preference sync.
 - New OCR browser coverage checks explicit crop/rotation/pages, unchecked suggestions
   and one exact financial save from selected items. Browser interception tests UI;
   native engine fixtures test real OCR separately, without interception in production.

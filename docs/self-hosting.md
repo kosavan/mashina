@@ -1,6 +1,6 @@
 # Self-hosting
 
-Linux requires Docker Engine and Compose. macOS and Windows use Docker Desktop with Linux containers; see the [separate Terminal and PowerShell walkthroughs](testing-release.md). Choose English or Russian before initial setup or sign-in, then change it under Settings. Russian is the default. The account preference is saved; local offline changes synchronize when connected. Switching language does not change currency, units or your records.
+Linux requires Docker Engine and Compose. macOS and Windows use Docker Desktop with Linux containers; see the [separate Terminal and PowerShell walkthroughs](testing-release.md). Choose English, German or Russian before initial setup or sign-in, then change it under Settings. Russian is the default. The account preference is saved; local offline changes synchronize when connected. Switching language does not change currency, units or your records.
 
 ```sh
 git clone https://github.com/kosavan/mashina.git

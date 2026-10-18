@@ -24,6 +24,9 @@ export function LanguagePicker({
         <option value="en" lang="en">
           English
         </option>
+        <option value="de" lang="de">
+          Deutsch
+        </option>
       </select>
     </label>
   );

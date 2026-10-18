@@ -248,7 +248,15 @@ export function RecordForm({
     ...categories,
     ...state.categories.filter((c) => !c.deleted).map((c) => c.name),
   ];
-  function applyOcr(fields: OcrFields, source?: File) {
+  function applyOcr(
+    fields: OcrFields,
+    source?: File,
+    recognizedItems: Item[] = [],
+  ) {
+    if (recognizedItems.length && items.length)
+      throw new Error(
+        tr("В записи уже есть позиции. Добавьте новые вручную после проверки."),
+      );
     if (fields.amount && items.length)
       throw new Error(
         tr(
@@ -271,6 +279,7 @@ export function RecordForm({
         ...(fields.price === undefined ? {} : { price: fields.price }),
       }));
     if (source) setFiles((current) => [...current, source]);
+    if (recognizedItems.length) setItems(recognizedItems);
     setDirty(true);
   }
   return (

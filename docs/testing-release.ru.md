@@ -1,4 +1,4 @@
-# Как проверить MASHINA 1.7
+# Как проверить MASHINA 1.8
 
 ## Выбор языка
 
@@ -29,7 +29,7 @@
 ```sh
 docker version
 docker compose version
-git clone --branch v1.7.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.8.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 cd mashina-test
 cp .env.example .env
 mkdir -p data
@@ -72,7 +72,7 @@ Set-Location "$env:USERPROFILE\mashina-testing"
 docker version
 docker compose version
 git --version
-git clone --branch v1.7.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
+git clone --branch v1.8.0 --depth 1 https://github.com/kosavan/mashina.git mashina-test
 Set-Location mashina-test
 Copy-Item .env.example .env
 New-Item -ItemType Directory -Force data | Out-Null
@@ -151,7 +151,7 @@ http://localhost:8000 в браузере ноутбука. `Ctrl+C` закры�
 Нужны Git, Docker Engine и Docker Compose на Linux. Команды выполняются на сервере:
 
 ```sh
-git clone --branch v1.7.0 --depth 1 https://github.com/kosavan/mashina.git
+git clone --branch v1.8.0 --depth 1 https://github.com/kosavan/mashina.git
 cd mashina
 cp .env.example .env
 mkdir -p data

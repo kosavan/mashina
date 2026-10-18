@@ -2,7 +2,7 @@
 
 English · [Russian](languages.ru.md) · [Deutsch introduction](../README.de.md)
 
-MASHINA 1.7.0 supports **English**, **Deutsch** and **Russian**. Russian remains
+MASHINA 1.8.0 supports **English**, **Deutsch**, **Russian**, **Simplified Chinese**, **Hindi**, **Spanish**, **Arabic** and **French**. Arabic uses right-to-left layout. Russian remains
 the default. Choose a language before setup/sign-in/demo, or under
 **Settings → App language** (**Einstellungen → App-Sprache** in German).
 
@@ -14,7 +14,7 @@ Previously supported payloads and pending financial operations remain compatible
 
 Bundled resources cover navigation, forms, accessibility labels, known validation
 messages, analytics, body damage and an isolated fictional demo presentation.
-German uses `de-DE` dates/numbers. Your currency, units, exact monetary amounts,
+All eight languages use their own date/number formatting; German uses `de-DE`. New language catalogs load on demand and all public catalogs are precached for offline use. Your currency, units, exact monetary amounts,
 IDs, custom categories, names, notes and files do not change. Demo presentation
 never rewrites its stored records or canonical financial categories.
 

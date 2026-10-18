@@ -1,3 +1,19 @@
+# MASHINA 1.8.0
+
+A clearer installed PWA, lighter garage photos, eight languages and more capable local OCR.
+
+- Safe-area-aware header/menu/title in portrait and landscape, with Chromium and WebKit regression coverage.
+- Compact authorized WebP card previews for existing and new photos. Original files, hashes, IDs, downloads and report images stay intact.
+- Simplified Chinese, Hindi, Spanish, Arabic (RTL) and French join Russian, English and German. New catalogs load on demand; offline switching remains available.
+- Clockwise rotation, crop preview, up to three selected PDF pages and editable, opt-in line items from simple labelled service tables. Normal Save remains the only financial write.
+- Preserve supported old payloads, schemas 001-007, settings, attachment references, exact amounts and offline operation IDs. No schema/configuration/dependency change from 1.7.
+
+[Update and rollback](docs/updating.md) · [Russian update guide](docs/updating.ru.md) · [Languages](docs/languages.md) · [Local OCR](docs/local-ocr.md) · [Validation](docs/release-validation-1.8.md)
+
+Back up the complete garage and retain the old image before updating. Old servers do not accept the new language/OCR options: update backend and frontend together. Preview caches are rebuildable and not operational backups. OCR uses local rus/eng data; complex tables and difficult instrument displays still need review. Physical iPhone validation remains separate from automated WebKit coverage.
+
+---
+
 # MASHINA 1.7.0
 
 German joins your garage, following [community request #20](https://github.com/kosavan/mashina/issues/20).

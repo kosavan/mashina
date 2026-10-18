@@ -4,8 +4,8 @@
 
 While adding a fuel fill-up, expense, service record or odometer reading, choose
 **Read a photo or PDF**. Choose fuel receipt, workshop invoice,
-dashboard or any screenshot/document. Select JPEG/PNG/WebP or one PDF page (1–20),
-then **Read locally**. Inspect the extracted text and correct suggested values.
+dashboard or any screenshot/document. Select JPEG/PNG/WebP or up to three distinct PDF pages (1–20),
+optionally choose clockwise rotation and a normalized crop in **Crop and rotate**, then **Read locally**. The crop applies after rotation to each selected page; the original attachment is unchanged. Inspect the extracted text and correct suggested values.
 Tick only fields you verified, then **Apply selected fields**. This only updates the
 current draft: the normal **Save** action creates the entry through the existing
 validated, idempotent workflow. Cancel does not apply recognition values.
@@ -21,7 +21,7 @@ or assign unlabelled digits to the odometer. You can enter values manually in re
 OCR accuracy varies with layout, glare and font. Compressed scans can lose date
 punctuation; unknown dates remain empty rather than guessing a separator. Seven-segment displays and unlabelled
 dashboards can require manual transcription. Workshop text is available immediately;
-structured multi-page line items are a [follow-up](roadmap.md).
+simple labelled tables now yield editable, individually unchecked line-item suggestions in maintenance drafts. Select either reviewed items or the total amount. Existing draft items are never overwritten. Tables with tax/discount/unknown columns, ambiguous layouts and unlabelled rows remain manual from the text; richer layouts are a [follow-up](roadmap.md).
 
 ## Local processing and limits
 
@@ -31,7 +31,7 @@ OCR runs on demand on the owner's server, one file at a time, with one CPU threa
 Native decoding happens in a short-lived process; private temporary input/output is
 removed after success/failure. It is process isolation with limits, not a full security sandbox.
 
-Limits: 20 MiB file, 25 MP image, one PDF page up to page 20, 2100px normalized image (small sources upscaled at most 2x),
+Limits: 20 MiB file, 25 MP image, up to three distinct PDF pages up to page 20, 2100px normalized image (small sources upscaled at most 2x),
 64 KiB recognized text, 45s deadline, 10 requests per user/client in five minutes.
 Linux worker caps address space at 512 MiB and native CPU time at 30s. Oversized,
 corrupt, protected or unreadable documents produce errors. OCR itself needs a connection
@@ -57,10 +57,10 @@ References: [Tesseract CLI](https://tesseract-ocr.github.io/tessdoc/Command-Line
 
 `POST /api/v1/ocr` uses an authenticated session and `X-CSRF-Token`, with multipart
 `file`, `vehicle_id`, `mode` (`receipt`, `service`, `odometer`, `screenshot`) and
-`page` (default 1). Only users with access to the active vehicle may call it.
+`page` (default 1). Optional additive fields: `pages` (comma-separated, up to three distinct pages 1-20), `rotation` (0/90/180/270 clockwise), `crop` (JSON array `[x,y,width,height]` normalized to 0-1, applied after rotation). Images support page 1 only. Existing single-page payloads remain valid. Only users with access to the active vehicle may call it.
 A successful response contains inert `text`, optional string fields `amount`,
 `liters`, `price`, `odometer`, `occurred_at`, and `engine: tesseract-local`.
-Decimal strings use a dot; dates use ISO format. Missing or ambiguous facts are omitted.
+The response additionally includes selected `pages` and `items` for simple labelled service tables (name, optional part_number, quantity, unit_price, discount=0). These remain inert suggestions and are never saved by OCR. Decimal strings use a dot; dates use ISO format. Missing or ambiguous facts are omitted.
 The endpoint has no database writes and never returns a proposed record identifier.
 Validation/recognition failures use the application's normal error envelope. Access
 is checked again after processing; revoked access cannot receive the result.

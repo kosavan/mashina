@@ -1,13 +1,8 @@
-# MASHINA sicher auf 1.7.0 aktualisieren
+# MASHINA sicher aktualisieren
 
 Deutsch · [English](updating.md) · [Russisch](updating.ru.md) · [Einführung](../README.de.md)
 
-Verwende das Ziel-Tag **`v1.7.0`**, sobald es in den
-[Releases](https://github.com/kosavan/mashina/releases/tag/v1.7.0) veröffentlicht ist.
-Diese Version ergänzt Deutsch. Gegenüber 1.6.0 gibt es keine neue Datenbankschema-
-revision (weiterhin 007), Konfiguration oder Abhängigkeit. Ältere Installationen
-führen die dazwischenliegenden Migrationen samt vollständigem Wiederherstellungs-
-archiv aus. Aktualisiere Server und Oberfläche zusammen: Alte Server lehnen `de` ab.
+Verwende das Ziel-Tag **v1.8.0**, sobald es in den [Releases](https://github.com/kosavan/mashina/releases/tag/v1.8.0) veröffentlicht ist. Diese Version ergänzt PWA-Safe-Areas, private Bildvorschauen, fünf weitere Sprachen und OCR-Zuschnitt/Drehung/Mehrseitenauswahl. Originaldateien und Schema 007 bleiben erhalten. Ältere Installationen führen die erforderlichen Zwischenmigrationen mit einem vollständigen Wiederherstellungsarchiv aus. Aktualisiere Server und Oberfläche zusammen; alte Server akzeptieren die neuen Sprach-/OCR-Optionen nicht.
 
 Die Befehle laufen im **bestehenden Installationsverzeichnis**. Bewahre `data`,
 die private `.env` und das vorherige Image auf. Führe keine Neueinrichtung durch,
@@ -69,7 +64,7 @@ Linux/macOS Terminal und Windows PowerShell:
 
 ```sh
 git fetch --tags origin
-git switch --detach v1.7.0
+git switch --detach v1.8.0
 docker compose build --pull
 docker compose up -d --no-build
 docker compose ps

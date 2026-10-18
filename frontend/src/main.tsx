@@ -9,7 +9,11 @@ import "@fontsource/manrope/800.css";
 import "./style.css";
 import App from "./App";
 import { getLocale, setLocale } from "./i18n";
-setLocale(getLocale());
+await setLocale(getLocale());
+document.documentElement.dataset.standalone = String(
+  matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true,
+);
 const client = new QueryClient({
   defaultOptions: {
     queries: { retry: false, refetchOnWindowFocus: false, staleTime: 60000 },

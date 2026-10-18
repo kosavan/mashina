@@ -1,4 +1,12 @@
-import { getLocale, setLocale, tr, useLocale, type Locale } from "./i18n";
+import {
+  getLocale,
+  setLocale,
+  tr,
+  useLocale,
+  localeInfo,
+  type Locale,
+} from "./i18n";
+import { useState } from "react";
 
 export function LanguagePicker({
   onChange,
@@ -6,28 +14,40 @@ export function LanguagePicker({
   onChange?: (locale: Locale) => void;
 }) {
   useLocale();
+  const [loading, setLoading] = useState(false);
+  const [failed, setFailed] = useState(false);
   return (
     <label className="language-picker">
       <span>{tr("Язык приложения")}</span>
       <select
         aria-label="Язык / Language"
         value={getLocale()}
-        onChange={(event) => {
+        disabled={loading}
+        onChange={async (event) => {
           const value = event.target.value as Locale;
-          setLocale(value);
-          onChange?.(value);
+          setLoading(true);
+          setFailed(false);
+          try {
+            await setLocale(value);
+            if (getLocale() === value) onChange?.(value);
+          } catch {
+            setFailed(true);
+          } finally {
+            setLoading(false);
+          }
         }}
       >
-        <option value="ru" lang="ru">
-          Русский
-        </option>
-        <option value="en" lang="en">
-          English
-        </option>
-        <option value="de" lang="de">
-          Deutsch
-        </option>
+        {Object.entries(localeInfo).map(([locale, info]) => (
+          <option key={locale} value={locale} lang={locale}>
+            {info.name}
+          </option>
+        ))}
       </select>
+      {failed && (
+        <small role="alert">
+          {tr("Сервер недоступен. Проверьте соединение.")}
+        </small>
+      )}
     </label>
   );
 }

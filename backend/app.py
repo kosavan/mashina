@@ -19,7 +19,7 @@ from argon2.exceptions import VerificationError, InvalidHashError
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form, Depends
 from fastapi.responses import JSONResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, UnidentifiedImageError
+from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, Field, ConfigDict
 
 from backend.storage import Store, Conflict, Denied, dumps, uid
@@ -34,6 +34,7 @@ from backend.notifications import install_notifications
 from backend.bank_api import install_bank
 from backend.machine_api import install_machine
 from backend.ocr import recognize, MAX_SOURCE
+from backend.previews import card_preview
 from starlette.concurrency import run_in_threadpool
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
@@ -45,7 +46,7 @@ class Credentials(BaseModel):
     username: str = Field(min_length=3, max_length=64)
     password: str = Field(min_length=12, max_length=256)
     bootstrap_token: str = Field(default="", max_length=256)
-    locale: Literal["ru", "en", "de"] = "ru"
+    locale: Literal["ru", "en", "de", "zh", "hi", "es", "ar", "fr"] = "ru"
 
 
 class LogoutInput(BaseModel):
@@ -79,7 +80,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.7.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.8.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -203,7 +204,7 @@ def create_app(data_path=None, bootstrap_token=None):
     @app.get(PREFIX + "/health")
     def health():
         revision = store.query("SELECT version_num FROM alembic_version")[0]["version_num"]
-        return {"status": "ok", "schema": revision}
+        return {"status": "ok", "schema": revision, "version": app.version}
 
     @app.get(PREFIX + "/setup")
     def setup_status():
@@ -400,6 +401,9 @@ def create_app(data_path=None, bootstrap_token=None):
         vehicle_id: str = Form(...),
         mode: Literal["receipt", "service", "odometer", "screenshot"] = Form(...),
         page: int = Form(1, ge=1, le=20),
+        pages: str = Form("", max_length=60),
+        rotation: int = Form(0),
+        crop: str = Form("", max_length=200),
         s=Depends(session),
     ):
         vehicle_id = uid(vehicle_id)
@@ -409,7 +413,17 @@ def create_app(data_path=None, bootstrap_token=None):
                 raise Denied("Автомобиль недоступен")
         throttle(request, bucket="ocr:" + s["user_id"], limit=10)
         content = await file.read(MAX_SOURCE + 1)
-        result = await run_in_threadpool(recognize, content, mode, page)
+        options = {}
+        if pages or crop or rotation:
+            try:
+                options = {
+                    "pages": [int(p.strip()) for p in pages.split(",")] if pages else None,
+                    "rotation": rotation,
+                    "crop": json.loads(crop) if crop else None,
+                }
+            except (ValueError, TypeError):
+                raise ValueError("Проверьте страницы и границы обрезки") from None
+        result = await run_in_threadpool(recognize, content, mode, page, **options)
         # A revoked driver must not receive extracted private content after processing.
         with s["store"].transaction() as c:
             car, _ = vehicle_access(c, vehicle_id, s["user_id"])
@@ -445,6 +459,7 @@ def create_app(data_path=None, bootstrap_token=None):
                     if image.width * image.height > 25000000:
                         raise ValueError("Изображение превышает 25 мегапикселей")
                     image.load()
+                    image = ImageOps.exif_transpose(image)
                     image.thumbnail((2400, 2400))
                     output = io.BytesIO()
                     image.convert("RGB").save(output, format="JPEG", quality=90)
@@ -498,8 +513,23 @@ def create_app(data_path=None, bootstrap_token=None):
         }
 
     @app.get(PREFIX + "/attachments/{attachment_id}")
-    def get_file(attachment_id: str, download: bool = False, s=Depends(session)):
+    def get_file(
+        attachment_id: str, request: Request, download: bool = False,
+        variant: Literal["card"] | None = None, s=Depends(session),
+    ):
         active_store = s["store"]
+        if variant == "card" and not download:
+            # Authorization is rechecked even for conditional/cached requests.
+            with active_store.lock:
+                with active_store.transaction() as c:
+                    row, _ = attachment_access(c, uid(attachment_id), s["user_id"])
+                    meta = json.loads(row["data"])
+                    if meta["media_type"] == "image/jpeg":
+                        target, etag = card_preview(active_store, row["filename"], meta["sha256"])
+                        headers = {"Cache-Control": "no-store", "ETag": etag}
+                        if request.headers.get("if-none-match") == etag:
+                            return Response(status_code=304, headers=headers)
+                        return FileResponse(target, media_type="image/webp", headers=headers)
         with active_store.transaction() as c:
             row, _ = attachment_access(c, uid(attachment_id), s["user_id"])
         meta = json.loads(row["data"])

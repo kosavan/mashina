@@ -88,7 +88,7 @@ No `llms.txt` is required for this implementation.
 
 Directory description:
 
-> MASHINA is an MIT-licensed, self-hosted vehicle maintenance tracker for service history, repairs, mileage, fuel and expenses. It includes a mobile-friendly PWA, local files, backup/restore and an isolated fictional demo after installation. Runs with Docker using FastAPI, React and SQLite. English, German and Russian interfaces. Physical iPhone validation remains in progress.
+> MASHINA is an MIT-licensed, self-hosted vehicle maintenance tracker for service history, repairs, mileage, fuel and expenses. It includes a mobile-friendly PWA, local files, backup/restore and an isolated fictional demo after installation. Runs with Docker using FastAPI, React and SQLite. Eight interface languages: English, German, Russian, Simplified Chinese, Hindi, Spanish, Arabic and French. Physical iPhone validation remains in progress.
 
 ## Measure after publication
 

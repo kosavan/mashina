@@ -15,6 +15,12 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.8.0: preserve existing installations
+
+Target tag: `v1.8.0`, after publication in Releases. Release 1.8.0 adds safe-area-aware installed-PWA headers, private card previews, five more UI languages and local OCR crop/rotation, up to three selected PDF pages and reviewed simple line items. No schema change from 1.6/1.7 (007), dependency or required configuration change. Update the server and frontend together: old servers reject new language/OCR options. Original photos, IDs, hashes, exact amounts, settings and offline queues are preserved. Preview files in data/previews are rebuildable caches and are excluded from full operational backups. Existing photos receive previews on their first authorized card request. Original downloads and report photos remain unchanged.
+
+Follow every backup/build/verification/rollback step below. Synchronize all devices before updating; never clear pending browser data. Verify the menu/header in the installed PWA, existing covers and original downloads, all eight language choices and one manual/offline record. Test OCR with a fictional source; applying suggestions changes a draft only. Keep the stopped data copy and previous image together for rollback. If updating from older schemas, the intervening migrations retain a complete recovery snapshot first.
+
 ## Release 1.7.0: German interface
 
 Target tag: `v1.7.0` (use only after it appears in Releases). Follow all backup, build, verification and rollback steps below, keeping the existing data mount and private `.env`. Select **Deutsch** before sign-in/setup or in **Settings → App language** after updating. Confirm the language persists after reload, then check existing records and offline synchronization. Do not clear browser storage with pending changes. Close and reopen the PWA after synchronizing if the old app shell remains. [German walkthrough](updating.de.md) · [Language scope](languages.md).

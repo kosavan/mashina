@@ -109,6 +109,9 @@ def test_service_tables_are_explicit_bounded_and_exact():
     assert line_items("Oil filter 2 123.45") == []
     assert line_items("Name | Qty | Price | Discount\nOil | 1 | 50 | 10") == []
     assert line_items("Name | Qty | Price\nOil | 1 | unknown") == []
+    assert line_items("Name       SKU       Qty Price\nOil        OIL-1     2     100.00") == [
+        {"name": "Oil", "part_number": "OIL-1", "quantity": "2", "unit_price": "100.00", "discount": "0"}]
+    assert line_items("Name SKU Qty Price Tax\nOil  OIL-1  2  100.00  20") == []
 
 
 def test_native_multi_page_ocr_does_not_guess_between_different_totals():

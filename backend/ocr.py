@@ -91,9 +91,16 @@ def line_items(text):
         "quantity": {"qty", "quantity", "кол-во", "количество"},
         "unit_price": {"price", "unit price", "цена"},
     }
+    labels = sorted({name for names in aliases.values() for name in names}, key=len, reverse=True)
+    label_pattern = "(?:" + "|".join(re.escape(name) for name in labels) + ")"
     columns, result = {}, []
     for line in text.splitlines():
         cells = [s.strip() for s in re.split(r"\s*\|\s*|\t+| {2,}", line.strip())]
+        # Tesseract can collapse gaps between short header labels to one space.
+        # Accept only a complete sequence of known labels; unknown columns still
+        # invalidate the header, and data rows retain their stricter separators.
+        if re.fullmatch(label_pattern + r"(?:\s+" + label_pattern + r")+", line.strip(), re.I):
+            cells = re.findall(label_pattern, line.strip(), re.I)
         header = {key: i for i, cell in enumerate(cells)
                   for key, names in aliases.items() if cell.casefold() in names}
         if {"name", "quantity", "unit_price"} <= header.keys():

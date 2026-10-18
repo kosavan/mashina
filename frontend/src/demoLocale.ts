@@ -1,11 +1,13 @@
 import type { State } from "./types";
 import fixture from "./locales/demo.json";
+import german from "./locales/demo.de.json";
 import { getLocale } from "./i18n";
 
-const demoMessages: Record<string, string> = fixture;
 // Only the isolated fictional fixture is projected. Real user records are never translated.
 export function localizeDemo(state: State): State {
   if (getLocale() === "ru") return state;
+  const demoMessages: Record<string, string> =
+    getLocale() === "de" ? german : fixture;
   function visit(value: unknown, key = ""): unknown {
     if (key === "categories" || key === "category") return value;
     if (typeof value === "string") return demoMessages[value] ?? value;

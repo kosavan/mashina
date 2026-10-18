@@ -1,3 +1,20 @@
+# MASHINA 1.7.0
+
+German joins your garage, following [community request #20](https://github.com/kosavan/mashina/issues/20).
+
+- Choose **Deutsch** before setup/sign-in/demo or in Settings.
+- Complete German interface and isolated demo, including forms, validation, body damage, sharing and import; German date/number formatting.
+- Save account language through the durable offline queue without changing personal records, exact money, currency or units.
+- German README and update/rollback walkthrough; updated English/Russian guides, roadmap and product-page language metadata.
+- Bundled translation catalogs are cached with the app shell for offline switching. No external translation service.
+- Scroll the sidebar on shorter screens so longer German labels keep the theme and account controls reachable.
+
+[German introduction](README.de.md) · [German update instructions](docs/updating.de.md) · [English update guide](docs/updating.md) · [Russian update guide](docs/updating.ru.md) · [Validation](docs/release-validation-1.7.md)
+
+No schema change from 1.6.0 (007), new dependency or configuration. Update backend and frontend together; old servers reject German settings. Older installations still apply the intervening migrations. Keep a full backup and the previous image. PDF/CSV output labels, external notification payloads and OCR recognition languages retain their existing scope; German OCR is not added. User-entered content is never translated.
+
+---
+
 # MASHINA 1.6.0
 
 A bodywork history for every car.

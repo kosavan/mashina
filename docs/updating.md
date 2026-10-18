@@ -1,6 +1,6 @@
 # Safely update MASHINA
 
-English · [Russian](updating.ru.md) · [Roadmap](roadmap.md)
+English · [Russian](updating.ru.md) · [Deutsch](updating.de.md) · [Roadmap](roadmap.md)
 
 The public product website is a separate static GitHub Pages deployment; see
 [search discovery](discoverability.md). It does not change the app image, schema,
@@ -14,6 +14,12 @@ Preserve `./data`, private `.env` and the previous image. Never reinstall, rerun
 account setup or replace `.env` with its example during an update. Use an existing
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
+
+## Release 1.7.0: German interface
+
+Target tag: `v1.7.0` (use only after it appears in Releases). Follow all backup, build, verification and rollback steps below, keeping the existing data mount and private `.env`. Select **Deutsch** before sign-in/setup or in **Settings → App language** after updating. Confirm the language persists after reload, then check existing records and offline synchronization. Do not clear browser storage with pending changes. Close and reopen the PWA after synchronizing if the old app shell remains. [German walkthrough](updating.de.md) · [Language scope](languages.md).
+
+No schema/config/dependency change from 1.6.0 (schema 007). Upgrading an older release still performs its required migrations and recovery snapshot. Both server and frontend must be updated together: old servers reject `de` preferences. For rollback restore the matching pre-update data and image; an older frontend does not support the saved German preference.
 
 ## Release 1.6.0: body damage schema
 

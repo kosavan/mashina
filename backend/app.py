@@ -45,7 +45,7 @@ class Credentials(BaseModel):
     username: str = Field(min_length=3, max_length=64)
     password: str = Field(min_length=12, max_length=256)
     bootstrap_token: str = Field(default="", max_length=256)
-    locale: Literal["ru", "en"] = "ru"
+    locale: Literal["ru", "en", "de"] = "ru"
 
 
 class LogoutInput(BaseModel):
@@ -79,7 +79,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.6.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.7.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (

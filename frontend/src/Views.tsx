@@ -1792,9 +1792,13 @@ export function SettingsPage() {
             <div>
               <dt>{tr("Язык и единицы")}</dt>
               <dd>
-                {getLocale() === "en"
-                  ? "English · ₽ · km · L"
-                  : "Русский · ₽ · км · л"}
+                {
+                  {
+                    ru: "Русский · ₽ · км · л",
+                    en: "English · ₽ · km · L",
+                    de: "Deutsch · ₽ · km · l",
+                  }[getLocale()]
+                }
               </dd>
             </div>
           </dl>

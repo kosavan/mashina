@@ -2,8 +2,12 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-10-12**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-10-18**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
+
+## German interface 1.7
+
+Accepted [community request #20](https://github.com/kosavan/mashina/issues/20): German setup/sign-in/settings, complete UI and isolated demo resources, German dates/numbers and offline language preference. No schema change, currency conversion or translation of owner records. [Language guide](languages.md) · [German update instructions](updating.de.md). Local and exact-source CI evidence is recorded in [release validation](release-validation-1.7.md); publication is gated on successful CI.
 
 ## Shipped feature map
 
@@ -20,7 +24,7 @@ validation and future work are separate. Dates are not delivery promises.
 | Ownership tools | Sharing, budgets, regular costs, reviewed CSV, sale PDF | Explicit scope and disclosure |
 | OCR 1.5 | Receipts, invoices, dashboard photos, arbitrary screenshots | Local text OCR, selected PDF page, human review |
 | Optional integrations | Scoped REST, read-only MCP, notifications, opt-in map | Device/external delivery checks remain open |
-| UI | English/Russian setup/settings, themes, isolated demo, localized screenshots | PDF/export/notification localization is incomplete |
+| UI | English/German/Russian setup/settings, themes, isolated demo; EN/RU screenshots | PDF/export/notification localization is incomplete |
 
 ## Maintenance 1.5.1
 
@@ -49,7 +53,7 @@ ownership confirmation and sitemap submission remain owner actions.
 | Priority | Planned work | Acceptance boundary |
 |---|---|---|
 | Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |
-| Next | Output localization | English/Russian PDF/export labels and notifications, unchanged user content |
+| Next | Output localization | English/German/Russian PDF/export labels and notifications, unchanged user content |
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
 | Planned | Larger backup archives | Bounded-memory streaming and verified restore beyond the current 200 MiB limit |
 | Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |

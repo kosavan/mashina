@@ -25,7 +25,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-The suites cover financial invariants, fuel cycles, mileage, permissions, idempotency, migrations, archive restoration, demo isolation and mobile/offline journeys. Main JavaScript budget is 180 KiB gzip; analytics load lazily. A synthetic 10,000-event calculation has a one-second test budget, not a measurement of your particular server. Compose limits the application to 1 CPU / 512 MiB.
+The suites cover financial invariants, fuel cycles, mileage, permissions, idempotency, migrations, archive restoration, demo isolation and mobile/offline journeys. Main JavaScript budget is 180 KiB gzip; analytics load lazily. Bundled language catalogs use a separate public chunk, cached with the app shell for offline switching. When adding a language, cover every UI/demo resource and parameter placeholder, setup/settings validation, formatting, unchanged user records and offline preference replay; see [language support](languages.md). A synthetic 10,000-event calculation has a one-second test budget, not a measurement of your particular server. Compose limits the application to 1 CPU / 512 MiB.
 
 Every change must preserve supported installed data and offline queues. Do not edit
 released migrations or the frozen initial schema; add a revision and extend the

@@ -1,11 +1,15 @@
 import { useSyncExternalStore } from "react";
 import english from "./locales/en.json";
+import german from "./locales/de.json";
 
-export type Locale = "ru" | "en";
-const messages: Record<string, string> = english;
+export type Locale = "ru" | "en" | "de";
+const catalogs: Record<Exclude<Locale, "ru">, Record<string, string>> = {
+  en: english,
+  de: german,
+};
 const listeners = new Set<() => void>();
 export function isLocale(value: unknown): value is Locale {
-  return value === "ru" || value === "en";
+  return value === "ru" || value === "en" || value === "de";
 }
 let language: Locale = "ru";
 try {
@@ -15,7 +19,8 @@ try {
   /* Storage may be unavailable in a restricted browser. */
 }
 export const getLocale = () => language;
-export const intlLocale = () => (language === "en" ? "en-GB" : "ru-RU");
+export const intlLocale = () =>
+  ({ ru: "ru-RU", en: "en-GB", de: "de-DE" })[language];
 export function setLocale(value: Locale) {
   language = value;
   try {
@@ -25,10 +30,11 @@ export function setLocale(value: Locale) {
   }
   if (typeof document !== "undefined") {
     document.documentElement.lang = value;
-    document.title =
-      value === "en"
-        ? "MASHINA — your digital garage"
-        : "MASHINA — ваш цифровой гараж";
+    document.title = {
+      ru: "MASHINA — ваш цифровой гараж",
+      en: "MASHINA — your digital garage",
+      de: "MASHINA — deine digitale Garage",
+    }[value];
   }
   listeners.forEach((listener) => listener());
 }
@@ -43,9 +49,9 @@ export function useLocale() {
 }
 
 // Exact resources and parameterized server messages only. Never walk the DOM or translate user records.
-const patterns = Object.entries(messages)
-  .filter(([key]) => /\{\d+\}/.test(key))
-  .map(([key, value]) => {
+const patterns = Object.keys(english)
+  .filter((key) => /\{\d+\}/.test(key))
+  .map((key) => {
     const indices: number[] = [];
     const parts = key.split(/(\{\d+\})/).map((part) => {
       if (/^\{\d+\}$/.test(part)) {
@@ -56,12 +62,13 @@ const patterns = Object.entries(messages)
     });
     return {
       expression: new RegExp("^" + parts.join("") + "$", "s"),
-      value,
+      key,
       indices,
     };
   });
 export function tr(key: string, values: readonly unknown[] = []): string {
-  let text = language === "en" ? messages[key] : key;
+  const messages = language === "ru" ? {} : catalogs[language];
+  let text = language === "ru" ? key : messages[key];
   if (text === undefined) {
     const normalized = key.replace(/\s+/g, " ").trim();
     if (messages[normalized])
@@ -78,7 +85,7 @@ export function tr(key: string, values: readonly unknown[] = []): string {
         pattern.indices.forEach((index, i) => {
           parameters[index] = messages[match[i + 1]] ?? match[i + 1];
         });
-        return pattern.value.replace(
+        return (messages[pattern.key] ?? pattern.key).replace(
           /\{(\d+)\}/g,
           (_, index) => parameters[Number(index)] ?? "",
         );

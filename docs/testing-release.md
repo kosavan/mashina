@@ -3,7 +3,7 @@
 English · [Russian](testing-release.ru.md) · [Roadmap](roadmap.md) · [Updates](updating.md)
 
 Use a separate installation with fictional information. Select **English** before
-setup/sign-in, or under **Settings → App language**. Your preference synchronizes
+setup/sign-in, or under **Settings → App language**. German (**Deutsch**) and Russian are also available; see [languages](languages.md). Your preference synchronizes
 after offline changes; user records, units and currencies are unchanged. Export
 and notification localization remain planned.
 

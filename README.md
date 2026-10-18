@@ -8,7 +8,7 @@
 </p>
 
 <p align="center">
-  English · <a href="README.ru.md">Russian</a> ·
+  English · <a href="README.ru.md">Russian</a> · <a href="README.de.md">Deutsch</a> ·
   <a href="https://github.com/kosavan/mashina/releases">Releases</a> ·
   <a href="docs/roadmap.md">Roadmap</a> ·
   <a href="docs/updating.md">Update</a> ·
@@ -29,7 +29,7 @@ server, with a mobile-friendly interface and private local storage.
 - **Analytics you can trust.** Full-to-full fuel consumption, separate purchase/sale values and clear missing-data states.
 - **Bodywork with a memory.** [Interactive damage map](docs/body-damage.md), before/after photos, repair status and linked service history.
 - **Tires deserve their own space.** Mounting history, manufacture codes, dated tread measurements and care guidance.
-- **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. English and Russian UI, selectable at setup and in Settings.
+- **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. English, German and Russian UI, selectable at setup and in Settings. See [languages](docs/languages.md) and the [German update guide](docs/updating.de.md).
 - **Local by default.** Durable offline entries, safe synchronization, SQLite + local files and complete backup/restore.
 
 Sharing, budgets, sale-history PDFs and reviewed CSV imports are included. Notifications and a scoped API/local MCP are optional. Service addresses stay local; external maps load only when you choose. No required cloud, paid API or telemetry.

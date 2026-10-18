@@ -821,8 +821,8 @@ export function VehiclePage() {
       />
       <section className="vehicle-hero panel">
         <div>
-          {vehicleImage(v) ? (
-            <img src={vehicleImage(v)} alt={v.name} />
+          {vehicleImage(v, true) ? (
+            <img src={vehicleImage(v, true)} alt={v.name} decoding="async" />
           ) : (
             <CarFront size={120} strokeWidth={1} />
           )}

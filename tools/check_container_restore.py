@@ -75,6 +75,13 @@ def main():
                 },
             },
         )["record"]
+        store.mutate(owner, {
+            "operation_id": str(uuid.uuid4()), "id": str(uuid.uuid4()),
+            "entity": "settings", "action": "create", "data": {"locale": "zh"},
+        })
+        from backend.previews import card_preview
+        preview, _ = card_preview(store, filename, hashlib.sha256(picture.getvalue()).hexdigest())
+        preview_bytes = preview.read_bytes()
         blob = make_backup(store)
         restore_backup(store, blob)
         assert store.state(owner)["vehicles"][0]["id"] == car["id"]
@@ -82,11 +89,15 @@ def main():
         store.close()
         reopened = Store(Path(work) / "garage")
         assert reopened.state(owner)["vehicles"][0]["name"] == "CI preserved"
+        assert reopened.state(owner)["settings"]["locale"] == "zh"
         restored = reopened.state(owner)["body_damages"][0]
         assert restored["id"] == damage["id"]
         assert restored["photos"] == damage["photos"]
         assert restored["status_history"] == damage["status_history"]
         assert (reopened.uploads / filename).read_bytes() == picture.getvalue()
+        preview.unlink()
+        rebuilt, _ = card_preview(reopened, filename, hashlib.sha256(picture.getvalue()).hexdigest())
+        assert rebuilt.read_bytes() == preview_bytes
         reopened.close()
     print("Read-only non-root production container: backup, restore and restart passed.")
 

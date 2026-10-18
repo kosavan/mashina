@@ -4,6 +4,7 @@ import { useApp } from "./context";
 import { api } from "./offline";
 import { tr } from "./i18n";
 import { Button } from "./components/ui/button";
+import type { Item } from "./types";
 
 type Mode = "receipt" | "service" | "odometer" | "screenshot";
 export type OcrFields = Partial<
@@ -12,7 +13,12 @@ export type OcrFields = Partial<
     string
   >
 >;
-type Result = { text: string; fields: OcrFields; engine: string };
+type Result = {
+  text: string;
+  fields: OcrFields;
+  engine: string;
+  items?: Item[];
+};
 
 export function OcrReview({
   kind,
@@ -21,7 +27,7 @@ export function OcrReview({
 }: {
   kind: string;
   vehicleId: string;
-  onApply: (fields: OcrFields, source?: File) => void;
+  onApply: (fields: OcrFields, source?: File, items?: Item[]) => void;
 }) {
   const { session } = useApp();
   const [open, setOpen] = useState(false);
@@ -36,6 +42,13 @@ export function OcrReview({
   );
   const [file, setFile] = useState<File>();
   const [page, setPage] = useState("1");
+  const [pages, setPages] = useState("");
+  const [rotation, setRotation] = useState(0);
+  const [crop, setCrop] = useState([0, 0, 100, 100]);
+  const [cropEnabled, setCropEnabled] = useState(false);
+  const [lineItems, setLineItems] = useState<Item[]>([]);
+  const [chosenItems, setChosenItems] = useState<Record<number, boolean>>({});
+  const preview = useRef<HTMLCanvasElement>(null);
   const [result, setResult] = useState<Result>();
   const [values, setValues] = useState<OcrFields>({});
   const [selected, setSelected] = useState<Record<string, boolean>>({});
@@ -43,6 +56,49 @@ export function OcrReview({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const controller = useRef<AbortController | null>(null);
+  useEffect(() => {
+    if (!file || !file.type.startsWith("image/")) return;
+    const url = URL.createObjectURL(file);
+    let active = true;
+    const image = new Image();
+    image.onload = () => {
+      if (!active || !preview.current) return;
+      const canvas = preview.current;
+      const sideways = rotation === 90 || rotation === 270;
+      const width = sideways ? image.height : image.width;
+      const height = sideways ? image.width : image.height;
+      const scale = Math.min(1, 600 / Math.max(width, height));
+      canvas.width = Math.round(width * scale);
+      canvas.height = Math.round(height * scale);
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      context.translate(canvas.width / 2, canvas.height / 2);
+      context.rotate((rotation * Math.PI) / 180);
+      context.drawImage(
+        image,
+        (-image.width * scale) / 2,
+        (-image.height * scale) / 2,
+        image.width * scale,
+        image.height * scale,
+      );
+      context.resetTransform();
+      if (cropEnabled) {
+        context.strokeStyle = "#84cc16";
+        context.lineWidth = 3;
+        context.strokeRect(
+          (crop[0] * canvas.width) / 100,
+          (crop[1] * canvas.height) / 100,
+          (crop[2] * canvas.width) / 100,
+          (crop[3] * canvas.height) / 100,
+        );
+      }
+    };
+    image.src = url;
+    return () => {
+      active = false;
+      URL.revokeObjectURL(url);
+    };
+  }, [file, rotation, cropEnabled, crop]);
   useEffect(() => () => controller.current?.abort(), []);
   // A suggestion from one vehicle must never be applied to another vehicle's draft.
   useEffect(() => {
@@ -84,6 +140,8 @@ export function OcrReview({
     setBusy(false);
     setError("");
     setAttach(false);
+    setLineItems([]);
+    setChosenItems({});
     if (clearSource) setFile(undefined);
   }
   async function recognize() {
@@ -110,6 +168,10 @@ export function OcrReview({
     body.append("vehicle_id", vehicleId);
     body.append("mode", mode);
     body.append("page", page);
+    if (pages.trim()) body.append("pages", pages.trim());
+    body.append("rotation", String(rotation));
+    if (cropEnabled)
+      body.append("crop", JSON.stringify(crop.map((v) => v / 100)));
     try {
       const data = await api<Result>(
         "/ocr",
@@ -120,6 +182,8 @@ export function OcrReview({
       setResult(data);
       setValues(data.fields);
       setSelected({});
+      setLineItems(data.items || []);
+      setChosenItems({});
     } catch (error) {
       if (!abort.signal.aborted) setError(tr((error as Error).message));
     } finally {
@@ -133,7 +197,15 @@ export function OcrReview({
           .filter((key) => selected[key] && values[key]?.trim())
           .map((key) => [key, values[key]!.trim()]),
       );
-      if (!Object.keys(fields).length) {
+      const pickedItems =
+        kind === "maintenance"
+          ? lineItems.filter((_, i) => chosenItems[i])
+          : [];
+      if (pickedItems.length && fields.amount)
+        throw new Error(
+          tr("Выберите позиции или итоговую сумму, не оба варианта"),
+        );
+      if (!Object.keys(fields).length && !pickedItems.length) {
         setError(tr("Выберите проверенные поля для переноса"));
         return;
       }
@@ -154,7 +226,7 @@ export function OcrReview({
           );
         fields[key] = value;
       }
-      onApply(fields, attach ? file : undefined);
+      onApply(fields, attach ? file : undefined, pickedItems);
       reset(true);
       setOpen(false);
     } catch (error) {
@@ -211,6 +283,10 @@ export function OcrReview({
                 reset();
                 setFile(e.target.files?.[0]);
                 setPage("1");
+                setPages("");
+                setRotation(0);
+                setCropEnabled(false);
+                setCrop([0, 0, 100, 100]);
               }}
             />
           </label>
@@ -230,6 +306,93 @@ export function OcrReview({
                 }}
               />
             </label>
+          )}
+          {file?.type === "application/pdf" && (
+            <label>
+              {tr("Страницы PDF через запятую (до трёх)")}
+              <input
+                value={pages}
+                placeholder="1,2,3"
+                disabled={busy}
+                onChange={(e) => {
+                  reset();
+                  setPages(e.target.value);
+                }}
+              />
+            </label>
+          )}
+          {file && (
+            <details className="ocr-preprocessing">
+              <summary>{tr("Обрезка и поворот")}</summary>
+              <label>
+                {tr("Поворот по часовой стрелке")}
+                <select
+                  value={rotation}
+                  aria-label={tr("Поворот по часовой стрелке")}
+                  disabled={busy}
+                  onChange={(e) => {
+                    reset();
+                    setRotation(Number(e.target.value));
+                  }}
+                >
+                  {[0, 90, 180, 270].map((value) => (
+                    <option key={value} value={value}>
+                      {value}°
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {file.type.startsWith("image/") && (
+                <canvas
+                  ref={preview}
+                  className="ocr-preview"
+                  aria-label={tr("Предпросмотр обрезки")}
+                />
+              )}
+              <label className="check-field">
+                <input
+                  type="checkbox"
+                  checked={cropEnabled}
+                  disabled={busy}
+                  onChange={(e) => {
+                    reset();
+                    setCropEnabled(e.target.checked);
+                  }}
+                />
+                {tr("Обрезать после поворота")}
+              </label>
+              {cropEnabled && (
+                <div className="field-grid">
+                  {["Слева, %", "Сверху, %", "Ширина, %", "Высота, %"].map(
+                    (label, i) => (
+                      <label key={label}>
+                        {tr(label)}
+                        <input
+                          type="number"
+                          min={i < 2 ? 0 : 1}
+                          max="100"
+                          value={crop[i]}
+                          disabled={busy}
+                          onChange={(e) => {
+                            reset();
+                            setCrop((v) =>
+                              v.map((n, j) =>
+                                i === j ? Number(e.target.value) : n,
+                              ),
+                            );
+                          }}
+                        />
+                      </label>
+                    ),
+                  )}
+                </div>
+              )}
+              <p className="field-help">
+                {tr(
+                  "Преобразования применяются ко всем выбранным страницам. Исходный файл не меняется.",
+                )}
+              </p>
+            </details>
           )}
           <Button
             type="button"
@@ -307,6 +470,65 @@ export function OcrReview({
                   </div>
                 ))}
               </div>
+              {kind === "maintenance" && lineItems.length > 0 && (
+                <section className="ocr-line-items">
+                  <h4>{tr("Проверьте позиции заказ-наряда")}</h4>
+                  <p className="field-help">
+                    {tr(
+                      "Выберите только проверенные строки. Итог будет рассчитан из выбранных позиций.",
+                    )}
+                  </p>
+                  {lineItems.map((item, index) => (
+                    <div key={index} className="ocr-line-item">
+                      <label className="check-field">
+                        <input
+                          type="checkbox"
+                          checked={!!chosenItems[index]}
+                          onChange={(e) =>
+                            setChosenItems((v) => ({
+                              ...v,
+                              [index]: e.target.checked,
+                            }))
+                          }
+                        />
+                        {tr("Перенести позицию {0}", [index + 1])}
+                      </label>
+                      {(
+                        [
+                          "name",
+                          "part_number",
+                          "quantity",
+                          "unit_price",
+                        ] as const
+                      ).map((key) => (
+                        <label key={key}>
+                          {tr(
+                            {
+                              name: "Название",
+                              part_number: "Артикул",
+                              quantity: "Кол-во",
+                              unit_price: "Цена, ₽",
+                            }[key],
+                          )}
+                          <input
+                            value={item[key]}
+                            maxLength={key === "name" ? 200 : 100}
+                            onChange={(e) =>
+                              setLineItems((v) =>
+                                v.map((row, i) =>
+                                  i === index
+                                    ? { ...row, [key]: e.target.value }
+                                    : row,
+                                ),
+                              )
+                            }
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  ))}
+                </section>
+              )}
               <label className="check-field">
                 <input
                   type="checkbox"
@@ -317,7 +539,7 @@ export function OcrReview({
               </label>
               <p className="field-help">
                 {tr(
-                  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Развёрнутые позиции счёта пока внесите вручную по распознанному тексту.",
+                  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.",
                 )}
               </p>
               <div className="settings-actions">

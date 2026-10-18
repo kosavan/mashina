@@ -4,7 +4,7 @@ from backend.tests.test_api import mutate
 import pytest
 
 
-@pytest.mark.parametrize("locale", ["ru", "en", "de"])
+@pytest.mark.parametrize("locale", ["ru", "en", "de", "zh", "hi", "es", "ar", "fr"])
 def test_setup_persists_validated_locale(tmp_path, locale):
     app = create_app(tmp_path, bootstrap_token="local-test-code")
     with TestClient(app) as client:
@@ -13,20 +13,20 @@ def test_setup_persists_validated_locale(tmp_path, locale):
             "password": "local-test-password",
             "bootstrap_token": "local-test-code",
         }
-        assert client.post("/api/v1/setup", json={**fields, "locale": "fr"}).status_code == 422
+        assert client.post("/api/v1/setup", json={**fields, "locale": "ja"}).status_code == 422
         response = client.post("/api/v1/setup", json={**fields, "locale": locale})
         assert response.status_code == 200
         assert client.get("/api/v1/state").json()["settings"]["locale"] == locale
 
 
-@pytest.mark.parametrize("locale", ["en", "de", "ru"])
+@pytest.mark.parametrize("locale", ["en", "de", "ru", "zh", "hi", "es", "ar", "fr"])
 def test_locale_settings_do_not_change_user_records(client, locale):
     car = mutate(client, "vehicle", {"name": "Моя машина"}).json()["record"]
     assert mutate(client, "settings", {"locale": locale, "theme": "light"}).status_code == 200
     state = client.get("/api/v1/state").json()
     assert state["settings"] == {"locale": locale, "theme": "light"}
     assert state["vehicles"][0]["name"] == car["name"]
-    assert mutate(client, "settings", {"locale": "fr"}).status_code == 422
+    assert mutate(client, "settings", {"locale": "ja"}).status_code == 422
     assert client.get("/api/v1/state").json()["settings"]["locale"] == locale
 
 

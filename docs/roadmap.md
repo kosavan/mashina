@@ -5,6 +5,10 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-10-18**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
+## Release 1.8
+
+Release 1.8.0 adds safe-area-aware installed-PWA headers, private card previews, five more UI languages and local OCR crop/rotation, up to three selected PDF pages and reviewed simple line items. No schema change from 1.6/1.7 (007), dependency or required configuration change. Update the server and frontend together: old servers reject new language/OCR options. Original photos, IDs, hashes, exact amounts, settings and offline queues are preserved. Preview files in data/previews are rebuildable caches and are excluded from full operational backups. Existing photos receive previews on their first authorized card request. Original downloads and report photos remain unchanged. Automated Chromium/WebKit and legacy upgrade/offline/restore coverage is required before publication. [OCR guide](local-ocr.md) · [Validation](release-validation-1.8.md).
+
 ## German interface 1.7
 
 Accepted [community request #20](https://github.com/kosavan/mashina/issues/20): German setup/sign-in/settings, complete UI and isolated demo resources, German dates/numbers and offline language preference. No schema change, currency conversion or translation of owner records. [Language guide](languages.md) · [German update instructions](updating.de.md). Local and exact-source CI evidence is recorded in [release validation](release-validation-1.7.md); publication is gated on successful CI.
@@ -24,7 +28,7 @@ Accepted [community request #20](https://github.com/kosavan/mashina/issues/20): 
 | Ownership tools | Sharing, budgets, regular costs, reviewed CSV, sale PDF | Explicit scope and disclosure |
 | OCR 1.5 | Receipts, invoices, dashboard photos, arbitrary screenshots | Local text OCR, selected PDF page, human review |
 | Optional integrations | Scoped REST, read-only MCP, notifications, opt-in map | Device/external delivery checks remain open |
-| UI | English/German/Russian setup/settings, themes, isolated demo; EN/RU screenshots | PDF/export/notification localization is incomplete |
+| UI | Eight-language setup/settings (RU/EN/DE/ZH/HI/ES/AR/FR), themes, isolated demo; EN/RU screenshots | PDF/export/notification localization is incomplete |
 
 ## Maintenance 1.5.1
 
@@ -52,7 +56,7 @@ ownership confirmation and sitemap submission remain owner actions.
 
 | Priority | Planned work | Acceptance boundary |
 |---|---|---|
-| Next | More local OCR | Crop/rotate, multi-page invoices, reviewed item tables/part numbers, evaluated seven-segment reading |
+| Next | More local OCR | Richer invoice layouts/tax/discount tables, per-field alternatives and evaluated seven-segment reading |
 | Next | Output localization | English/German/Russian PDF/export labels and notifications, unchanged user content |
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
 | Planned | Larger backup archives | Bounded-memory streaming and verified restore beyond the current 200 MiB limit |

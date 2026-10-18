@@ -29,7 +29,7 @@ server, with a mobile-friendly interface and private local storage.
 - **Analytics you can trust.** Full-to-full fuel consumption, separate purchase/sale values and clear missing-data states.
 - **Bodywork with a memory.** [Interactive damage map](docs/body-damage.md), before/after photos, repair status and linked service history.
 - **Tires deserve their own space.** Mounting history, manufacture codes, dated tread measurements and care guidance.
-- **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. English, German and Russian UI, selectable at setup and in Settings. See [languages](docs/languages.md) and the [German update guide](docs/updating.de.md).
+- **Built for your phone.** Dark/light themes, touch-friendly controls and an installable PWA. English, German, Russian, Simplified Chinese, Hindi, Spanish, Arabic and French UI, selectable at setup and in Settings. See [languages](docs/languages.md) and the [German update guide](docs/updating.de.md).
 - **Local by default.** Durable offline entries, safe synchronization, SQLite + local files and complete backup/restore.
 
 Sharing, budgets, sale-history PDFs and reviewed CSV imports are included. Notifications and a scoped API/local MCP are optional. Service addresses stay local; external maps load only when you choose. No required cloud, paid API or telemetry.
@@ -115,8 +115,8 @@ React + TypeScript + Vite · FastAPI · SQLite/WAL · local attachments. A modul
 
 **[Development & tests](docs/development.md)** · **[Architecture](specs/001-mashina-platform)** · **[Fuel capture](docs/fuel-capture.md)** · **[Tires & service locations](docs/tires-and-locations.md)** · **[API & MCP](docs/machine-access.md)**
 
-[Roadmap: shipped, next and research](docs/roadmap.md). Local text OCR is available;
-multi-page invoice tables, specialized dashboard recognition, natural-language search,
+[Roadmap: shipped, next and research](docs/roadmap.md). Local OCR includes crop/rotation, up to three PDF pages and reviewed simple invoice line items. Garage cards use compact private previews without changing original photos.
+complex invoice layouts, specialized dashboard recognition, natural-language search,
 an expense-entry bot, OBD-II and reviewed VIN/parts lookup are planned.
 For existing installations, follow the [backup, update and rollback guide](docs/updating.md).
 

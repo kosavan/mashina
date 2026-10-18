@@ -301,7 +301,7 @@ export function Garage() {
               (a, b) =>
                 (a.remaining_days ?? 99999) - (b.remaining_days ?? 99999),
             )[0];
-          const image = vehicleImage(v);
+          const image = vehicleImage(v, true);
           return (
             <article className="vehicle-card" key={v.id}>
               <button
@@ -316,7 +316,12 @@ export function Garage() {
                   className={`vehicle-cover ${v.demo_image?.includes("porsche") ? "warm" : ""}`}
                 >
                   {image ? (
-                    <img src={image} alt={v.name} />
+                    <img
+                      src={image}
+                      alt={v.name}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   ) : (
                     <div className="vehicle-placeholder">
                       <CarFront size={80} strokeWidth={1} />
@@ -1797,6 +1802,11 @@ export function SettingsPage() {
                     ru: "Русский · ₽ · км · л",
                     en: "English · ₽ · km · L",
                     de: "Deutsch · ₽ · km · l",
+                    zh: "简体中文 · ₽ · km · L",
+                    hi: "हिन्दी · ₽ · km · L",
+                    es: "Español · ₽ · km · L",
+                    ar: "العربية · ₽ · km · L",
+                    fr: "Français · ₽ · km · L",
                   }[getLocale()]
                 }
               </dd>

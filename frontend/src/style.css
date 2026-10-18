@@ -742,12 +742,14 @@ small {
   flex-direction: column;
 }
 .topbar {
-  height: 70px;
+  min-height: 70px;
+  height: auto;
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 38px;
+  padding: var(--safe-top) max(38px, var(--safe-right)) 0
+    max(38px, var(--safe-left));
   gap: 10px;
 }
 .breadcrumb {
@@ -2975,7 +2977,8 @@ input[type="checkbox"] {
     padding: 30px 26px 60px;
   }
   .topbar {
-    padding: 0 26px;
+    padding: var(--safe-top) max(26px, var(--safe-right)) 0
+      max(26px, var(--safe-left));
   }
   .demo-banner {
     padding-left: 26px;
@@ -3244,7 +3247,7 @@ input[type="checkbox"] {
     display: flex;
     position: absolute;
     right: 8px;
-    top: 24px;
+    top: max(24px, var(--safe-top));
   }
   .menu-backdrop {
     display: block;
@@ -3262,8 +3265,9 @@ input[type="checkbox"] {
     padding: 26px 22px 35px;
   }
   .topbar {
-    height: 58px;
-    padding: 0 18px;
+    min-height: calc(58px + var(--safe-top));
+    padding: var(--safe-top) max(18px, var(--safe-right)) 0
+      max(18px, var(--safe-left));
   }
   .mobile-menu {
     display: flex;
@@ -3693,7 +3697,8 @@ input[type="checkbox"] {
     padding: 26px 18px 30px;
   }
   .topbar {
-    padding: 0 12px;
+    padding: var(--safe-top) max(12px, var(--safe-right)) 0
+      max(12px, var(--safe-left));
   }
   .breadcrumb > span:first-of-type {
     display: none;
@@ -4883,4 +4888,117 @@ input[type="checkbox"] {
 .ocr-content .check-field {
   min-height: 44px;
   align-items: center;
+}
+.ocr-preview {
+  display: block;
+  max-width: 100%;
+  max-height: 260px;
+  margin: 12px auto;
+  border-radius: 12px;
+}
+.ocr-line-item {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ocr-line-item > .check-field {
+  grid-column: 1 / -1;
+}
+
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+.topbar .breadcrumb {
+  min-width: 0;
+}
+.topbar .breadcrumb strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.topbar .mobile-menu {
+  flex-shrink: 0;
+  min-width: 44px;
+  min-height: 44px;
+}
+html[dir="rtl"] .sidebar {
+  inset: 0 0 0 auto;
+}
+html[dir="rtl"] .main-wrapper {
+  margin-left: 0;
+  margin-right: 234px;
+}
+html[dir="rtl"] input[type="number"],
+html[dir="rtl"] input[type="date"],
+html[dir="rtl"] input[type="datetime-local"] {
+  direction: ltr;
+}
+@media (max-width: 1250px) {
+  html[dir="rtl"] .main-wrapper {
+    margin-right: 210px;
+  }
+}
+@media (max-width: 760px) {
+  .sidebar {
+    padding-top: max(30px, var(--safe-top));
+  }
+  html[dir="rtl"] .sidebar {
+    transform: translateX(100%);
+  }
+  html[dir="rtl"] .sidebar-open {
+    transform: translateX(0);
+  }
+  html[dir="rtl"] .main-wrapper {
+    margin-right: 0;
+  }
+}
+@media (max-height: 600px) {
+  html[data-standalone="true"] .topbar {
+    min-height: calc(58px + var(--safe-top));
+    padding: var(--safe-top) max(18px, var(--safe-right)) 0
+      max(18px, var(--safe-left));
+  }
+  html[data-standalone="true"] .mobile-menu {
+    display: flex;
+  }
+  html[data-standalone="true"] .mobile-menu-close {
+    display: flex;
+    position: absolute;
+    inset-inline-end: 8px;
+    top: max(8px, var(--safe-top));
+  }
+  html[data-standalone="true"] .sidebar {
+    transform: translateX(-100%);
+    z-index: 70;
+    padding-top: max(30px, var(--safe-top));
+    padding-inline-start: max(20px, var(--safe-left));
+    padding-inline-end: 20px;
+    width: min(320px, 100vw);
+  }
+  html[data-standalone="true"] .menu-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 65;
+    border: 0;
+    background: #0008;
+    backdrop-filter: blur(3px);
+  }
+  html[data-standalone="true"] .sidebar-open {
+    transform: translateX(0);
+  }
+  html[data-standalone="true"] .main-wrapper {
+    margin-inline: 0;
+  }
+  html[data-standalone="true"][dir="rtl"] .sidebar {
+    transform: translateX(100%);
+    padding-inline-start: max(20px, var(--safe-right));
+  }
+  html[data-standalone="true"][dir="rtl"] .sidebar-open {
+    transform: translateX(0);
+  }
 }

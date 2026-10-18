@@ -9,7 +9,7 @@ Deutsch · [English](README.md) · [Russisch](README.ru.md) · [Releases](https:
 MASHINA ist ein quelloffenes, selbst gehostetes Fahrzeugtagebuch für Wartung,
 Reparaturen, Kilometerstände, Tankvorgänge und Ausgaben. Deine Daten und Dateien
 bleiben auf deinem Server. Die mobile Oberfläche bietet ein installierbares PWA,
-helle und dunkle Designs sowie Deutsch, Englisch und Russisch.
+helle und dunkle Designs sowie Deutsch, Englisch, Russisch, vereinfachtes Chinesisch, Hindi, Spanisch, Arabisch und Französisch.
 
 ## Was du erfassen kannst
 

@@ -270,7 +270,7 @@ class Store:
             if entity == "settings":
                 if "locale" in payload["data"] and (
                     not isinstance(payload["data"]["locale"], str)
-                    or payload["data"]["locale"] not in {"ru", "en", "de"}
+                    or payload["data"]["locale"] not in {"ru", "en", "de", "zh", "hi", "es", "ar", "fr"}
                 ):
                     raise ValueError("Неподдерживаемый язык интерфейса")
                 prior_settings = c.exec_driver_sql(

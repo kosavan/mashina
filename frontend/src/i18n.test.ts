@@ -22,7 +22,7 @@ describe("interface language", () => {
     expect(getLocale()).toBe("ru");
     expect(isLocale("en")).toBe(true);
     expect(isLocale("de")).toBe(true);
-    expect(isLocale("fr")).toBe(false);
+    expect(isLocale("ja")).toBe(false);
     expect(tr("Добавить автомобиль")).toBe("Добавить автомобиль");
   });
   it("translates UI, parameters and dates while preserving units and canonical categories", () => {
@@ -67,6 +67,31 @@ describe("interface language", () => {
       Object.keys(demoEnglish).sort(),
     );
   });
+  for (const locale of ["zh", "hi", "es", "ar", "fr"] as const) {
+    it(`has complete ${locale} resources and preserves user text after loading`, async () => {
+      const catalog: Record<string, string> = JSON.parse(
+        readFileSync(`src/locales/${locale}.json`, "utf8"),
+      );
+      const demo = JSON.parse(
+        readFileSync(`src/locales/demo.${locale}.json`, "utf8"),
+      );
+      expect(Object.keys(catalog).sort()).toEqual(Object.keys(english).sort());
+      expect(Object.keys(demo).sort()).toEqual(Object.keys(demoEnglish).sort());
+      for (const [key, value] of Object.entries(catalog)) {
+        expect(value.trim(), key).not.toBe("");
+        expect(value.match(/\{\d+\}/g)?.sort() ?? [], key).toEqual(
+          key.match(/\{\d+\}/g)?.sort() ?? [],
+        );
+        if (key !== "Язык / Language")
+          expect(value, key).not.toMatch(/[а-яё]/i);
+      }
+      await setLocale(locale);
+      expect(tr("Мой гараж")).toBe(catalog["Мой гараж"]);
+      expect(tr("Открыть {0}", ["История"])).toContain("История");
+      expect(categoryLabel("Моя категория")).toBe("Моя категория");
+      expect(money(123456, "EUR")).not.toBe("");
+    });
+  }
   it("does not rewrite demo storage or canonical finance fields", () => {
     const state = {
       vehicles: [{ name: "Volvo XC60", drive: "Полный" }],

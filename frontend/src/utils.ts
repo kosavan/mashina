@@ -58,8 +58,12 @@ export const today = () => {
 };
 export const monthStart = () => today().slice(0, 7) + "-01";
 export const fileURL = (id: string) => `/api/v1/attachments/${id}`;
-export const vehicleImage = (v: Vehicle) =>
-  v.photo_id ? fileURL(v.photo_id) : v.demo_image ? `/${v.demo_image}` : "";
+export const vehicleImage = (v: Vehicle, card = false) =>
+  v.photo_id
+    ? fileURL(v.photo_id) + (card ? "?variant=card" : "")
+    : v.demo_image
+      ? `/${v.demo_image}`
+      : "";
 export const activeEvents = (s: State, id = "") =>
   s.events.filter((e) => !e.deleted && (!id || e.vehicle_id === id));
 export function sumEvents(events: Entry[], currency = "RUB") {

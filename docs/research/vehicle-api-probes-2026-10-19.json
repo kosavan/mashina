@@ -1,0 +1,64 @@
+{
+  "checked_at": "2026-10-19T16:54:48.713797+00:00",
+  "scope": "Only official public demonstration input and an unidentifiable public RDW row; no owner VIN, plate, credentials or garage data",
+  "probes": [
+    {
+      "name": "vpic_documentation_sample",
+      "url": "https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValues/5UXWX7C5*BA?format=json&modelyear=2011",
+      "method": "GET",
+      "authentication": "none",
+      "status": 200,
+      "response_bytes": 3994,
+      "sample_kind": "official documented partial VIN, with wildcard; not a real owner's identifier",
+      "result": {
+        "Make": "BMW",
+        "Model": "X3",
+        "ModelYear": "2011",
+        "DisplacementL": "3.0",
+        "EngineCylinders": "6",
+        "ErrorCode": "6",
+        "ErrorText": "6 - Incomplete VIN"
+      },
+      "seconds": 2.774
+    },
+    {
+      "name": "rdw_metadata",
+      "url": "https://opendata.rdw.nl/api/views/m9d7-ebf2.json",
+      "method": "GET",
+      "authentication": "none",
+      "status": 200,
+      "response_bytes": 33081,
+      "result": {
+        "id": "m9d7-ebf2",
+        "name": "Open Data RDW: Gekentekende_voertuigen",
+        "licenseId": "PUBLIC_DOMAIN",
+        "rowsUpdatedAt": 1792387863,
+        "attribution": "Team Open Data RDW",
+        "attributionLink": null
+      },
+      "columns": [
+        "kenteken",
+        "merk",
+        "handelsbenaming",
+        "vervaldatum_apk"
+      ],
+      "seconds": 0.936
+    },
+    {
+      "name": "rdw_public_fields",
+      "url": "https://opendata.rdw.nl/resource/m9d7-ebf2.json?$select=merk,handelsbenaming,vervaldatum_apk&$limit=1",
+      "method": "GET",
+      "authentication": "none",
+      "status": 200,
+      "response_bytes": 82,
+      "result": [
+        {
+          "merk": "TOYOTA",
+          "handelsbenaming": "TOYOTA YARIS",
+          "vervaldatum_apk": "20290204"
+        }
+      ],
+      "seconds": 1.42
+    }
+  ]
+}

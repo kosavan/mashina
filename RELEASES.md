@@ -1,4 +1,6 @@
-# MASHINA 1.9.0 (prepared; publication gated by exact-source CI)
+# MASHINA 1.9.0
+
+Released 19 October 2026 after exact-source CI; deployed with backup, restore and data verification. [Validation](docs/release-validation-1.9.md).
 
 Local OCR first reads native PDF text and uses complementary image-recognition passes for scans/photos. Review conflicting candidates and reconciled service lines with tax/discounts; the experimental seven-segment reader only suggests values for cropped panels. Nothing creates financial or odometer records without review and save.
 

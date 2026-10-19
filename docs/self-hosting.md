@@ -39,7 +39,7 @@ docker compose run --rm --no-deps mashina /app/.venv/bin/python -m backend.cli r
 docker compose up -d
 ```
 
-Restoration validates paths, sizes, hashes, schema and foreign keys; a recovery copy precedes replacement. Sessions are invalidated and notification delivery is paused after restore. Never copy only the live `.db` file while WAL is active. Web restore limit: 200 MiB; individual attachment limit: 20 MiB.
+Restoration validates paths, sizes, hashes, schema and foreign keys; a recovery copy precedes replacement. Sessions are invalidated and notification delivery is paused after restore. Never copy only the live `.db` file while WAL is active. In 1.9, streamed web/CLI restore accepts up to 20 GiB compressed/expanded and 100,000 entries, with staging on the data volume; individual attachments remain limited to 20 MiB. Older images retain their 200 MiB restore bound. See [archive capacity and rollback](ocr-results-archives.md).
 
 Settings also export related JSON/CSV and a full archive. Core data stay local. Optional notifications, machine API and maps need explicit owner/user actions; no external integration is required for ordinary record keeping.
 

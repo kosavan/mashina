@@ -81,8 +81,9 @@ docker image tag PREVIOUS_IMAGE_ID mashina:before-update
 
 Replace `PREVIOUS_IMAGE_ID` with the recorded ID. Save the printed ZIP filename,
 copy it off-disk, and keep `.env` privately. Linux may need sudo to read UID 10001
-data. Do not proceed on backup failure. Restore currently limits compressed and
-expanded archives to 200 MiB; verify restorability before upgrading a large garage.
+data. Do not proceed on backup failure. Releases through 1.8.1 limit compressed and
+expanded restore archives to 200 MiB; 1.9 accepts up to 20 GiB through streaming
+restore or CLI. Verify restorability with the matching image before upgrading.
 
 Also keep an untouched **cold directory copy** for rollback after failed migration.
 The destination below must not already exist; choose a new name if needed.

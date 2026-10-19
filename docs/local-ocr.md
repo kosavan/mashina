@@ -1,6 +1,6 @@
 # Fully local text recognition
 
-For prepared 1.9 improvements and updated limits, see [1.9](ocr-results-archives.md).
+For 1.9 behavior and limits, see [1.9](ocr-results-archives.md).
 
 ## Use
 
@@ -23,7 +23,7 @@ or assign unlabelled digits to the odometer. You can enter values manually in re
 OCR accuracy varies with layout, glare and font. Compressed scans can lose date
 punctuation; unknown dates remain empty rather than guessing a separator. Seven-segment displays and unlabelled
 dashboards can require manual transcription. Workshop text is available immediately;
-simple labelled tables now yield editable, individually unchecked line-item suggestions in maintenance drafts. Select either reviewed items or the total amount. Existing draft items are never overwritten. Tables with tax/discount/unknown columns, ambiguous layouts and unlabelled rows remain manual from the text; richer layouts are a [follow-up](roadmap.md).
+simple labelled tables now yield editable, individually unchecked line-item suggestions in maintenance drafts. Select either reviewed items or the total amount. Existing draft items are never overwritten. Tax/discount rows are suggested only when their arithmetic reconciles to the printed line total. Unknown columns, ambiguous layouts and unlabelled rows remain manual from the text; see the [supported table rules](ocr-results-archives.md).
 
 ## Local processing and limits
 
@@ -33,8 +33,8 @@ OCR runs on demand on the owner's server, one file at a time, with one CPU threa
 Native decoding happens in a short-lived process; private temporary input/output is
 removed after success/failure. It is process isolation with limits, not a full security sandbox.
 
-Limits: 20 MiB file, 25 MP image, up to three distinct PDF pages up to page 20, 2100px normalized image (small sources upscaled at most 2x),
-64 KiB recognized text, 45s deadline, 10 requests per user/client in five minutes.
+Limits: 20 MiB file, 25 MP image, up to three distinct PDF pages up to page 20, a 2100px primary pass and complementary pass up to 2800px (small sources upscaled at most 2x),
+64 KiB recognized text, 65s processing budget and 75s outer timeout, 10 requests per user/client in five minutes.
 Linux worker caps address space at 512 MiB and native CPU time at 30s. Oversized,
 corrupt, protected or unreadable documents produce errors. OCR itself needs a connection
 to your server; ordinary manual/offline entry remains available.
@@ -62,7 +62,8 @@ References: [Tesseract CLI](https://tesseract-ocr.github.io/tessdoc/Command-Line
 `page` (default 1). Optional additive fields: `pages` (comma-separated, up to three distinct pages 1-20), `rotation` (0/90/180/270 clockwise), `crop` (JSON array `[x,y,width,height]` normalized to 0-1, applied after rotation). Images support page 1 only. Existing single-page payloads remain valid. Only users with access to the active vehicle may call it.
 A successful response contains inert `text`, optional string fields `amount`,
 `liters`, `price`, `odometer`, `occurred_at`, and `engine: tesseract-local`.
-The response additionally includes selected `pages` and `items` for simple labelled service tables (name, optional part_number, quantity, unit_price, discount=0). These remain inert suggestions and are never saved by OCR. Decimal strings use a dot; dates use ISO format. Missing or ambiguous facts are omitted.
+The response additionally includes selected `pages` and `items` for reconciled labelled service tables (name, optional part_number, quantity, unit_price, discount as a monetary amount per line). These remain inert suggestions and are never saved by OCR. Decimal strings use a dot; dates use ISO format. Missing or ambiguous facts are omitted.
+Additive `candidates` and `alternatives` expose conflicting values and text for explicit review; disagreement is not a confirmed field.
 The endpoint has no database writes and never returns a proposed record identifier.
 Validation/recognition failures use the application's normal error envelope. Access
 is checked again after processing; revoked access cannot receive the result.

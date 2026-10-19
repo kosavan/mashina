@@ -2,6 +2,8 @@
 
 from contextlib import asynccontextmanager
 import csv
+from datetime import date
+from decimal import Decimal
 import hashlib
 import io
 import json
@@ -24,7 +26,7 @@ from pydantic import BaseModel, Field, ConfigDict
 
 from backend.storage import Store, Conflict, Denied, dumps, uid
 from backend.domain import analytics, iso, text
-from backend.backup import make_backup, restore_backup, MAX_ARCHIVE
+from backend.backup import save_backup, restore_backup, MAX_ARCHIVE
 from backend.demo import seed
 from backend.ownership import ownership_report, csv_rows, import_row
 from backend.access import vehicle_access, upload_access, attachment_access
@@ -35,7 +37,16 @@ from backend.bank_api import install_bank
 from backend.machine_api import install_machine
 from backend.ocr import recognize, MAX_SOURCE
 from backend.previews import card_preview
+from backend.output_locale import user_locale, translate, number
 from starlette.concurrency import run_in_threadpool
+
+
+class ArchiveFileResponse(FileResponse):
+    async def __call__(self, scope, receive, send):
+        try:
+            await super().__call__(scope, receive, send)
+        finally:
+            Path(self.path).unlink(missing_ok=True)
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
@@ -80,7 +91,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.8.1", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.9.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -98,7 +109,8 @@ def create_app(data_path=None, bootstrap_token=None):
             body_limit = (
                 256 * 1024
                 if request.url.path.startswith("/api/machine/")
-                else MAX_ARCHIVE + 1024 * 1024
+                else (MAX_ARCHIVE + 1024 * 1024 if request.url.path == PREFIX + "/restore/stream"
+                      else 201 * 1024 * 1024)
             )
             if size and (not size.isdigit() or int(size) > body_limit):
                 return JSONResponse({"detail": "Запрос слишком большой"}, status_code=413)
@@ -614,11 +626,33 @@ def create_app(data_path=None, bootstrap_token=None):
         )
 
     @app.get(PREFIX + "/export.csv")
-    def export_csv(s=Depends(session)):
+    def export_csv(readable: bool = False, s=Depends(session)):
         real_only(s)
         state = s["store"].state(s["user_id"])
         buffer = io.StringIO(newline="")
         writer = csv.writer(buffer)
+        if readable:
+            locale = user_locale(s["store"], s["user_id"])
+            labels = ["Дата", "Автомобиль", "Тип", "Категория", "Описание", "Сумма", "Валюта", "Пробег, км"]
+            writer.writerow([translate(label, locale) for label in labels])
+            cars = {car["id"]: car["name"] for car in state["vehicles"]}
+            kinds = {"expense": "Расход", "fuel": "Заправка", "maintenance": "Обслуживание и ремонт",
+                     "odometer": "Пробег", "note": "Заметка"}
+            def safe_cell(value):
+                value = str(value or "")
+                return "'" + value if value.lstrip().startswith(("=", "+", "-", "@")) or value.startswith(("\t", "\r", "\n")) else value
+
+            for event in state["events"]:
+                if event.get("deleted"):
+                    continue
+                # Category and description are user data, even when identical to a system label.
+                writer.writerow([date.fromisoformat(event["occurred_at"][:10]).strftime("%d/%m/%Y" if locale == "en" else "%d.%m.%Y"), safe_cell(cars.get(event["vehicle_id"], "")),
+                                 translate(kinds.get(event["kind"], event["kind"]), locale),
+                                 safe_cell(event.get("category", "")), safe_cell(event.get("description", "")),
+                                 number(Decimal(event.get("amount_minor", 0)) / 100, locale, 2),
+                                 event.get("currency", "RUB"), event.get("odometer", "")])
+            return Response("\ufeff" + buffer.getvalue(), media_type="text/csv; charset=utf-8",
+                            headers={"Content-Disposition": "attachment; filename=mashina-readable.csv"})
         writer.writerow(["entity", "id", "vehicle_id", "event_id", "data_json"])
         for entity in (
             "vehicles",
@@ -655,19 +689,50 @@ def create_app(data_path=None, bootstrap_token=None):
     @app.get(PREFIX + "/backup")
     def backup(s=Depends(session)):
         archive_only(s)
-        return Response(
-            make_backup(store),
-            media_type="application/zip",
-            headers={"Content-Disposition": "attachment; filename=mashina-backup.zip"},
-        )
+        descriptor, name = tempfile.mkstemp(prefix="download-", suffix=".zip", dir=store.path)
+        os.close(descriptor)
+        target = Path(name)
+        try:
+            save_backup(store, target)
+            return ArchiveFileResponse(target, media_type="application/zip", filename="mashina-backup.zip")
+        except Exception:
+            target.unlink(missing_ok=True)
+            raise
 
     @app.post(PREFIX + "/restore")
-    async def restore(file: UploadFile = File(...), s=Depends(session)):
+    def restore(file: UploadFile = File(...), s=Depends(session)):
         archive_only(s)
-        blob = await file.read(MAX_ARCHIVE + 1)
+        if file.size is not None and file.size > MAX_ARCHIVE:
+            raise ValueError("Архив превышает 20 ГиБ")
         with store.lock:
             archive_only(s)
-            restore_backup(store, blob)
+            restore_backup(store, file.file)
+        return {"ok": True, "login_required": True}
+
+    @app.post(PREFIX + "/restore/stream")
+    async def restore_stream(request: Request, s=Depends(session)):
+        await run_in_threadpool(archive_only, s)
+        if request.headers.get("content-type", "").split(";", 1)[0] != "application/zip":
+            raise HTTPException(415, "Нужен ZIP-архив")
+        # Stage directly on the persistent data volume, not the small /tmp tmpfs.
+        with tempfile.TemporaryDirectory(prefix="restore-upload-", dir=store.path) as work:
+            target = Path(work) / "archive.zip"
+            received = 0
+            with target.open("wb") as output:
+                if os.name != "nt":
+                    target.chmod(0o600)
+                async for chunk in request.stream():
+                    received += len(chunk)
+                    if received > MAX_ARCHIVE:
+                        raise HTTPException(413, "Архив превышает 20 ГиБ")
+                    await run_in_threadpool(output.write, chunk)
+
+            def apply_archive():
+                with store.lock:
+                    archive_only(s)
+                    restore_backup(store, target)
+
+            await run_in_threadpool(apply_archive)
         return {"ok": True, "login_required": True}
 
     install_notifications(app, session, throttle)

@@ -8,7 +8,7 @@ import tempfile
 import uuid
 
 from backend.storage import Store
-from backend.backup import make_backup, restore_backup
+from backend.backup import save_backup, restore_backup
 
 
 def main():
@@ -82,8 +82,9 @@ def main():
         from backend.previews import card_preview
         preview, _ = card_preview(store, filename, hashlib.sha256(picture.getvalue()).hexdigest())
         preview_bytes = preview.read_bytes()
-        blob = make_backup(store)
-        restore_backup(store, blob)
+        archive = Path(work) / "streamed.zip"
+        save_backup(store, archive)
+        restore_backup(store, archive)
         assert store.state(owner)["vehicles"][0]["id"] == car["id"]
         assert (store.uploads / filename).read_bytes() == picture.getvalue()
         store.close()

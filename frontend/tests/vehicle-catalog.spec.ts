@@ -1,0 +1,52 @@
+import { test, expect } from "@playwright/test";
+
+test.use({ extraHTTPHeaders: { "X-Forwarded-For": "203.0.113.186" } });
+
+test("360px dependent vehicle suggestions support keyboard, manual input and offline saving", async ({ page, context }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/");
+  await page.getByLabel("Язык / Language", { exact: true }).selectOption("en");
+  await page.getByRole("button", { name: "Explore the demo garage" }).click();
+  await expect(page.getByRole("heading", { name: "My garage", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "Add vehicle", exact: true }).click();
+  await page.getByLabel("Vehicle name", { exact: true }).fill("Catalog test");
+  const brand = page.getByRole("combobox", { name: "Make", exact: true });
+  await brand.fill("vol");
+  await brand.press("ArrowDown");
+  await brand.press("Enter");
+  await expect(brand).toHaveValue("Volkswagen");
+  await brand.fill("Volvo");
+  const model = page.getByRole("combobox", { name: "Model", exact: true });
+  await model.fill("XC6");
+  await page.getByRole("option", { name: "XC60", exact: true }).click();
+  const engine = page.getByRole("combobox", { name: "Engine", exact: true });
+  await engine.fill("D4");
+  await page.getByRole("option", { name: "D4", exact: true }).click();
+  await model.fill("Custom model");
+  await expect(engine).toHaveValue("");
+  await engine.fill("My custom engine");
+  await engine.press("Escape");
+  await expect(page.getByRole("dialog")).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: "../.cache/screenshots/vehicle-catalog-mobile.png", fullPage: true });
+  await page.evaluate(() => { document.documentElement.dataset.theme = "light"; });
+  await page.screenshot({ path: "../.cache/screenshots/vehicle-catalog-mobile-light.png" });
+  await context.setOffline(true);
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await context.setOffline(false);
+  await expect.poll(async () => {
+    const state = await (await page.request.get("/api/v1/state")).json();
+    return state.vehicles.find((car: { name: string }) => car.name === "Catalog test");
+  }).toMatchObject({ brand: "Volvo", model: "Custom model", engine: "My custom engine" });
+  await page.reload();
+  await page.getByRole("button", { name: "Open Catalog test", exact: true }).click();
+  await page.getByRole("button", { name: "Edit", exact: true }).click();
+  await expect(page.getByRole("combobox", { name: "Model", exact: true })).toHaveValue("Custom model");
+  await expect(page.getByRole("combobox", { name: "Engine", exact: true })).toHaveValue("My custom engine");
+  await page.getByLabel("Vehicle name", { exact: true }).fill("Catalog test edited");
+  await page.getByRole("button", { name: "Save", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  const final = await (await page.request.get("/api/v1/state")).json();
+  expect(final.vehicles.find((car: { name: string }) => car.name === "Catalog test edited")).toMatchObject({ brand: "Volvo", model: "Custom model", engine: "My custom engine" });
+});

@@ -10,7 +10,7 @@ from pathlib import Path
 import secrets
 import uuid
 from backend.storage import Store
-from backend.backup import make_backup, restore_backup
+from backend.backup import save_backup, restore_backup
 
 
 def main():
@@ -83,7 +83,7 @@ def main():
             directory = Path(args.backup_dir)
             directory.mkdir(parents=True, exist_ok=True)
             target = directory / f"mashina-{datetime.now():%Y%m%d-%H%M%S-%f}.zip"
-            target.write_bytes(make_backup(store))
+            save_backup(store, target)
             target.chmod(0o600)
             for old in sorted(directory.glob("mashina-*.zip"), reverse=True)[args.keep :]:
                 old.unlink()
@@ -111,7 +111,7 @@ def main():
         else:
             if not args.file:
                 parser.error("--file is required; stop the app before CLI restore")
-            restore_backup(store, Path(args.file).read_bytes())
+            restore_backup(store, Path(args.file))
             print("Restore verified and applied. Sessions invalidated.")
     except ValueError as exc:
         parser.error(str(exc))

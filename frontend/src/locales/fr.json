@@ -1500,5 +1500,21 @@
   "Выберите только проверенные строки. Итог будет рассчитан из выбранных позиций.": "Sélectionnez uniquement les lignes révisées. Le total sera calculé à partir des éléments de campagne sélectionnés.",
   "Перенести позицию {0}": "Appliquer l'élément de campagne {0}",
   "В записи уже есть позиции. Добавьте новые вручную после проверки.": "Cet enregistrement contient déjà des éléments de ligne. Ajoutez-en de nouveaux manuellement après examen.",
-  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Confirmez séparément le réservoir plein, les pleins manqués et les corrections historiques du compteur kilométrique. Vérifiez chaque champ et élément de campagne sélectionnés avant de les enregistrer."
+  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Confirmez séparément le réservoir plein, les pleins manqués et les corrections historiques du compteur kilométrique. Vérifiez chaque champ et élément de campagne sélectionnés avant de les enregistrer.",
+  "Варианты распознавания": "Propositions de reconnaissance",
+  "Выберите после проверки": "Choisir après vérification",
+  "Другие варианты текста": "Autres résultats de texte",
+  "Вариант текста {0}": "Résultat de texte {0}",
+  "Показать варианты: {0}": "Afficher les options : {0}",
+  "Нет подходящего варианта. Оставьте свой ввод.": "Aucune option correspondante. Conservez votre saisie.",
+  "Выберите из подсказок или введите вручную. Двигатели разных поколений и рынков собраны вместе — проверьте свой вариант по документам.": "Choisissez une suggestion ou saisissez votre valeur. Les moteurs de générations et marchés différents sont regroupés ; vérifiez les documents du véhicule.",
+  "Налоги включены в цену; скидка указана суммой за строку.": "Les taxes sont incluses dans le prix unitaire ; la remise est un montant pour la ligne entière.",
+  "Архив превышает 20 ГиБ": "L’archive dépasse 20 Gio",
+  "Архив превышает лимит 20 ГиБ или 100 000 файлов": "L’archive dépasse la limite de 20 Gio ou 100 000 fichiers",
+  "Манифест слишком большой": "Le manifeste est trop volumineux",
+  "Недопустимая запись архива": "Entrée d’archive non valide",
+  "Неизвестный файл архива": "Fichier inconnu dans l’archive",
+  "Некорректный размер файла": "Taille de fichier non valide",
+  "Нужен ZIP-архив": "Une archive ZIP est requise",
+  "Текст не найден. Проверьте снимок и языки rus и eng на сервере.": "Aucun texte trouvé. Vérifiez l’image et les données linguistiques rus et eng du serveur."
 }

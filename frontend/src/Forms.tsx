@@ -1,3 +1,4 @@
+import { VehicleIdentityFields } from "./VehicleIdentityFields";
 import { categoryLabel } from "./utils";
 import { tr } from "./i18n";
 import { useRef, useState } from "react";
@@ -323,9 +324,12 @@ export function RecordForm({
               required
               placeholder={tr("Например, Volvo XC60")}
             />
+            <VehicleIdentityFields
+              record={record}
+              vehicles={state.vehicles}
+              onDirty={() => setDirty(true)}
+            />
             <div className="field-grid">
-              <Field label={tr("Марка")} name="brand" value={record?.brand} />
-              <Field label={tr("Модель")} name="model" value={record?.model} />
               <Field
                 label={tr("Год выпуска")}
                 name="year"
@@ -399,11 +403,6 @@ export function RecordForm({
                   value={record?.trim}
                 />
                 <Field label="VIN" name="vin" value={record?.vin} />
-                <Field
-                  label={tr("Двигатель")}
-                  name="engine"
-                  value={record?.engine}
-                />
                 <Field
                   label={tr("Коробка передач")}
                   name="transmission"

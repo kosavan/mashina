@@ -19,7 +19,7 @@ test("360px local OCR review preserves draft, confirms fields and saves one fuel
   await page.route("**/api/v1/ocr", async route => {
     calls++;
     expect(route.request().postDataBuffer()?.toString()).toContain("receipt");
-    await route.fulfill({ json: { engine: "tesseract-local", text: "TOTAL 1234.56\nODO 999999 km\n<script>alert(1)</script>", fields: { amount: "1234.56", odometer: "999999" } } });
+    await route.fulfill({ json: { engine: "tesseract-local", text: "TOTAL 1234.56\nODO 999999 km\n<script>alert(1)</script>", fields: { odometer: "999999" }, candidates: { amount: ["1234.56", "1234.58"] }, alternatives: ["TOTAL 1234.56", "TOTAL 1234.58"] } });
   });
   await page.getByRole("button", { name: "Read a photo or PDF" }).click();
   await page.getByLabel("Photo, screenshot or PDF", { exact: true }).setInputFiles(file);
@@ -32,6 +32,9 @@ test("360px local OCR review preserves draft, confirms fields and saves one fuel
   await page.getByRole("button", { name: "Read a photo or PDF" }).click();
   await page.getByLabel("Photo, screenshot or PDF", { exact: true }).setInputFiles(file);
   await page.getByRole("button", { name: "Read locally", exact: true }).click();
+  await expect(page.getByLabel("Reviewed field: Amount, ₽", { exact: true })).toHaveValue("");
+  await page.getByRole("combobox", { name: "Recognition candidates: Amount, ₽", exact: true }).selectOption("1234.56");
+  await expect(page.getByLabel("Apply Amount, ₽", { exact: true })).not.toBeChecked();
   await expect(page.getByLabel("Reviewed field: Amount, ₽", { exact: true })).toHaveValue("1234.56");
   await page.getByLabel("Reviewed field: Amount, ₽", { exact: true }).fill("1200,01");
   await page.getByRole("checkbox", { name: "Apply Amount, ₽", exact: true }).check();

@@ -125,14 +125,14 @@ class Store:
                 )
             connection.commit()
             if current and set(current) != set(scripts.get_heads()):
-                from backend.backup import make_backup
+                from backend.backup import save_backup
 
                 directory = self.path / "upgrades"
                 directory.mkdir(mode=0o700, exist_ok=True)
                 snapshot = (
                     directory / f"before-{'-'.join(current)}-{datetime.now():%Y%m%d-%H%M%S-%f}.zip"
                 )
-                snapshot.write_bytes(make_backup(self))
+                save_backup(self, snapshot)
                 snapshot.chmod(0o600)
             cfg.attributes["connection"] = connection
             with connection.begin():

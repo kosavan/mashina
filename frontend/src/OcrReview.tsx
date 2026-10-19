@@ -18,6 +18,8 @@ type Result = {
   fields: OcrFields;
   engine: string;
   items?: Item[];
+  candidates?: Partial<Record<keyof OcrFields, string[]>>;
+  alternatives?: string[];
 };
 
 export function OcrReview({
@@ -427,6 +429,22 @@ export function OcrReview({
                   "Неподписанные и неоднозначные числа не подставляются. Для фото приборки проверьте, что это одометр в километрах, а не поездка, запас хода или мили.",
                 )}
               </p>
+              {!!result.alternatives?.length && (
+                <details>
+                  <summary>{tr("Другие варианты текста")}</summary>
+                  {Array.from(new Set(result.alternatives))
+                    .filter((text) => text !== result.text)
+                    .map((text, index) => (
+                      <textarea
+                        key={index}
+                        aria-label={tr("Вариант текста {0}", [index + 1])}
+                        value={text}
+                        readOnly
+                        rows={7}
+                      />
+                    ))}
+                </details>
+              )}
               <div className="ocr-fields">
                 {keys.map((key) => (
                   <div className="ocr-field" key={key}>
@@ -443,6 +461,34 @@ export function OcrReview({
                       />
                       {tr("Перенести {0}", [labels[key]])}
                     </label>
+                    {!!result.candidates?.[key]?.length && (
+                      <label>
+                        {tr("Варианты распознавания")}
+                        <select
+                          aria-label={
+                            tr("Варианты распознавания") + ": " + labels[key]
+                          }
+                          value=""
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value)
+                              setValues((current) => ({
+                                ...current,
+                                [key]: value,
+                              }));
+                          }}
+                        >
+                          <option value="">
+                            {tr("Выберите после проверки")}
+                          </option>
+                          {result.candidates[key]!.map((value) => (
+                            <option key={value} value={value}>
+                              {value}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                    )}
                     <label>
                       <span className="sr-only">
                         {tr("Проверенное поле: {0}", [labels[key]])}
@@ -478,6 +524,11 @@ export function OcrReview({
                       "Выберите только проверенные строки. Итог будет рассчитан из выбранных позиций.",
                     )}
                   </p>
+                  <p className="field-help">
+                    {tr(
+                      "Налоги включены в цену; скидка указана суммой за строку.",
+                    )}
+                  </p>
                   {lineItems.map((item, index) => (
                     <div key={index} className="ocr-line-item">
                       <label className="check-field">
@@ -499,6 +550,7 @@ export function OcrReview({
                           "part_number",
                           "quantity",
                           "unit_price",
+                          "discount",
                         ] as const
                       ).map((key) => (
                         <label key={key}>
@@ -508,6 +560,7 @@ export function OcrReview({
                               part_number: "Артикул",
                               quantity: "Кол-во",
                               unit_price: "Цена, ₽",
+                              discount: "Скидка, ₽",
                             }[key],
                           )}
                           <input

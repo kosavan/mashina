@@ -1,0 +1,226 @@
+{
+  "История автомобиля | MASHINA": {
+    "en": "Vehicle history | MASHINA",
+    "de": "Fahrzeughistorie | MASHINA"
+  },
+  "Нет данных": {
+    "en": "No data",
+    "de": "Keine Daten"
+  },
+  "Не указана": {
+    "en": "Not specified",
+    "de": "Nicht angegeben"
+  },
+  "ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ": {
+    "en": "DEMONSTRATION DATA",
+    "de": "DEMONSTRATIONSDATEN"
+  },
+  "ИСТОРИЯ АВТОМОБИЛЯ": {
+    "en": "VEHICLE HISTORY",
+    "de": "FAHRZEUGHISTORIE"
+  },
+  "ПОСЛЕДНИЙ ИЗВЕСТНЫЙ ПРОБЕГ": {
+    "en": "LATEST KNOWN ODOMETER",
+    "de": "LETZTER BEKANNTER KILOMETERSTAND"
+  },
+  "ПРОБЕГ ЗА ПЕРИОД ВЛАДЕНИЯ": {
+    "en": "DISTANCE DURING OWNERSHIP",
+    "de": "FAHRSTRECKE IM BESITZZEITRAUM"
+  },
+  "Показания внесены пользователем. Расстояние считается от подтверждённой исходной точки, а не от нулевого одометра.": {
+    "en": "Readings are entered by users. Distance is calculated from the confirmed baseline, rather than a zero odometer.",
+    "de": "Die Kilometerstände stammen von Nutzern. Die Fahrstrecke wird ab dem bestätigten Ausgangswert berechnet, nicht ab Kilometerstand null."
+  },
+  "Автомобиль в деталях": {
+    "en": "Vehicle details",
+    "de": "Fahrzeugdetails"
+  },
+  "Марка / модель": {
+    "en": "Make / model",
+    "de": "Marke / Modell"
+  },
+  "Двигатель": {
+    "en": "Engine",
+    "de": "Motor"
+  },
+  "Коробка передач": {
+    "en": "Transmission",
+    "de": "Getriebe"
+  },
+  "Привод": {
+    "en": "Drive",
+    "de": "Antrieb"
+  },
+  "Топливо": {
+    "en": "Fuel",
+    "de": "Kraftstoff"
+  },
+  "Бензин": {
+    "en": "Petrol",
+    "de": "Benzin"
+  },
+  "Дизель": {
+    "en": "Diesel",
+    "de": "Diesel"
+  },
+  "Электричество": {
+    "en": "Electricity",
+    "de": "Strom"
+  },
+  "Гибрид": {
+    "en": "Hybrid",
+    "de": "Hybrid"
+  },
+  "Начало владения": {
+    "en": "Ownership started",
+    "de": "Beginn des Besitzes"
+  },
+  "Государственный номер": {
+    "en": "Registration plate",
+    "de": "Kennzeichen"
+  },
+  "Характеристики пока не заполнены.": {
+    "en": "No vehicle details recorded yet.",
+    "de": "Noch keine Fahrzeugdaten erfasst."
+  },
+  "Начало истории": {
+    "en": "Start of history",
+    "de": "Beginn der Historie"
+  },
+  "Период отчёта: ": {
+    "en": "Report period: ",
+    "de": "Berichtszeitraum: "
+  },
+  "Данные отражают записи владельцев и водителей и не заменяют независимую диагностику или проверку документов. Личные документы, заметки и сведения об аккаунтах в этот отчёт не включены.": {
+    "en": "This report reflects records entered by owners and drivers and does not replace an independent inspection or document verification. Private documents, notes and account details are excluded.",
+    "de": "Dieser Bericht enthält Einträge von Besitzern und Fahrern und ersetzt keine unabhängige Untersuchung oder Dokumentenprüfung. Private Dokumente, Notizen und Kontodaten sind nicht enthalten."
+  },
+  "Финансовая история": {
+    "en": "Financial history",
+    "de": "Finanzhistorie"
+  },
+  "Эксплуатационные расходы · ": {
+    "en": "Running costs · ",
+    "de": "Betriebskosten · "
+  },
+  "Обслуживание и ремонт": {
+    "en": "Maintenance and repairs",
+    "de": "Wartung und Reparaturen"
+  },
+  "Эксплуатация на километр": {
+    "en": "Running cost per kilometre",
+    "de": "Betriebskosten pro Kilometer"
+  },
+  "Недостаточно подтверждённых показаний": {
+    "en": "Insufficient confirmed readings",
+    "de": "Nicht genügend bestätigte Kilometerstände"
+  },
+  "Цена покупки (отдельно)": {
+    "en": "Purchase price (separate)",
+    "de": "Kaufpreis (separat)"
+  },
+  "Цена продажи (отдельно)": {
+    "en": "Sale price (separate)",
+    "de": "Verkaufspreis (separat)"
+  },
+  "Цена покупки и продажи не включена в эксплуатационные расходы. Изменение рыночной стоимости не оценивалось. Валюты не конвертируются и не суммируются.": {
+    "en": "Purchase and sale prices are excluded from running costs. Changes in market value have not been estimated. Currencies are not converted or added together.",
+    "de": "Kauf- und Verkaufspreis sind nicht in den Betriebskosten enthalten. Änderungen des Marktwerts wurden nicht geschätzt. Währungen werden weder umgerechnet noch zusammengezählt."
+  },
+  "История обслуживания": {
+    "en": "Service history",
+    "de": "Wartungshistorie"
+  },
+  "Работы за этот период не записаны.": {
+    "en": "No service records in this period.",
+    "de": "Keine Wartungen in diesem Zeitraum erfasst."
+  },
+  "Обслуживание / ремонт": {
+    "en": "Maintenance / repair",
+    "de": "Wartung / Reparatur"
+  },
+  "Запчасть / работа": {
+    "en": "Part / labour",
+    "de": "Ersatzteil / Arbeit"
+  },
+  "\nАртикул: ": {
+    "en": "\nPart number: ",
+    "de": "\nTeilenummer: "
+  },
+  " шт.": {
+    "en": " pcs",
+    "de": " Stk."
+  },
+  " км": {
+    "en": " km",
+    "de": " km"
+  },
+  "Стоимость записи: ": {
+    "en": "Record cost: ",
+    "de": "Kosten des Eintrags: "
+  },
+  "ЦИФРОВАЯ ИСТОРИЯ АВТОМОБИЛЯ": {
+    "en": "DIGITAL VEHICLE HISTORY",
+    "de": "DIGITALE FAHRZEUGHISTORIE"
+  },
+  "Подготовлено ": {
+    "en": "Prepared ",
+    "de": "Erstellt am "
+  },
+  " · Демо": {
+    "en": " · Demo",
+    "de": " · Demo"
+  },
+  "Есть напоминание об обслуживании. Откройте свой гараж.": {
+    "en": "A service reminder is due. Open your garage.",
+    "de": "Eine Wartungserinnerung steht an. Öffne deine Garage."
+  },
+  "Дата": {
+    "en": "Date",
+    "de": "Datum"
+  },
+  "Автомобиль": {
+    "en": "Vehicle",
+    "de": "Fahrzeug"
+  },
+  "Тип": {
+    "en": "Type",
+    "de": "Typ"
+  },
+  "Категория": {
+    "en": "Category",
+    "de": "Kategorie"
+  },
+  "Описание": {
+    "en": "Description",
+    "de": "Beschreibung"
+  },
+  "Сумма": {
+    "en": "Amount",
+    "de": "Betrag"
+  },
+  "Валюта": {
+    "en": "Currency",
+    "de": "Währung"
+  },
+  "Пробег, км": {
+    "en": "Odometer, km",
+    "de": "Kilometerstand, km"
+  },
+  "Расход": {
+    "en": "Expense",
+    "de": "Ausgabe"
+  },
+  "Заправка": {
+    "en": "Refuelling",
+    "de": "Tankfüllung"
+  },
+  "Заметка": {
+    "en": "Note",
+    "de": "Notiz"
+  },
+  "Пробег": {
+    "en": "Odometer",
+    "de": "Kilometerstand"
+  }
+}

@@ -1,0 +1,191 @@
+{
+  "Audi": {
+    "A3": ["1.4 TFSI", "2.0 TDI"],
+    "A4": ["2.0 TFSI", "2.0 TDI"],
+    "A6": ["2.0 TFSI", "3.0 TDI"],
+    "Q3": ["2.0 TFSI", "2.0 TDI"],
+    "Q5": ["2.0 TFSI", "2.0 TDI"],
+    "Q7": ["3.0 TFSI", "3.0 TDI"]
+  },
+  "BMW": {
+    "1 Series": ["118i", "120d"],
+    "3 Series": ["320i", "330i", "320d"],
+    "5 Series": ["520i", "530i", "520d"],
+    "X1": ["sDrive18i", "xDrive20d"],
+    "X3": ["xDrive20i", "xDrive20d"],
+    "X5": ["xDrive30d", "xDrive40i"]
+  },
+  "Chevrolet": {
+    "Aveo": ["1.4", "1.6"],
+    "Cruze": ["1.6", "1.8"],
+    "Lacetti": ["1.4", "1.6", "1.8"],
+    "Niva": ["1.7"]
+  },
+  "Chery": {
+    "Tiggo 4": ["1.5", "1.5 Turbo"],
+    "Tiggo 7 Pro": ["1.5 Turbo"],
+    "Tiggo 8 Pro": ["1.6 Turbo", "2.0 Turbo"]
+  },
+  "Citroën": {
+    "C3": ["1.2 PureTech"],
+    "C4": ["1.6 THP", "1.6 HDi"],
+    "C5": ["2.0 HDi"]
+  },
+  "Ford": {
+    "Fiesta": ["1.0 EcoBoost", "1.6"],
+    "Focus": ["1.6", "2.0"],
+    "Mondeo": ["2.0 EcoBoost", "2.0 TDCi"],
+    "Kuga": ["1.5 EcoBoost", "2.0 TDCi"]
+  },
+  "Geely": {
+    "Atlas": ["2.0", "2.4"],
+    "Coolray": ["1.5 Turbo"],
+    "Monjaro": ["2.0 Turbo"]
+  },
+  "Haval": {
+    "F7": ["1.5 Turbo", "2.0 Turbo"],
+    "Jolion": ["1.5 Turbo"],
+    "H9": ["2.0 Turbo"]
+  },
+  "Honda": {
+    "Accord": ["2.0", "2.4"],
+    "Civic": ["1.8", "1.5 Turbo"],
+    "CR-V": ["2.0", "2.4"]
+  },
+  "Hyundai": {
+    "Accent": ["1.4", "1.6"],
+    "Solaris": ["1.4", "1.6"],
+    "Elantra": ["1.6", "2.0"],
+    "Creta": ["1.6", "2.0"],
+    "Tucson": ["2.0", "2.0 CRDi"],
+    "Santa Fe": ["2.4", "2.2 CRDi"]
+  },
+  "Kia": {
+    "Rio": ["1.4", "1.6"],
+    "Ceed": ["1.6 MPI", "1.4 T-GDI"],
+    "Cerato": ["1.6", "2.0"],
+    "Sportage": ["2.0", "2.0 CRDi"],
+    "Sorento": ["2.4", "2.2 CRDi"]
+  },
+  "LADA": {
+    "Granta": ["1.6"],
+    "Vesta": ["1.6", "1.8"],
+    "Largus": ["1.6"],
+    "Niva Legend": ["1.7"],
+    "Niva Travel": ["1.7"],
+    "Kalina": ["1.4", "1.6"],
+    "Priora": ["1.6"]
+  },
+  "Lexus": {
+    "IS": ["250", "300h"],
+    "ES": ["250", "300h"],
+    "NX": ["200", "300h"],
+    "RX": ["350", "450h"]
+  },
+  "Mazda": {
+    "3": ["1.6", "2.0 SKYACTIV-G"],
+    "6": ["2.0 SKYACTIV-G", "2.5 SKYACTIV-G"],
+    "CX-5": ["2.0 SKYACTIV-G", "2.5 SKYACTIV-G"]
+  },
+  "Mercedes-Benz": {
+    "A-Class": ["A 180", "A 200"],
+    "C-Class": ["C 180", "C 200", "C 220 d"],
+    "E-Class": ["E 200", "E 220 d"],
+    "GLC": ["200", "220 d"],
+    "GLE": ["300 d", "450"]
+  },
+  "Mitsubishi": {
+    "ASX": ["1.6", "2.0"],
+    "Lancer": ["1.6", "1.8", "2.0"],
+    "Outlander": ["2.0", "2.4", "3.0"],
+    "Pajero": ["3.0", "3.2 DI-D"]
+  },
+  "Nissan": {
+    "Almera": ["1.6"],
+    "Juke": ["1.6", "1.6 DIG-T"],
+    "Qashqai": ["1.6", "2.0"],
+    "X-Trail": ["2.0", "2.5"],
+    "Terrano": ["1.6", "2.0"]
+  },
+  "Opel": {
+    "Astra": ["1.4 Turbo", "1.6"],
+    "Corsa": ["1.2", "1.4"],
+    "Insignia": ["1.6 Turbo", "2.0 CDTI"]
+  },
+  "Peugeot": {
+    "208": ["1.2 PureTech"],
+    "308": ["1.6 THP", "1.6 HDi"],
+    "3008": ["1.6 THP", "2.0 HDi"]
+  },
+  "Porsche": {
+    "Cayenne": ["3.0", "3.6", "4.8"],
+    "Macan": ["2.0", "3.0"],
+    "Panamera": ["3.0", "3.6", "4.8"],
+    "911": []
+  },
+  "Renault": {
+    "Logan": ["1.4", "1.6"],
+    "Sandero": ["1.6"],
+    "Duster": ["1.6", "2.0", "1.5 dCi"],
+    "Kaptur": ["1.6", "2.0"],
+    "Megane": ["1.6", "1.5 dCi"]
+  },
+  "Škoda": {
+    "Octavia": [
+      "1.0 TSI",
+      "1.4 TSI",
+      "1.5 TSI",
+      "1.8 TSI",
+      "2.0 TSI",
+      "1.6 TDI",
+      "2.0 TDI"
+    ],
+    "Rapid": ["1.6 MPI", "1.4 TSI"],
+    "Superb": ["1.8 TSI", "2.0 TSI", "2.0 TDI"],
+    "Kodiaq": ["1.4 TSI", "2.0 TSI", "2.0 TDI"],
+    "Karoq": ["1.4 TSI", "1.5 TSI", "2.0 TDI"]
+  },
+  "Subaru": {
+    "Forester": ["2.0", "2.5"],
+    "Outback": ["2.5", "3.6"],
+    "XV": ["1.6", "2.0"]
+  },
+  "Suzuki": {
+    "Swift": ["1.2", "1.3"],
+    "Vitara": ["1.4 Boosterjet", "1.6"],
+    "SX4": ["1.6"],
+    "Jimny": ["1.3", "1.5"]
+  },
+  "Tesla": {
+    "Model 3": ["Standard Range", "Long Range", "Performance"],
+    "Model Y": ["Long Range", "Performance"],
+    "Model S": ["Long Range", "Plaid"],
+    "Model X": ["Long Range", "Plaid"]
+  },
+  "Toyota": {
+    "Corolla": ["1.6", "1.8 Hybrid", "2.0 Hybrid"],
+    "Camry": ["2.0", "2.5", "3.5"],
+    "RAV4": ["2.0", "2.5 Hybrid"],
+    "Yaris": ["1.5 Hybrid"],
+    "Land Cruiser": ["4.0", "4.5 D-4D"],
+    "Land Cruiser Prado": ["2.7", "4.0", "2.8 D-4D"]
+  },
+  "Volkswagen": {
+    "Polo": ["1.6 MPI", "1.4 TSI"],
+    "Golf": ["1.4 TSI", "1.5 TSI", "2.0 TDI"],
+    "Passat": ["1.4 TSI", "1.8 TSI", "2.0 TDI"],
+    "Tiguan": ["1.4 TSI", "2.0 TSI", "2.0 TDI"],
+    "Touareg": ["3.0 TSI", "3.0 TDI"]
+  },
+  "Volvo": {
+    "XC60": ["D4", "D5", "T5", "T6", "B4", "B5", "T8"],
+    "XC90": ["D5", "T5", "T6", "B5", "T8"],
+    "XC40": ["T3", "T4", "T5", "B3", "B4"],
+    "S60": ["T4", "T5", "T6"],
+    "V60": ["D3", "D4", "T5", "T6"]
+  },
+  "УАЗ": {
+    "Patriot": ["2.7"],
+    "Hunter": ["2.7"]
+  }
+}

@@ -5002,3 +5002,71 @@ html[dir="rtl"] input[type="datetime-local"] {
     transform: translateX(0);
   }
 }
+
+.vehicle-search {
+  position: relative;
+  min-width: 0;
+}
+.vehicle-search > label {
+  display: block;
+  margin-bottom: 8px;
+}
+.vehicle-search-input {
+  display: flex;
+  gap: 4px;
+}
+.vehicle-search-input input {
+  min-width: 0;
+  flex: 1;
+}
+.vehicle-search-input button {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px;
+  background: var(--panel);
+  color: inherit;
+  min-width: 44px;
+  min-height: 44px;
+}
+.vehicle-search-options {
+  position: absolute;
+  z-index: 30;
+  top: 100%;
+  width: 100%;
+  max-height: 240px;
+  overflow-y: auto;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  box-shadow: 0 12px 28px #0002;
+}
+.vehicle-search-options button {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  text-align: start;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: inherit;
+}
+.vehicle-search-options button:hover,
+.vehicle-search-options button:focus-visible,
+.vehicle-search-options button[aria-selected="true"] {
+  background: var(--panel-2);
+}
+.vehicle-search-options p {
+  padding: 10px;
+  font-size: 13px;
+}
+
+.vehicle-identity-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+@media (max-width: 600px) {
+  .vehicle-identity-grid {
+    grid-template-columns: 1fr;
+  }
+}

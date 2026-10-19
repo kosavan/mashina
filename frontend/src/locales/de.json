@@ -1500,5 +1500,21 @@
   "Выберите только проверенные строки. Итог будет рассчитан из выбранных позиций.": "Wähle nur geprüfte Zeilen. Die Summe wird aus den ausgewählten Positionen berechnet.",
   "Перенести позицию {0}": "Position {0} übernehmen",
   "В записи уже есть позиции. Добавьте новые вручную после проверки.": "Dieser Eintrag enthält bereits Positionen. Ergänze neue nach der Prüfung manuell.",
-  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Bestätige vollen Tank, fehlende Tankvorgänge und historische Kilometerstandskorrekturen separat. Prüfe vor dem Speichern alle ausgewählten Felder und Positionen."
+  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Bestätige vollen Tank, fehlende Tankvorgänge und historische Kilometerstandskorrekturen separat. Prüfe vor dem Speichern alle ausgewählten Felder und Positionen.",
+  "Варианты распознавания": "Erkennungsvarianten",
+  "Выберите после проверки": "Nach Prüfung auswählen",
+  "Другие варианты текста": "Weitere Textergebnisse",
+  "Вариант текста {0}": "Textergebnis {0}",
+  "Показать варианты: {0}": "Optionen anzeigen: {0}",
+  "Нет подходящего варианта. Оставьте свой ввод.": "Keine passende Option. Eigene Eingabe beibehalten.",
+  "Выберите из подсказок или введите вручную. Двигатели разных поколений и рынков собраны вместе — проверьте свой вариант по документам.": "Vorschlag auswählen oder selbst eingeben. Motoren verschiedener Generationen und Märkte sind zusammen aufgeführt; bitte mit den Fahrzeugpapieren abgleichen.",
+  "Налоги включены в цену; скидка указана суммой за строку.": "Steuern sind im Stückpreis enthalten; der Rabatt gilt als Betrag für die gesamte Zeile.",
+  "Архив превышает 20 ГиБ": "Archiv überschreitet 20 GiB",
+  "Архив превышает лимит 20 ГиБ или 100 000 файлов": "Archiv überschreitet 20 GiB oder 100.000 Dateien",
+  "Манифест слишком большой": "Manifest ist zu groß",
+  "Недопустимая запись архива": "Ungültiger Archiveintrag",
+  "Неизвестный файл архива": "Unbekannte Archivdatei",
+  "Некорректный размер файла": "Ungültige Dateigröße",
+  "Нужен ZIP-архив": "Ein ZIP-Archiv ist erforderlich",
+  "Текст не найден. Проверьте снимок и языки rus и eng на сервере.": "Kein Text gefunden. Bild und die Sprachdaten rus und eng auf dem Server prüfen."
 }

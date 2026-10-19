@@ -1,7 +1,7 @@
 """Local, transient OCR suggestions. Recognition never writes application data."""
 
 from datetime import date
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 import json
 import os
 from pathlib import Path
@@ -23,7 +23,7 @@ def suggestions(text, mode):
     fields = {}
     lines = text.splitlines()
     patterns = {
-        "amount": r"(?:итого(?:\s+к\s+оплате)?|всего\s+к\s+оплате|grand\s+total|total\s+due|total)\s*[:=]?\s*(\d[\d ]*(?:[.,]\d{1,2})?)(?:\s*(?:₽|руб\.?|RUB))?\s*$",
+        "amount": r"(?:итог(?:о)?(?:\s+к\s+оплате)?|(?:сумма\s+)?к\s+оплате|всего(?:\s+к\s+оплате)?|gesamt(?:betrag)?|endbetrag|zu\s+zahlen|grand\s+total|total\s+due|total)\s*[:=]?\s*(\d[\d ]*(?:[.,]\d{1,2})?)(?:\s*(?:₽|руб\.?|RUB))?\s*$",
         "liters": r"(?:литр[ыаов]*|об[ъь]ем|litres?|liters?|volume)\s*[:=]?\s*(\d{1,4}(?:[.,]\d{1,3})?)\s*(?:л|L)?\s*$",
         "price": r"(?:цена\s*(?:за\s*)?(?:литра|литр|1\s*л)|price\s*(?:per\s*)?(?:litre|liter)|unit\s+price)\s*[:=]?\s*(\d{1,5}(?:[.,]\d{1,2})?)\s*(?:₽|руб\.?|RUB)?\s*$",
         "odometer": r"(?:одометр|пробег|odometer|odo)\s*[:=]?\s*(\d[\d ]{0,8})\s*(?:км|km)?\s*$",
@@ -84,48 +84,117 @@ def parse_options(page, pages=None, rotation=0, crop=None):
 
 
 def line_items(text):
-    """Only labelled tables; unstructured/ambiguous rows remain reviewable text."""
+    """Recognize labelled rows only; reconcile discounts/taxes against printed totals."""
     aliases = {
         "name": {"name", "description", "item", "наименование", "название", "работа"},
         "part_number": {"part", "part number", "sku", "артикул"},
         "quantity": {"qty", "quantity", "кол-во", "количество"},
         "unit_price": {"price", "unit price", "цена"},
+        "discount": {"discount", "скидка"},
+        "discount_percent": {"discount %", "скидка %"},
+        "tax": {"tax", "vat", "ндс"},
+        "tax_percent": {"tax %", "vat %", "ндс %"},
+        "tax_included": {"vat included", "tax included", "в т.ч. ндс"},
+        "tax_excluded": {"vat excluded", "tax extra", "ндс сверху"},
+        "total": {"total", "amount", "сумма", "итог"},
     }
     labels = sorted({name for names in aliases.values() for name in names}, key=len, reverse=True)
     label_pattern = "(?:" + "|".join(re.escape(name) for name in labels) + ")"
     columns, result = {}, []
+
+    def numeric(value, percentage=False):
+        value = value.replace("\u00a0", " ").strip()
+        if percentage:
+            value = value.removesuffix("%").strip()
+        if re.fullmatch(r"\d{1,3}(?:,\d{3})+\.\d{1,2}", value):
+            value = value.replace(",", "")
+        elif re.fullmatch(r"\d{1,3}(?:\.\d{3})+,\d{1,2}", value):
+            value = value.replace(".", "")
+        if not re.fullmatch(r"(?:\d{1,10}|\d{1,3}(?: \d{3})+)(?:[.,]\d{1,2})?", value):
+            raise ValueError()
+        return Decimal(value.replace(" ", "").replace(",", "."))
+
+    def cents(value):
+        return value.quantize(Decimal(".01"), rounding=ROUND_HALF_UP)
+
     for line in text.splitlines():
         cells = [s.strip() for s in re.split(r"\s*\|\s*|\t+| {2,}", line.strip())]
-        # Tesseract can collapse gaps between short header labels to one space.
-        # Accept only a complete sequence of known labels; unknown columns still
-        # invalidate the header, and data rows retain their stricter separators.
         if re.fullmatch(label_pattern + r"(?:\s+" + label_pattern + r")+", line.strip(), re.I):
             cells = re.findall(label_pattern, line.strip(), re.I)
         header = {key: i for i, cell in enumerate(cells)
                   for key, names in aliases.items() if cell.casefold() in names}
         if {"name", "quantity", "unit_price"} <= header.keys():
-            # Tax/discount/total columns need manual review, never silently discard them.
             columns = header if len(header) == len(cells) else {}
             continue
         if not columns or len(cells) != len(columns):
             continue
         item = {key: cells[i] for key, i in columns.items()}
-        if not item["name"] or len(item["name"]) > 200 or item["name"].casefold() in {"total", "subtotal", "итого", "всего"}:
+        if (not item["name"] or len(item["name"]) > 200
+                or item["name"].casefold() in {"total", "subtotal", "итого", "всего"}
+                or len(item.get("part_number", "")) > 100):
             continue
-        if any(not re.fullmatch(r"\d{1,8}(?:[.,]\d{1,2})?", item[key])
-               for key in ("quantity", "unit_price")):
+        try:
+            quantity, price = (numeric(item[key]) for key in ("quantity", "unit_price"))
+            if not 0 < quantity <= 100000 or quantity * price > 10000000000:
+                continue
+            percentage = "discount_percent" in item or item.get("discount", "").endswith("%")
+            if "discount" in item and "discount_percent" in item:
+                continue
+            discount = numeric(item.get("discount_percent", item.get("discount", "0")), percentage)
+            if percentage:
+                if discount > 100:
+                    continue
+                discount = cents(quantity * price * discount / 100)
+            if discount > quantity * price:
+                continue
+            net = cents(quantity * price - discount)
+            tax_keys = [key for key in ("tax", "tax_percent", "tax_included", "tax_excluded") if key in item]
+            if len(tax_keys) > 1:
+                continue
+            total = numeric(item["total"]) if "total" in item else None
+            if tax_keys:
+                key = tax_keys[0]
+                tax = numeric(item[key], key == "tax_percent")
+                if key == "tax_percent":
+                    if tax > 100:
+                        continue
+                    if total == net:
+                        tax = cents(net * tax / (100 + tax))
+                    else:
+                        tax = cents(net * tax / 100)
+                    key = "tax"
+                # Generic VAT is ambiguous without a printed final line total.
+                if total is None or tax > net:
+                    continue
+                if key in {"tax", "tax_included"} and total == net:
+                    pass
+                elif key in {"tax", "tax_excluded"} and total == cents(net + tax):
+                    price += tax / quantity
+                else:
+                    continue
+            if total is not None and total != cents(quantity * price - discount):
+                continue
+            result.append({"name": item["name"], "part_number": item.get("part_number", ""),
+                           "quantity": str(quantity), "unit_price": str(price), "discount": str(discount)})
+            if len(result) == 100:
+                break
+        except (ValueError, InvalidOperation):
             continue
-        quantity, price = (Decimal(item[key].replace(",", "."))
-                           for key in ("quantity", "unit_price"))
-        if not 0 < quantity <= 100000 or price < 0 or quantity * price > 10000000000:
-            continue
-        if len(item.get("part_number", "")) > 100:
-            continue
-        result.append({**item, "part_number": item.get("part_number", ""),
-                       "quantity": str(quantity), "unit_price": str(price), "discount": "0"})
-        if len(result) == 100:
-            break
     return result
+
+
+def review_candidates(texts, mode):
+    """Show conflicting labelled values; do not turn a pass disagreement into a fact."""
+    found = {}
+    for text in texts:
+        for line in text.splitlines():
+            for key, value in suggestions(line.replace("\u00a0", " "), mode).items():
+                found.setdefault(key, set()).add(value)
+            if mode == "odometer" and re.fullmatch(r"\s*\d{4,7}\s*(?:km|км)?\s*", line, re.I):
+                digits = re.sub(r"\D", "", line)
+                if int(digits) <= 3000000:
+                    found.setdefault("odometer", set()).add(digits)
+    return {key: sorted(values)[:12] for key, values in found.items()}
 
 
 def recognize(content: bytes, mode: str, page: int, *, pages=None, rotation=0, crop=None):
@@ -156,7 +225,7 @@ def recognize(content: bytes, mode: str, page: int, *, pages=None, rotation=0, c
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
             try:
-                process.wait(timeout=45)
+                process.wait(timeout=75)
             except subprocess.TimeoutExpired:
                 if os.name != "nt":
                     os.killpg(process.pid, signal.SIGKILL)
@@ -165,7 +234,7 @@ def recognize(content: bytes, mode: str, page: int, *, pages=None, rotation=0, c
                 process.wait()
                 raise ValueError("Истекло время локального распознавания") from None
             output = folder / "result.json"
-            if not output.exists() or output.stat().st_size > MAX_TEXT * 3:
+            if not output.exists() or output.stat().st_size > MAX_TEXT * 8:
                 raise ValueError("Не удалось распознать файл. Попробуйте другой снимок.")
             result = json.loads(output.read_text(encoding="utf-8"))
             if result.get("error"):
@@ -173,8 +242,20 @@ def recognize(content: bytes, mode: str, page: int, *, pages=None, rotation=0, c
             raw = result.get("text")
             if not isinstance(raw, str) or len(raw.encode("utf-8")) > MAX_TEXT:
                 raise ValueError("Результат распознавания слишком большой")
-            return {"text": raw, "fields": suggestions(raw, mode), "engine": "tesseract-local",
-                    "items": line_items(raw) if mode == "service" else [],
+            alternatives = result.get("alternatives", [raw])
+            if (not isinstance(alternatives, list) or len(alternatives) > 6
+                    or any(not isinstance(t, str) or len(t.encode("utf8")) > MAX_TEXT for t in alternatives)):
+                raise ValueError("Некорректный результат распознавания")
+            candidates = review_candidates([raw, *alternatives], mode)
+            fields = {key: value for key, value in suggestions(raw, mode).items()
+                      if candidates.get(key) == [value]}
+            # A conflicting pass is available as source text and never contributes automatic items.
+            items = line_items(raw) if mode == "service" else []
+            if items and any(line_items(t) and line_items(t) != items for t in alternatives):
+                items = []
+            return {"text": raw, "fields": fields, "engine": "tesseract-local",
+                    "items": items, "candidates": candidates,
+                    "alternatives": alternatives, "confidence": result.get("confidence"),
                     "pages": options["pages"]}
     except OSError:
         raise ValueError("Не удалось запустить локальное распознавание") from None

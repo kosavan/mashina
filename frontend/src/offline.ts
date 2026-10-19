@@ -18,7 +18,11 @@ export async function api<T>(
   csrf = "",
 ): Promise<T> {
   const headers = new Headers(options.headers);
-  if (!(options.body instanceof FormData) && options.body)
+  if (
+    !(options.body instanceof FormData) &&
+    options.body &&
+    !headers.has("Content-Type")
+  )
     headers.set("Content-Type", "application/json");
   if (csrf) headers.set("X-CSRF-Token", csrf);
   const response = await fetch("/api/v1" + path, {

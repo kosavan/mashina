@@ -5,6 +5,7 @@ import json
 import time
 
 from backend.domain import reminder_status
+from backend.output_locale import user_locale
 from backend.notifications import digest, telegram_config
 from backend.notification_transport import (
     ProviderResult,
@@ -89,8 +90,8 @@ def due_targets(store, now, actor="", reminder_id=""):
 
 def provider_transport(channel, destination, identity):
     if channel == "push":
-        return send_push(json.loads(destination), identity["private_key"])
-    return send_telegram(telegram_config()[0], destination)
+        return send_push(json.loads(destination), identity["private_key"], identity.get("locale", "ru"))
+    return send_telegram(telegram_config()[0], destination, identity.get("locale", "ru"))
 
 
 def dispatch(store, *, send=False, now=None, transport=provider_transport):
@@ -169,6 +170,7 @@ def dispatch(store, *, send=False, now=None, transport=provider_transport):
         fresh = [current[item["id"]] for item in group if item["id"] in current]
         if fresh:
             identity = store.query("SELECT * FROM notification_identity WHERE id=1")[0]
+            identity = {**identity, "locale": user_locale(store, actor)}
             try:
                 outcome = transport(channel, fresh[0]["destination"], identity)
             except Exception:

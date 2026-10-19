@@ -105,8 +105,10 @@ def test_real_local_engine_image_and_pdf(pdf, russian):
         image.save(output, format="PNG")
     result = recognize(output.getvalue(), "receipt", 2 if pdf else 1)
     assert result["engine"] == "tesseract-local"
-    assert result["fields"].get("amount") == "1234.56", result
-    assert result["fields"].get("odometer") == "123456", result
+    assert "1234.56" in result["candidates"].get("amount", []), result
+    assert "123456" in result["candidates"].get("odometer", []), result
+    assert result["fields"].get("amount") in (None, "1234.56"), result
+    assert result["fields"].get("odometer") in (None, "123456"), result
     assert result["fields"].get("occurred_at") == "2026-10-12", result
     assert ("ИТОГО" if russian else "TOTAL") in result["text"]
 
@@ -122,7 +124,8 @@ def test_real_scanned_pdf_retains_reviewable_text_without_inventing_date():
     output = io.BytesIO()
     image.save(output, format="PDF", resolution=150)
     result = recognize(output.getvalue(), "receipt", 1)
-    assert result["fields"]["amount"] == "1234.56", result
+    assert "1234.56" in result["candidates"].get("amount", []), result
+    assert result["fields"].get("amount") in (None, "1234.56"), result
     assert "ИТОГО" in result["text"]
     # A compressed scan can lose punctuation. Missing dates must remain unknown;
     # this is not permission to guess a separator or create an invalid date.

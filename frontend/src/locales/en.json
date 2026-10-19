@@ -1500,5 +1500,21 @@
   "Выберите только проверенные строки. Итог будет рассчитан из выбранных позиций.": "Select only reviewed rows. The total will be calculated from the selected line items.",
   "Перенести позицию {0}": "Apply line item {0}",
   "В записи уже есть позиции. Добавьте новые вручную после проверки.": "This record already has line items. Add new ones manually after review.",
-  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Confirm full tank, missed fill-ups and historical odometer corrections separately. Check every selected field and line item before saving."
+  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Confirm full tank, missed fill-ups and historical odometer corrections separately. Check every selected field and line item before saving.",
+  "Варианты распознавания": "Recognition candidates",
+  "Выберите после проверки": "Choose after checking",
+  "Другие варианты текста": "Other text results",
+  "Вариант текста {0}": "Text result {0}",
+  "Показать варианты: {0}": "Show options: {0}",
+  "Нет подходящего варианта. Оставьте свой ввод.": "No matching option. Keep your own entry.",
+  "Выберите из подсказок или введите вручную. Двигатели разных поколений и рынков собраны вместе — проверьте свой вариант по документам.": "Choose a suggestion or enter your own. Engines from different generations and markets are listed together; check your vehicle documents.",
+  "Налоги включены в цену; скидка указана суммой за строку.": "Taxes are included in the unit price; discount is an amount for the whole line.",
+  "Архив превышает 20 ГиБ": "Archive exceeds 20 GiB",
+  "Архив превышает лимит 20 ГиБ или 100 000 файлов": "Archive exceeds the limit of 20 GiB or 100,000 files",
+  "Манифест слишком большой": "Manifest is too large",
+  "Недопустимая запись архива": "Invalid archive entry",
+  "Неизвестный файл архива": "Unknown archive file",
+  "Некорректный размер файла": "Invalid file size",
+  "Нужен ZIP-архив": "A ZIP archive is required",
+  "Текст не найден. Проверьте снимок и языки rus и eng на сервере.": "No text found. Check the image and the rus and eng language data on your server."
 }

@@ -19,8 +19,9 @@ All eight languages use their own date/number formatting; German uses `de-DE`. N
 IDs, custom categories, names, notes and files do not change. Demo presentation
 never rewrites its stored records or canonical financial categories.
 
-PDF/CSV output labels and external notification payloads retain their existing
-language; full output localization remains planned in the [roadmap](roadmap.md).
+PDF, readable CSV and generic external notifications in 1.9 use the account language
+in RU/EN/DE, with English fallback for other UI languages. User content and machine
+JSON/legacy CSV keys are unchanged. See [output language scope](ocr-results-archives.md).
 OCR still uses the bundled Russian/English Tesseract data; changing the interface
 language does not add recognition languages. No runtime translation service is used.
 

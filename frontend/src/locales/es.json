@@ -1500,5 +1500,21 @@
   "Выберите только проверенные строки. Итог будет рассчитан из выбранных позиций.": "Seleccione solo filas revisadas. El total se calculará a partir de las líneas de pedido seleccionadas.",
   "Перенести позицию {0}": "Aplicar línea de pedido {0}",
   "В записи уже есть позиции. Добавьте новые вручную после проверки.": "Este registro ya tiene partidas. Agregue nuevos manualmente después de la revisión.",
-  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Confirme el tanque lleno, los repostajes omitidos y las correcciones históricas del odómetro por separado. Verifique cada campo y línea de pedido seleccionados antes de guardar."
+  "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.": "Confirme el tanque lleno, los repostajes omitidos y las correcciones históricas del odómetro por separado. Verifique cada campo y línea de pedido seleccionados antes de guardar.",
+  "Варианты распознавания": "Opciones de reconocimiento",
+  "Выберите после проверки": "Selecciona tras comprobar",
+  "Другие варианты текста": "Otros resultados de texto",
+  "Вариант текста {0}": "Resultado de texto {0}",
+  "Показать варианты: {0}": "Mostrar opciones: {0}",
+  "Нет подходящего варианта. Оставьте свой ввод.": "Sin coincidencias. Conserva tu entrada manual.",
+  "Выберите из подсказок или введите вручную. Двигатели разных поколений и рынков собраны вместе — проверьте свой вариант по документам.": "Elige una sugerencia o escribe manualmente. Se incluyen motores de distintas generaciones y mercados; comprueba la documentación del vehículo.",
+  "Налоги включены в цену; скидка указана суммой за строку.": "El precio unitario incluye impuestos; el descuento es un importe por línea.",
+  "Архив превышает 20 ГиБ": "El archivo supera 20 GiB",
+  "Архив превышает лимит 20 ГиБ или 100 000 файлов": "El archivo supera el límite de 20 GiB o 100.000 archivos",
+  "Манифест слишком большой": "El manifiesto es demasiado grande",
+  "Недопустимая запись архива": "Entrada de archivo no válida",
+  "Неизвестный файл архива": "Archivo desconocido en el archivo comprimido",
+  "Некорректный размер файла": "Tamaño de archivo no válido",
+  "Нужен ZIP-архив": "Se necesita un archivo ZIP",
+  "Текст не найден. Проверьте снимок и языки rus и eng на сервере.": "No se encontró texto. Comprueba la imagen y los datos de idiomas rus y eng del servidor."
 }

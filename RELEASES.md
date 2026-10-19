@@ -1,3 +1,17 @@
+# MASHINA 1.9.0 (prepared; publication gated by exact-source CI)
+
+Local OCR first reads native PDF text and uses complementary image-recognition passes for scans/photos. Review conflicting candidates and reconciled service lines with tax/discounts; the experimental seven-segment reader only suggests values for cropped panels. Nothing creates financial or odometer records without review and save.
+
+Sale PDFs, readable CSV and generic notifications support RU/EN/DE while preserving user text. Other output languages fall back to English. Machine JSON and legacy CSV retain their existing formats.
+
+ZIP64 backup, recovery snapshots and restore stream through disk with a 20 GiB compressed/expanded bound. Browser restore uploads directly to the data volume rather than the small temporary tmpfs. Old format-1 backups remain supported. Local searchable make/model/engine suggestions work offline, include saved custom values and always allow manual entry. The starter catalogue is not a fitment database.
+
+Schema remains 007; released migrations, stable IDs, authorization, exact sums and offline queues remain compatible. Keep the verified pre-update data backup and previous image for rollback; an older image cannot restore a new archive above its old 200 MiB bound.
+
+[Feature scope and limits](docs/ocr-results-archives.md) · [Russian guide](docs/ocr-results-archives.ru.md) · [Update and rollback](docs/updating.md)
+
+---
+
 # MASHINA 1.8.1
 
 Vehicle profiles now display the same compact, authorized WebP preview as garage

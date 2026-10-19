@@ -1872,11 +1872,13 @@ export function SettingsPage() {
                     return;
                   setBusy(true);
                   try {
-                    const body = new FormData();
-                    body.append("file", f);
                     await api(
-                      "/restore",
-                      { method: "POST", body },
+                      "/restore/stream",
+                      {
+                        method: "POST",
+                        body: f,
+                        headers: { "Content-Type": "application/zip" },
+                      },
                       session.csrf,
                     );
                     notify(tr("Архив восстановлен. Войдите заново."));
@@ -1922,7 +1924,7 @@ export function SettingsPage() {
             <Button
               variant="outline"
               disabled={session.demo}
-              onClick={() => download("/api/v1/export.csv")}
+              onClick={() => download("/api/v1/export.csv?readable=true")}
             >
               CSV
               <Download size={15} />

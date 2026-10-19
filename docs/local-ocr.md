@@ -1,5 +1,7 @@
 # Fully local text recognition
 
+For prepared 1.9 improvements and updated limits, see [1.9](ocr-results-archives.md).
+
 ## Use
 
 While adding a fuel fill-up, expense, service record or odometer reading, choose

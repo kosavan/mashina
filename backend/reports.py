@@ -1,6 +1,7 @@
 """Private allowlisted sale snapshots and bounded local PDF generation."""
 
 from dataclasses import dataclass
+from functools import partial
 from datetime import date
 from decimal import Decimal
 import io
@@ -32,6 +33,7 @@ from reportlab.platypus import (
 from backend.access import vehicle_access
 from backend.domain import analytics
 from backend.storage import row_data
+from backend.output_locale import translate, user_locale, number
 
 MAX_WORKS = 500
 MAX_EVENTS = 5000
@@ -78,6 +80,7 @@ class ReportSnapshot:
     cover: bytes | None
     demo: bool
     generated: str
+    locale: str = "ru"
 
 
 def report_snapshot(store, actor: str, vehicle_id: str, options: ReportOptions, demo=False):
@@ -231,21 +234,17 @@ def report_snapshot(store, actor: str, vehicle_id: str, options: ReportOptions, 
             cover,
             demo,
             date.today().isoformat(),
+            user_locale(store, actor),
         )
 
 
-def money(value: int, code="RUB"):
-    sign = "-" if value < 0 else ""
-    value = abs(value)
-    return (
-        f"{sign}{value // 100:,}".replace(",", " ")
-        + f",{value % 100:02d} "
-        + ("₽" if code == "RUB" else code)
-    )
+def money(value: int, code="RUB", locale="ru"):
+    return number(Decimal(value) / 100, locale, 2) + " " + ("₽" if code == "RUB" else code)
 
 
-def date_label(value):
-    return date.fromisoformat(value[:10]).strftime("%d.%m.%Y") if value else "Не указана"
+def date_label(value, locale="ru"):
+    return (date.fromisoformat(value[:10]).strftime("%d/%m/%Y" if locale == "en" else "%d.%m.%Y")
+            if value else translate("Не указана", locale))
 
 
 class LimitedCanvas(Canvas):
@@ -256,6 +255,12 @@ class LimitedCanvas(Canvas):
 
 
 def render_report(snapshot: ReportSnapshot):
+    def t(label):
+        return translate(label, snapshot.locale)
+
+    money_label = partial(money, locale=snapshot.locale)
+    date_value = partial(date_label, locale=snapshot.locale)
+
     if len(snapshot.works) > MAX_WORKS:
         raise ValueError("Больше 500 работ. Сузьте период отчёта.")
     if len(json.dumps(snapshot.works, ensure_ascii=False)) > 400000:
@@ -348,13 +353,13 @@ def render_report(snapshot: ReportSnapshot):
         leftMargin=42,
         topMargin=82,
         bottomMargin=52,
-        title="История автомобиля | MASHINA",
+        title=t("История автомобиля | MASHINA"),
         author="MASHINA",
         pageCompression=1,
     )
     width = A4[0] - 84
     story = [
-        p("ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ" if snapshot.demo else "ИСТОРИЯ АВТОМОБИЛЯ", "small"),
+        p(t("ДЕМОНСТРАЦИОННЫЕ ДАННЫЕ") if snapshot.demo else t("ИСТОРИЯ АВТОМОБИЛЯ"), "small"),
         Spacer(1, 12),
         p(snapshot.vehicle["name"], "title"),
     ]
@@ -385,17 +390,17 @@ def render_report(snapshot: ReportSnapshot):
             raise ValueError(
                 "Обложка повреждена. Отключите фото или загрузите его заново."
             ) from None
-    current = f"{snapshot.vehicle['current_odometer']:,}".replace(",", " ")
+    current = number(snapshot.vehicle["current_odometer"], snapshot.locale)
     distance = (
-        f"{snapshot.mileage:,}".replace(",", " ") if snapshot.mileage is not None else "Нет данных"
+        number(snapshot.mileage, snapshot.locale) if snapshot.mileage is not None else t("Нет данных")
     )
     story.append(
         table(
             [
-                [p("ПОСЛЕДНИЙ ИЗВЕСТНЫЙ ПРОБЕГ", "small"), p("ПРОБЕГ ЗА ПЕРИОД ВЛАДЕНИЯ", "small")],
+                [p(t("ПОСЛЕДНИЙ ИЗВЕСТНЫЙ ПРОБЕГ"), "small"), p(t("ПРОБЕГ ЗА ПЕРИОД ВЛАДЕНИЯ"), "small")],
                 [
-                    p(current + " км", "number"),
-                    p(distance + (" км" if snapshot.mileage is not None else ""), "number"),
+                    p(current + t(" км"), "number"),
+                    p(distance + (t(" км") if snapshot.mileage is not None else ""), "number"),
                 ],
             ],
             [width / 2, width / 2],
@@ -403,31 +408,31 @@ def render_report(snapshot: ReportSnapshot):
     )
     story.append(
         p(
-            "Показания внесены пользователем. Расстояние считается от подтверждённой исходной точки, а не от нулевого одометра.",
+            t("Показания внесены пользователем. Расстояние считается от подтверждённой исходной точки, а не от нулевого одометра."),
             "small",
         )
     )
-    story.append(p("Автомобиль в деталях", "heading"))
+    story.append(p(t("Автомобиль в деталях"), "heading"))
     fields = [
         (
-            "Марка / модель",
+            t("Марка / модель"),
             " ".join(filter(None, [snapshot.vehicle.get("brand"), snapshot.vehicle.get("model")])),
         ),
-        ("Двигатель", snapshot.vehicle.get("engine")),
-        ("Коробка передач", snapshot.vehicle.get("transmission")),
-        ("Привод", snapshot.vehicle.get("drive")),
+        (t("Двигатель"), snapshot.vehicle.get("engine")),
+        (t("Коробка передач"), snapshot.vehicle.get("transmission")),
+        (t("Привод"), snapshot.vehicle.get("drive")),
         (
-            "Топливо",
+            t("Топливо"),
             {
-                "petrol": "Бензин",
-                "diesel": "Дизель",
-                "electric": "Электричество",
-                "hybrid": "Гибрид",
+                "petrol": t("Бензин"),
+                "diesel": t("Дизель"),
+                "electric": t("Электричество"),
+                "hybrid": t("Гибрид"),
             }.get(snapshot.vehicle.get("fuel"), snapshot.vehicle.get("fuel")),
         ),
         (
-            "Начало владения",
-            date_label(snapshot.vehicle.get("purchase_date"))
+            t("Начало владения"),
+            date_value(snapshot.vehicle.get("purchase_date"))
             if snapshot.vehicle.get("purchase_date")
             else None,
         ),
@@ -435,100 +440,100 @@ def render_report(snapshot: ReportSnapshot):
     if snapshot.options.include_identifiers:
         fields += [
             ("VIN", snapshot.vehicle.get("vin")),
-            ("Государственный номер", snapshot.vehicle.get("plate")),
+            (t("Государственный номер"), snapshot.vehicle.get("plate")),
         ]
     details = [[p(label, "small"), p(value)] for label, value in fields if value]
     if details:
         story.append(table(details, [width * 0.38, width * 0.62], compact=True))
     else:
-        story.append(p("Характеристики пока не заполнены.", "small"))
+        story.append(p(t("Характеристики пока не заполнены."), "small"))
     story.append(PageBreak())
     period = (
-        (date_label(snapshot.options.start) if snapshot.options.start else "Начало истории")
+        (date_value(snapshot.options.start) if snapshot.options.start else t("Начало истории"))
         + " - "
         + (
-            date_label(snapshot.options.end)
+            date_value(snapshot.options.end)
             if snapshot.options.end
-            else date_label(snapshot.generated)
+            else date_value(snapshot.generated)
         )
     )
-    story.append(p("Период отчёта: " + period, "small"))
+    story.append(p(t("Период отчёта: ") + period, "small"))
     story.append(
         p(
-            "Данные отражают записи владельцев и водителей и не заменяют независимую диагностику или проверку документов. Личные документы, заметки и сведения об аккаунтах в этот отчёт не включены.",
+            t("Данные отражают записи владельцев и водителей и не заменяют независимую диагностику или проверку документов. Личные документы, заметки и сведения об аккаунтах в этот отчёт не включены."),
             "small",
         )
     )
     story.append(Spacer(1, 12))
     if snapshot.options.include_costs:
-        story.append(p("Финансовая история", "heading"))
+        story.append(p(t("Финансовая история"), "heading"))
         for totals in snapshot.finance:
             code = totals["currency"]
             story.extend(
                 [
-                    p("Эксплуатационные расходы · " + code, "small"),
-                    p(money(totals["total_minor"], code), "number"),
+                    p(t("Эксплуатационные расходы · ") + code, "small"),
+                    p(money_label(totals["total_minor"], code), "number"),
                 ]
             )
             rows = [
-                [p("Топливо", "small"), p(money(totals["fuel_minor"], code), "right")],
+                [p(t("Топливо"), "small"), p(money_label(totals["fuel_minor"], code), "right")],
                 [
-                    p("Обслуживание и ремонт", "small"),
-                    p(money(totals["maintenance_minor"], code), "right"),
+                    p(t("Обслуживание и ремонт"), "small"),
+                    p(money_label(totals["maintenance_minor"], code), "right"),
                 ],
             ]
             if totals["cost_per_km"] is not None:
-                value = f"{Decimal(str(totals['cost_per_km'])):.2f}".replace(".", ",")
+                value = number(Decimal(str(totals["cost_per_km"])), snapshot.locale, 2)
                 rows.append(
                     [
-                        p("Эксплуатация на километр", "small"),
+                        p(t("Эксплуатация на километр"), "small"),
                         p(value + " " + ("₽" if code == "RUB" else code), "right"),
                     ]
                 )
             else:
                 rows.append(
                     [
-                        p("Эксплуатация на километр", "small"),
-                        p("Недостаточно подтверждённых показаний", "small"),
+                        p(t("Эксплуатация на километр"), "small"),
+                        p(t("Недостаточно подтверждённых показаний"), "small"),
                     ]
                 )
             for key, label in (
-                ("purchase_minor", "Цена покупки (отдельно)"),
-                ("sale_minor", "Цена продажи (отдельно)"),
+                ("purchase_minor", t("Цена покупки (отдельно)")),
+                ("sale_minor", t("Цена продажи (отдельно)")),
             ):
                 if totals[key]:
-                    rows.append([p(label, "small"), p(money(totals[key], code), "right")])
+                    rows.append([p(label, "small"), p(money_label(totals[key], code), "right")])
             story.extend([table(rows, [width * 0.60, width * 0.40]), Spacer(1, 14)])
         story.append(
             p(
-                "Цена покупки и продажи не включена в эксплуатационные расходы. Изменение рыночной стоимости не оценивалось. Валюты не конвертируются и не суммируются.",
+                t("Цена покупки и продажи не включена в эксплуатационные расходы. Изменение рыночной стоимости не оценивалось. Валюты не конвертируются и не суммируются."),
                 "small",
             )
         )
         story.append(Spacer(1, 20))
-    story.append(p("История обслуживания", "heading"))
+    story.append(p(t("История обслуживания"), "heading"))
     if not snapshot.works:
-        story.append(p("Работы за этот период не записаны."))
+        story.append(p(t("Работы за этот период не записаны.")))
     for work in snapshot.works:
         story.append(CondPageBreak(85))
-        stamp = date_label(work["occurred_at"])
+        stamp = date_value(work["occurred_at"])
         if work.get("odometer") is not None:
-            stamp += " · " + f"{work['odometer']:,}".replace(",", " ") + " км"
+            stamp += " · " + number(work["odometer"], snapshot.locale) + t(" км")
         story.extend(
             [
                 Spacer(1, 14),
                 p(stamp, "small"),
-                p(work.get("description") or "Обслуживание / ремонт"),
+                p(work.get("description") or t("Обслуживание / ремонт")),
             ]
         )
         rows = []
         for item in work.get("items", []):
-            label = str(item.get("name") or "Запчасть / работа")
+            label = str(item.get("name") or t("Запчасть / работа"))
             if item.get("part_number"):
-                label += "\nАртикул: " + str(item["part_number"])
-            row = [p(label, "small"), p(str(item.get("quantity") or "1") + " шт.", "right")]
+                label += t("\nАртикул: ") + str(item["part_number"])
+            row = [p(label, "small"), p(str(item.get("quantity") or "1") + t(" шт."), "right")]
             if snapshot.options.include_costs:
-                row.append(p(money(item.get("amount_minor") or 0, work["currency"]), "right"))
+                row.append(p(money_label(item.get("amount_minor") or 0, work["currency"]), "right"))
             rows.append(row)
         if rows:
             story.append(
@@ -542,7 +547,7 @@ def render_report(snapshot: ReportSnapshot):
             )
         if snapshot.options.include_costs:
             story.append(
-                p("Стоимость записи: " + money(work["amount_minor"], work["currency"]), "right")
+                p(t("Стоимость записи: ") + money_label(work["amount_minor"], work["currency"]), "right")
             )
 
     def page_chrome(c, document):
@@ -554,15 +559,15 @@ def render_report(snapshot: ReportSnapshot):
         c.rect(42, A4[1] - 55, 42, 3, fill=1, stroke=0)
         c.setFillColor(MUTED)
         c.setFont("Manrope", 8)
-        c.drawRightString(A4[0] - 42, A4[1] - 44, "ЦИФРОВАЯ ИСТОРИЯ АВТОМОБИЛЯ")
+        c.drawRightString(A4[0] - 42, A4[1] - 44, t("ЦИФРОВАЯ ИСТОРИЯ АВТОМОБИЛЯ"))
         c.setStrokeColor(LINE)
         c.line(42, 39, A4[0] - 42, 39)
         c.drawString(
             42,
             25,
-            "Подготовлено "
-            + date_label(snapshot.generated)
-            + (" · Демо" if snapshot.demo else " · MASHINA"),
+            t("Подготовлено ")
+            + date_value(snapshot.generated)
+            + (t(" · Демо") if snapshot.demo else " · MASHINA"),
         )
         c.drawRightString(A4[0] - 42, 25, str(document.page))
         c.restoreState()

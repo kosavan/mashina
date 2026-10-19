@@ -9,6 +9,8 @@ import re
 import socket
 from urllib.parse import urlsplit
 
+from backend.output_locale import translate
+
 MAX_RESPONSE = 65536
 
 
@@ -183,7 +185,7 @@ class PinnedSession:
         return response
 
 
-def send_push(subscription, private_key):
+def send_push(subscription, private_key, locale="ru"):
     try:
         from pywebpush import webpush, WebPushException
 
@@ -193,7 +195,7 @@ def send_push(subscription, private_key):
             data=json.dumps(
                 {
                     "title": "MASHINA",
-                    "body": "Есть напоминание об обслуживании. Откройте свой гараж.",
+                    "body": translate("Есть напоминание об обслуживании. Откройте свой гараж.", locale),
                 },
                 ensure_ascii=False,
             ),
@@ -230,14 +232,14 @@ def telegram_request(token, method, payload):
     )
 
 
-def send_telegram(token, chat_id):
+def send_telegram(token, chat_id, locale="ru"):
     try:
         status, headers, content = telegram_request(
             token,
             "sendMessage",
             {
                 "chat_id": chat_id,
-                "text": "MASHINA: есть напоминание об обслуживании. Откройте свой гараж.",
+                "text": "MASHINA: " + translate("Есть напоминание об обслуживании. Откройте свой гараж.", locale),
                 "link_preview_options": {"is_disabled": True},
             },
         )

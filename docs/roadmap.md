@@ -2,8 +2,18 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-10-18**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-10-19**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
+
+## Prepared for 1.9.0: OCR, outputs, archives and vehicle selection
+
+Accepted 19.10.2026. Implemented locally: native PDF text plus complementary OCR passes,
+selectable ambiguous values, reconciled tax/discount rows and an evaluated experimental
+seven-segment candidate; RU/EN/DE PDF/readable CSV/notifications; disk-backed ZIP64
+backup/restore up to 20 GiB; offline searchable make/model/engine suggestions with manual
+input (29 makes, 123 models). Existing schema 007, user data and queues are preserved.
+Local regression and visual checks passed. Publication requires exact-source CI; this is not yet a published release. [Usage and limits](ocr-results-archives.md).
+
 
 ## Profile photo performance 1.8.1
 
@@ -60,10 +70,7 @@ ownership confirmation and sitemap submission remain owner actions.
 
 | Priority | Planned work | Acceptance boundary |
 |---|---|---|
-| Next | More local OCR | Richer invoice layouts/tax/discount tables, per-field alternatives and evaluated seven-segment reading |
-| Next | Output localization | English/German/Russian PDF/export labels and notifications, unchanged user content |
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
-| Planned | Larger backup archives | Bounded-memory streaming and verified restore beyond the current 200 MiB limit |
 | Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |
 | Later | Natural-language search | Local processing, permissions, measured resource budget |
 | Later | Expense bot and OBD-II | Optional owner-configured components, confirmed writes |

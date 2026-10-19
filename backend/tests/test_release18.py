@@ -13,7 +13,7 @@ from backend.tests.test_ocr import require_engine
 
 def test_health_identifies_release_without_changing_schema(client):
     result = client.get("/api/v1/health").json()
-    assert result == {"status": "ok", "schema": "007", "version": "1.8.1"}
+    assert result == {"status": "ok", "schema": "007", "version": "1.9.0"}
 
 
 def upload(client, image):
@@ -107,7 +107,7 @@ def test_service_tables_are_explicit_bounded_and_exact():
     assert line_items(text) == [{"name": "Oil filter", "part_number": "ABC-12",
         "quantity": "2", "unit_price": "123.45", "discount": "0"}]
     assert line_items("Oil filter 2 123.45") == []
-    assert line_items("Name | Qty | Price | Discount\nOil | 1 | 50 | 10") == []
+    assert line_items("Name | Qty | Price | Discount\nOil | 1 | 50 | 10")[0]["discount"] == "10"
     assert line_items("Name | Qty | Price\nOil | 1 | unknown") == []
     assert line_items("Name       SKU       Qty Price\nOil        OIL-1     2     100.00") == [
         {"name": "Oil", "part_number": "OIL-1", "quantity": "2", "unit_price": "100.00", "discount": "0"}]

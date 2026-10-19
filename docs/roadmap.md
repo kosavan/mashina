@@ -5,15 +5,22 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-10-19**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
-## Prepared for 1.9.0: OCR, outputs, archives and vehicle selection
+## Shipped in 1.9.0: OCR, outputs, archives and vehicle selection
 
-Accepted 19.10.2026. Implemented locally: native PDF text plus complementary OCR passes,
+Released and deployed to the owner server on 19.10.2026: native PDF text plus complementary OCR passes,
 selectable ambiguous values, reconciled tax/discount rows and an evaluated experimental
 seven-segment candidate; RU/EN/DE PDF/readable CSV/notifications; disk-backed ZIP64
 backup/restore up to 20 GiB; offline searchable make/model/engine suggestions with manual
 input (29 makes, 123 models). Existing schema 007, user data and queues are preserved.
-Local regression and visual checks passed. Publication requires exact-source CI; this is not yet a published release. [Usage and limits](ocr-results-archives.md).
+Exact-source CI, actual-backup restore and post-update data verification passed.
+[Release validation](release-validation-1.9.md). [Usage and limits](ocr-results-archives.md).
 
+
+## VIN and registration research: 19.10.2026
+
+[Source comparison and next steps](vehicle-source-research.md): public vPIC and RDW
+requests verified without owner data; country, licensing and credential restrictions
+recorded. Integrations and the fitment catalogue remain unbuilt.
 
 ## Profile photo performance 1.8.1
 
@@ -42,7 +49,7 @@ Accepted [community request #20](https://github.com/kosavan/mashina/issues/20): 
 | Ownership tools | Sharing, budgets, regular costs, reviewed CSV, sale PDF | Explicit scope and disclosure |
 | OCR 1.5 | Receipts, invoices, dashboard photos, arbitrary screenshots | Local text OCR, selected PDF page, human review |
 | Optional integrations | Scoped REST, read-only MCP, notifications, opt-in map | Device/external delivery checks remain open |
-| UI | Eight-language setup/settings (RU/EN/DE/ZH/HI/ES/AR/FR), themes, isolated demo; EN/RU screenshots | PDF/export/notification localization is incomplete |
+| UI | Eight-language setup/settings (RU/EN/DE/ZH/HI/ES/AR/FR), themes, isolated demo; EN/RU screenshots | RU/EN/DE PDFs, readable CSV and notifications; other output languages fall back to English |
 
 ## Maintenance 1.5.1
 
@@ -142,7 +149,7 @@ Optional local-only vision models may be evaluated later against CPU/RAM budgets
 
 ## Remaining product work
 
-1. Localize PDF/export content and notification payloads; then add more UI languages.
+1. Extend output localization beyond RU/EN/DE; then add more UI languages.
 2. Natural-language history search, optional expense-entry Telegram bot and OBD-II component.
 3. Passkeys and additional sign-in methods.
 4. Continue device/accessibility/performance and backup/restore verification alongside every slice.

@@ -2,8 +2,20 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-10-19**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-10-26**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
+
+## Dusk visual refresh
+
+Accepted 2026-10-26: a shared Hallmark Dusk direction for the application, GitHub
+Pages and repository images. Smoked-glass navigation, slate/bone themes, restrained
+periwinkle/apricot signals, local landscape photography, refreshed fictional demo
+cars and recaptured English/Russian product screens. Manrope and MASHINA identity
+are retained. No schema, API, data-format or offline-queue changes; no reset or
+owner-server deployment. Implemented and verified locally; publication uses the
+existing exact-source CI gate and checked-source Pages workflow.
+[Acceptance and validation](../specs/017-dusk-visual-refresh/spec.md) ·
+[Asset sources](visual-assets.md).
 
 ## Prepared for 1.9.0: OCR, outputs, archives and vehicle selection
 

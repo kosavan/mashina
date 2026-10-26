@@ -46,6 +46,7 @@ it("precaches unvisited lazy modules and fonts, versions their content and exclu
         "/assets/entry.js",
         "/assets/settings.js",
         "/assets/fonts/local.woff2",
+        "/dusk-landscape.webp",
       ]),
     );
     expect(first.PRECACHE).not.toContain("/private-document.pdf");

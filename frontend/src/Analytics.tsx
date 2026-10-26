@@ -55,18 +55,18 @@ type Data = {
   cost_trend?: any[];
 };
 const colors = [
-  "#c1ee79",
-  "#84a961",
-  "#597548",
-  "#343f31",
-  "#c4b78b",
-  "#748a9a",
-  "#b9c4a4",
-  "#74876f",
-  "#829583",
-  "#a2aa92",
-  "#c9c7b7",
-  "#9b9f8a",
+  "var(--chart-1)",
+  "var(--chart-2)",
+  "var(--chart-3)",
+  "var(--chart-4)",
+  "var(--chart-5)",
+  "var(--chart-6)",
+  "var(--chart-7)",
+  "var(--chart-8)",
+  "var(--chart-9)",
+  "var(--chart-10)",
+  "var(--chart-11)",
+  "var(--chart-12)",
 ];
 function ChartEmpty() {
   return (
@@ -271,7 +271,6 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               <section className="panel chart-panel chart-main">
                 <div className="panel-heading">
                   <div>
-                    <span className="eyebrow">{tr("ДИНАМИКА")}</span>
                     <h3>{tr("Расходы по месяцам")}</h3>
                   </div>
                   <span className="chart-unit">{currency}</span>
@@ -293,12 +292,12 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                           >
                             <stop
                               offset="0%"
-                              stopColor="#b9e87a"
+                              stopColor="var(--accent)"
                               stopOpacity={0.25}
                             />
                             <stop
                               offset="100%"
-                              stopColor="#b9e87a"
+                              stopColor="var(--accent)"
                               stopOpacity={0}
                             />
                           </linearGradient>
@@ -323,10 +322,10 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                           type="monotone"
                           dataKey="amount"
                           name={tr("Расходы")}
-                          stroke="#b9e87a"
+                          stroke="var(--accent)"
                           fill="url(#areaFill)"
                           strokeWidth={2.5}
-                          activeDot={{ r: 5, fill: "#c5ef8b" }}
+                          activeDot={{ r: 5, fill: "var(--accent-hover)" }}
                           isAnimationActive={false}
                         />
                       </AreaChart>
@@ -339,7 +338,6 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               <section className="panel chart-panel">
                 <div className="panel-heading">
                   <div>
-                    <span className="eyebrow">{tr("СТРУКТУРА")}</span>
                     <h3>{tr("Куда уходят деньги")}</h3>
                   </div>
                 </div>
@@ -461,7 +459,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         <Line
                           dataKey="consumption"
                           name={tr("л/100 км")}
-                          stroke="#b9e87a"
+                          stroke="var(--accent)"
                           strokeWidth={2}
                           dot={{ r: 3 }}
                           isAnimationActive={false}
@@ -489,7 +487,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         <Line
                           dataKey="price"
                           name={currency + tr("/л")}
-                          stroke="#a4b5c9"
+                          stroke="var(--chart-3)"
                           strokeWidth={2}
                           dot={false}
                           isAnimationActive={false}
@@ -527,7 +525,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                           <Bar
                             dataKey="amount"
                             name={tr("Расходы")}
-                            fill="#b9e87a"
+                            fill="var(--accent)"
                             radius={[5, 5, 0, 0]}
                             maxBarSize={75}
                             isAnimationActive={false}
@@ -559,7 +557,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                       <Line
                         dataKey="cost"
                         name={currency + tr("/км")}
-                        stroke="#c1ee79"
+                        stroke="var(--accent)"
                         dot={false}
                         strokeWidth={2}
                         isAnimationActive={false}
@@ -595,9 +593,6 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             )}
             <section className="panel ownership-panel">
               <div>
-                <span className="eyebrow">
-                  {tr("СТОИМОСТЬ ВЛАДЕНИЯ · ВЫБРАННЫЕ АВТОМОБИЛИ")}
-                </span>
                 <h3>{tr("Эксплуатация и капитал — отдельно")}</h3>
                 <p className="muted">
                   {tr(

@@ -18,6 +18,9 @@
 
 ![MASHINA: capture, understand and maintain your vehicles. Actual product with isolated synthetic demo data.](docs/assets/en/mashina-overview.png)
 
+The Dusk interface pairs smoked glass with slate and warm light surfaces.
+[Design and image sources](docs/visual-assets.md).
+
 ## A garage worth keeping up to date
 
 MASHINA is a modern, open-source, self-hosted vehicle maintenance tracker and car

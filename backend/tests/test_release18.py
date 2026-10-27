@@ -13,7 +13,7 @@ from backend.tests.test_ocr import require_engine
 
 def test_health_identifies_release_without_changing_schema(client):
     result = client.get("/api/v1/health").json()
-    assert result == {"status": "ok", "schema": "007", "version": "1.10.0"}
+    assert result == {"status": "ok", "schema": "007", "version": "1.9.0"}
 
 
 def upload(client, image):

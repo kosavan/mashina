@@ -15,22 +15,9 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
-## Release 1.10.0: Dusk design
+## Withdrawal of 1.10.0
 
-Target tag: `v1.10.0` once published in Releases. This is a visual update relative to 1.9.0. Use `v1.10.0` for `TARGET_TAG` below. First take the complete backup and retain the previous image; then verify existing records, photos, both themes and offline synchronization.
-
-## Dusk interface and Fold M identity
-
-This visual update changes bundled styles, images and icons, with no schema,
-settings-key, API or queue-format change. Follow the existing backup procedure
-below and retain the previous image with its matching data backup. No data reset,
-account recreation or browser-storage clearing is needed.
-
-The public offline cache version now includes its bundled images/icons as well
-as application code. Reconnect and reopen the app to receive the new shell;
-pending operations remain in IndexedDB. Verify an existing vehicle, original
-photo, light/dark themes and a pending offline entry. For rollback, use the
-previous image and matching complete backup as described below.
+The owner withdrew the 1.10.0 design on 2026-10-27. Returning to 1.9.0 keeps schema 007. Preserve a full current backup and image first. Check current data with the 1.9.0 image in isolation; after replacement compare records, attachments and settings. Do not overwrite newer records with an older backup. On failure use the matching retained image and data. Reopen the PWA online and reload the screen while preserving browser storage and offline queues.
 
 ## Release 1.9.0: OCR, output languages, streaming archives and vehicle suggestions
 

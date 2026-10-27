@@ -128,20 +128,21 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
   return (
     <div className="auth-page">
       <section className="auth-story">
-        <header className="auth-brand">
-          <a href="#" className="wordmark">
-            <span className="brand-mark">
-              <BrandMark />
-            </span>
-            MASHINA
-          </a>
-        </header>
+        <a href="#" className="wordmark">
+          <span className="brand-mark">
+            <BrandMark />
+          </span>
+          MASHINA
+        </a>
         <div className="auth-copy">
+          <span className="eyebrow">
+            {tr("ДЛЯ ТЕХ, КТО ЛЮБИТ СВОЮ МАШИНУ")}
+          </span>
           <h1>
             {tr("Больше, чем")}
             <br />
             {tr("просто ")}
-            {tr("гараж.")}
+            <em>{tr("гараж.")}</em>
           </h1>
           <p>
             {tr("Каждая поездка. Каждая деталь.")}
@@ -155,18 +156,13 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
             <ShieldCheck size={17} />{" "}
             {tr(" Ваш сервер. Ваши данные. Ваши правила.")}
           </div>
-          <a
-            className="photo-credit"
-            href="https://commons.wikimedia.org/wiki/File:Vallee-brouillard.jpg"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Thomas Bresson / CC BY 3.0
-          </a>
         </div>
       </section>
       <section className="auth-panel">
         <div>
+          <span className="label-pill">
+            {tr("ПЕРСОНАЛЬНЫЙ ЦИФРОВОЙ ГАРАЖ")}
+          </span>
           <h2>{setup ? tr("Добро пожаловать.") : tr("С возвращением.")}</h2>
           <p className="muted">
             {setup
@@ -304,12 +300,7 @@ export default function App() {
     localStorage.setItem("mashina-theme", theme);
     document
       .querySelector("meta[name=theme-color]")
-      ?.setAttribute(
-        "content",
-        getComputedStyle(document.documentElement)
-          .getPropertyValue("--bg")
-          .trim(),
-      );
+      ?.setAttribute("content", theme === "dark" ? "#101211" : "#f5f6f2");
   }, [theme]);
   useEffect(() => {
     if (!toast) return;
@@ -528,7 +519,7 @@ export default function App() {
     return (
       <div className="app-loader">
         <CarFront size={32} />
-        <span className="wordmark">MASHINA</span>
+        <span>MASHINA</span>
         <div className="loading-line" />
       </div>
     );
@@ -859,7 +850,7 @@ export default function App() {
           <footer className="main-footer">
             <span>{tr("MASHINA · с заботой о каждой детали")}</span>
             <span>
-              <ShieldCheck size={13} />
+              <span className="status-dot" />
               {session.demo
                 ? tr("Демонстрационный гараж")
                 : tr("Ваш сервер · ваши данные")}

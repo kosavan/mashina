@@ -180,20 +180,8 @@ for (const locale of ["en", "ru"] as const) {
     await page.getByLabel("Язык / Language", { exact: true }).selectOption(locale);
     await page.getByRole("button", { name: locale === "en" ? "Explore the demo garage" : "Посмотреть демогараж" }).click();
     await expect(page.getByRole("heading", { name: locale === "en" ? "My garage" : "Мой гараж", exact: true })).toBeVisible();
-    await page.locator(".vehicle-cover img").evaluateAll(async images => {
-      await Promise.all(images.map(async image => {
-        const photo = image as HTMLImageElement;
-        photo.loading = "eager";
-        await photo.decode();
-      }));
-    });
-    await page.screenshot({ path: `../.cache/screenshots/garage-${locale}.png`, fullPage: true, animations: "disabled" });
-    await page.locator(".vehicle-grid").screenshot({
-      path: `../.cache/screenshots/garage-cards-${locale}.png`,
-      omitBackground: true,
-      animations: "disabled",
-      style: ".desktop-fab { visibility: hidden; } html, body, #root, .app-shell, .main-wrapper, main { background: transparent !important; } .main-wrapper::before { display: none !important; }",
-    });
+    await page.screenshot({ path: `../.cache/screenshots/garage-${locale}.png`, fullPage: true });
+    await page.locator(".vehicle-grid").screenshot({ path: `../.cache/screenshots/garage-cards-${locale}.png`, style: ".desktop-fab { visibility: hidden; }" });
     await page.locator(".sidebar").getByRole("button", { name: locale === "en" ? "Analytics" : "Аналитика", exact: true }).click();
     const select = page.locator(".analytics-filters select").first();
     const car = await page.locator('select[aria-label]').filter({ has: page.locator('option', { hasText: 'Volvo XC60' }) }).first().locator('option').filter({ hasText: 'Volvo XC60' }).getAttribute('value');

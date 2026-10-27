@@ -1,22 +1,22 @@
 {
   "brand": "MASHINA",
   "tagline": "Your garage. Your history. Your server.",
-  "brief": "Owner-selected A, Fold M (2026-10-26), for the calm Dusk interface.",
+  "brief": "A premium personal garage, local and private. Apex M selected by the owner; green-only final artwork.",
   "adjectives": [
     "personal",
     "precise",
-    "calm",
-    "premium"
+    "premium",
+    "private"
   ],
   "industry": "software",
-  "brand_color": "#B9B5F4",
-  "tile_color": "#11141C",
+  "brand_color": "#c1ee79",
+  "tile_color": "#101211",
   "greyscale": false,
   "final": true,
-  "round": 3,
+  "round": 2,
   "concepts": [
     {
-      "name": "Fold M",
+      "name": "Apex M",
       "symbol": "masters/mashina-symbol.svg",
       "lockup": "masters/mashina-horizontal.svg",
       "stacked": "masters/mashina-stacked.svg",
@@ -25,16 +25,16 @@
       "symbol_on_dark": "masters/mashina-symbol.svg",
       "lockup_on_dark": "masters/mashina-horizontal.svg",
       "lockup_on_tile": "masters/mashina-horizontal.svg",
-      "idea": "A recognizable M with soft shoulders and one precise fold.",
+      "idea": "Two journeys meet in one personal garage.",
       "rationale": [
-        "Calm geometry for Dusk",
-        "Readable at favicon scale",
-        "Local outlined Manrope"
+        "One green mark at all sizes",
+        "Filled geometry with strong 45-degree diagonals",
+        "Outlined Manrope wordmark and local app icons"
       ]
     }
   ],
-  "recommendation": "Owner-selected Fold M. Use ink artwork on pale backgrounds.",
+  "recommendation": "Approved Apex M, green-only artwork.",
   "next_steps": [
-    "Use production exports and follow usage.md."
+    "Use the exported green identity and follow usage.md."
   ]
 }

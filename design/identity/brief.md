@@ -1,17 +1,4 @@
-# MASHINA identity history and current direction
-
-## Fold M, selected 26 October 2026
-
-The owner requested a Dusk logo/color redesign and chose **A, Fold M** from
-the [three directions](dusk-concepts/overview.png). Softened shoulders and one
-precise fold use periwinkle on slate and ink on bone. MASHINA and licensed local
-Manrope remain. Rollout includes the app, PWA/favicon, GitHub Pages, README and
-actual-product images. [Current guide](usage.md).
-
-## Original Apex exploration, October 2026
-
-The following is historical and superseded by Fold M. Its green-only restriction
-applies to that original round.
+# MASHINA identity exploration
 
 Personal, private, precise, quietly premium. Existing equity: the name MASHINA and muted lime on graphite. The stock car icon has little distinctive identity; the replacement must work at 16 px and in one color.
 

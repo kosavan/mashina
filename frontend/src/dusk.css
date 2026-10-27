@@ -866,7 +866,8 @@ html[dir="rtl"] .main-wrapper {
 }
 
 @media (min-width: 1700px) {
-  .vehicle-cover {
+  .vehicle-cover,
+  .vehicle-cover.warm {
     height: 300px;
   }
 }
@@ -898,7 +899,8 @@ html[dir="rtl"] .main-wrapper {
   .garage-summary strong span {
     font-size: 10px;
   }
-  .vehicle-cover {
+  .vehicle-cover,
+  .vehicle-cover.warm {
     height: 218px;
   }
   .vehicle-title h2 {

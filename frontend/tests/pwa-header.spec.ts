@@ -45,30 +45,3 @@ for (const landscape of [false, true]) {
     await page.screenshot({ path: `../.cache/screenshots/pwa-header-${landscape ? "landscape" : "portrait"}-${test.info().project.name}.png`, animations: "disabled" });
   });
 }
-
-test("installed PWA keeps correct RTL landscape and tablet shell offsets", async ({ page }) => {
-  await page.setViewportSize({ width: 956, height: 440 });
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, "standalone", { value: true });
-    localStorage.setItem("mashina-locale", "en");
-  });
-  await page.goto("/");
-  await page.getByRole("button", { name: "Explore the demo garage" }).click();
-  await expect(page.getByRole("heading", { name: "My garage", exact: true })).toBeVisible();
-  await page.evaluate(() => {
-    document.documentElement.dir = "rtl";
-    document.documentElement.style.setProperty("--safe-left", "62px");
-    document.documentElement.style.setProperty("--safe-right", "62px");
-  });
-  const main = await page.locator(".main-wrapper").boundingBox();
-  expect(main!.x).toBe(0);
-  expect(main!.width).toBe(956);
-  await expect(page.getByRole("button", { name: "Open menu", exact: true })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.setViewportSize({ width: 1024, height: 900 });
-  await expect(page.getByRole("button", { name: "Open menu", exact: true })).toBeHidden();
-  const tabletMain = await page.locator(".main-wrapper").boundingBox();
-  const sidebar = await page.locator(".sidebar").boundingBox();
-  expect(tabletMain!.x).toBe(0);
-  expect(tabletMain!.width).toBe(1024 - sidebar!.width);
-});

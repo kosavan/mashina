@@ -21,7 +21,7 @@ These files do not change account settings automatically.
 
 Select **GitHub Actions** under repository Settings > Pages. Commit the reviewed
 changes. After **MASHINA checks** succeeds for a main-branch push, **Publish MASHINA
-website** checks out that exact SHA and publishes only the fourteen files allowed by
+website** checks out that exact SHA and publishes only the five files allowed by
 `tools/build_site.py`. It never publishes the repository tree or the private app.
 
 Local checks, from a checkout without an existing `dist-site` directory:

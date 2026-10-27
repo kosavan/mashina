@@ -2,28 +2,12 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-10-26**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-10-19**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
-## Design release 1.10.0
+## Dusk rollback
 
-Accepted 2026-10-27: a separate Dusk release relative to 1.9.0, search metadata verification and a backed-up upgrade of the owner’s existing Proxmox installation with preservation checks. Publication and installation await CI; server behavior and schema are unchanged.
-
-## Dusk visual refresh
-
-Accepted 2026-10-26: a shared Hallmark Dusk direction for the application, GitHub
-Pages and repository images. Smoked-glass navigation, slate/bone themes, restrained
-periwinkle/apricot signals, local landscape photography, refreshed fictional demo
-cars and recaptured English/Russian product screens. Manrope and the MASHINA name
-are retained, with the owner-selected Fold M logo. No schema, API, data-format or offline-queue changes; no reset or
-owner-server deployment. Implemented and verified locally; publication uses the
-existing exact-source CI gate and checked-source Pages workflow.
-[Acceptance and validation](../specs/017-dusk-visual-refresh/spec.md) ·
-[Asset sources](visual-assets.md).
-
-Additional scope accepted 2026-10-26: new Dusk-compatible logo/color exploration
-and a revised public product image without nested outlines or an opaque blue
-gutter. The owner selected A, Fold M; the new identity is included in the rollout.
+2026-10-27: the owner requested withdrawal of Dusk, Fold M and version 1.10.0. Application, website and imagery return to the pre-redesign 1.9.0 state. The rollback preserves current data, with a complete backup, an isolated 1.9.0 startup check and record/attachment comparison before replacement. Verification and publication evidence is recorded in the rollback PR.
 
 ## Prepared for 1.9.0: OCR, outputs, archives and vehicle selection
 

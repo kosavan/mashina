@@ -60,6 +60,7 @@ import { Sheet } from "./components/ui/dialog";
 import { ServiceLocation } from "./ServiceLocation";
 
 export function PageHeading({
+  eyebrow,
   title,
   description,
   action,
@@ -72,6 +73,7 @@ export function PageHeading({
   return (
     <header className="page-heading">
       <div>
+        <div className="eyebrow">{tr(eyebrow)}</div>
         <h1>{title}</h1>
         <p>{description}</p>
       </div>
@@ -301,17 +303,7 @@ export function Garage() {
             )[0];
           const image = vehicleImage(v, true);
           return (
-            <article
-              className="vehicle-card"
-              key={v.id}
-              style={
-                image
-                  ? ({
-                      "--vehicle-photo": `url(${JSON.stringify(image)})`,
-                    } as React.CSSProperties)
-                  : undefined
-              }
-            >
+            <article className="vehicle-card" key={v.id}>
               <button
                 className="vehicle-open"
                 aria-label={tr("Открыть {0}", [v.name])}
@@ -337,16 +329,20 @@ export function Garage() {
                     </div>
                   )}
                   <span className="vehicle-badge">
-                    {(v.status === "active"
+                    {v.status === "active"
                       ? tr("В ГАРАЖЕ")
                       : v.status === "sold"
                         ? tr("ПРОДАН")
-                        : tr("В АРХИВЕ")
-                    ).toLocaleLowerCase()}
+                        : tr("В АРХИВЕ")}
                   </span>
                   <span className="cover-arrow">
                     <ArrowUpRight size={20} />
                   </span>
+                  <div className="cover-caption">
+                    {v.demo_image
+                      ? "MASHINA / DEMO COLLECTION"
+                      : v.brand || tr("ВАШ АВТОМОБИЛЬ")}
+                  </div>
                 </div>
                 <div className="vehicle-content">
                   <div className="vehicle-title">
@@ -385,7 +381,7 @@ export function Garage() {
                   <div
                     className={`vehicle-next ${next?.status === "overdue" ? "danger" : ""}`}
                   >
-                    <Wrench size={14} />
+                    <span className="status-dot" />
                     <span>
                       {next ? next.title : tr("Всё под контролем")}
                       {v.role === "driver" && <em> {tr(" · Водитель")}</em>}
@@ -439,6 +435,7 @@ export function Garage() {
         <div className="panel spending-panel">
           <div className="panel-heading">
             <div>
+              <span className="eyebrow">{tr("ПОД КОНТРОЛЕМ")}</span>
               <h3>{tr("Как меняются расходы")}</h3>
             </div>
             <button className="text-link" onClick={() => setPage("analytics")}>
@@ -472,6 +469,7 @@ export function Garage() {
         <div className="panel attention-panel">
           <div className="panel-heading">
             <div>
+              <span className="eyebrow">{tr("НЕ УПУСТИТЬ ВАЖНОЕ")}</span>
               <h3>{tr("На горизонте")}</h3>
             </div>
             <Bell size={20} />
@@ -529,6 +527,7 @@ export function Garage() {
       <section className="panel recent-panel">
         <div className="panel-heading">
           <div>
+            <span className="eyebrow">{tr("ИСТОРИЯ ПРОДОЛЖАЕТСЯ")}</span>
             <h3>{tr("Последние события")}</h3>
           </div>
           <button className="text-link" onClick={() => setPage("timeline")}>
@@ -830,9 +829,7 @@ export function VehiclePage() {
         </div>
         <aside>
           <span className="license-plate">{v.plate || tr("Без номера")}</span>
-          <span className="metric-label">
-            {tr("ТЕКУЩИЙ ПРОБЕГ").toLocaleLowerCase()}
-          </span>
+          <span className="eyebrow">{tr("ТЕКУЩИЙ ПРОБЕГ")}</span>
           <strong>
             {number(v.current_odometer)}
             <small>{tr("км")}</small>
@@ -1921,7 +1918,7 @@ export function SettingsPage() {
               disabled={session.demo}
               onClick={() => download("/api/v1/export.json")}
             >
-              <abbr title="JavaScript Object Notation">JSON</abbr>
+              JSON
               <Download size={15} />
             </Button>
             <Button
@@ -1929,7 +1926,7 @@ export function SettingsPage() {
               disabled={session.demo}
               onClick={() => download("/api/v1/export.csv?readable=true")}
             >
-              <abbr title="Comma-separated values">CSV</abbr>
+              CSV
               <Download size={15} />
             </Button>
           </div>

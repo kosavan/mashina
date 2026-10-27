@@ -5,6 +5,10 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-10-26**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
+## Design release 1.10.0
+
+Accepted 2026-10-27: a separate Dusk release relative to 1.9.0, search metadata verification and a backed-up upgrade of the owner’s existing Proxmox installation with preservation checks. Publication and installation await CI; server behavior and schema are unchanged.
+
 ## Dusk visual refresh
 
 Accepted 2026-10-26: a shared Hallmark Dusk direction for the application, GitHub

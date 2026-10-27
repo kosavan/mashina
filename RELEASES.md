@@ -1,3 +1,15 @@
+# MASHINA 1.10.0 — Dusk
+
+A visual release on top of 1.9.0: Dusk slate/bone themes, translucent navigation and vehicle cards, the Fold M identity, refreshed fictional demo photos and updated English/Russian product images. Existing private photos remain private and their originals are preserved. No new product features or database migrations are introduced.
+
+The offline shell version now includes bundled icons and images. Open the installed PWA online after updating; preserve browser storage and pending offline entries.
+
+Schema remains 007. API payloads, record IDs, exact money, settings, attachments and offline operation formats remain compatible. Back up the full data directory and retain the previous image before updating; rollback uses the matching image and data backup.
+
+[Update instructions](docs/updating.md) · [Russian update instructions](docs/updating.ru.md) · [Design and asset provenance](docs/visual-assets.md)
+
+---
+
 # MASHINA 1.9.0 (prepared; publication gated by exact-source CI)
 
 Local OCR first reads native PDF text and uses complementary image-recognition passes for scans/photos. Review conflicting candidates and reconciled service lines with tax/discounts; the experimental seven-segment reader only suggests values for cropped panels. Nothing creates financial or odometer records without review and save.

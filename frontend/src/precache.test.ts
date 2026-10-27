@@ -19,6 +19,16 @@ it("precaches unvisited lazy modules and fonts, versions their content and exclu
     mkdirSync(join(root, "public"));
     const worker = readFileSync(new URL("../public/sw.js", import.meta.url));
     writeFileSync(join(root, "public/sw.js"), worker);
+    const publicPaths = [
+      ...worker
+        .toString()
+        .match(/const PRECACHE=\[([^\]]+)\]/)![1]
+        .matchAll(/['"]([^'"]+)['"]/g),
+    ]
+      .map((match) => match[1])
+      .filter((path) => path !== "/" && path !== "/index.html");
+    for (const path of publicPaths)
+      writeFileSync(join(root, "dist", path.slice(1)), "public asset");
     writeFileSync(
       join(root, "dist/index.html"),
       '<script src="/assets/entry.js"></script>',
@@ -46,6 +56,7 @@ it("precaches unvisited lazy modules and fonts, versions their content and exclu
         "/assets/entry.js",
         "/assets/settings.js",
         "/assets/fonts/local.woff2",
+        "/dusk-landscape.webp",
       ]),
     );
     expect(first.PRECACHE).not.toContain("/private-document.pdf");
@@ -57,6 +68,9 @@ it("precaches unvisited lazy modules and fonts, versions their content and exclu
       "// changed lazy module",
     );
     expect(build().VERSION).not.toBe(first.VERSION);
+    const beforeIconChange = build().VERSION;
+    writeFileSync(join(root, "dist/icon-192.png"), "updated Fold M icon");
+    expect(build().VERSION).not.toBe(beforeIconChange);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }

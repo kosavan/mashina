@@ -1,9 +1,13 @@
 """Validate the public site's metadata, links, sitemap and packaged file boundary."""
 
+import argparse
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+import re
 import xml.etree.ElementTree as ET
+
+from build_site import PUBLIC_FILES
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
@@ -46,6 +50,9 @@ class Page(HTMLParser):
             self.schema += data
 
 
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--output", type=Path, default=ROOT / "dist-site")
+output = parser.parse_args().output
 page = Page()
 page.feed((SITE / "index.html").read_text(encoding="utf-8"))
 assert page.canonical == BASE and page.description and page.robots
@@ -58,14 +65,23 @@ for link in page.links:
         continue
     if link.startswith("#"):
         assert link[1:] in page.ids, link
-    elif link == "assets/mashina-overview.png":
-        assert (ROOT / "docs/assets/en/mashina-overview.png").is_file()
     else:
-        assert (SITE / link).exists(), link
+        public_name = link.removeprefix("./")
+        if not public_name:
+            public_name = "index.html"
+        assert public_name in PUBLIC_FILES, f"Not in public allowlist: {link}"
+        assert (ROOT / PUBLIC_FILES[public_name]).is_file(), link
+for name in ("style.css", "base.css", "tokens.css"):
+    css = (SITE / name).read_text(encoding="utf-8")
+    for match in re.finditer(r"url\([\"']?([^\"')]+)[\"']?\)", css):
+        asset = match[1].removeprefix("./")
+        assert asset in PUBLIC_FILES, f"CSS resource is not local/allowlisted: {asset}"
+        assert (ROOT / PUBLIC_FILES[asset]).is_file(), asset
 tree = ET.parse(SITE / "sitemap.xml")
 assert [node.text for node in tree.findall(".//{*}loc")] == [BASE]
-output = ROOT / "dist-site"
 if output.exists():
     actual = {p.relative_to(output).as_posix() for p in output.rglob("*") if p.is_file()}
-    assert actual == {"index.html", "style.css", "sitemap.xml", ".nojekyll", "assets/mashina-overview.png"}
+    assert actual == set(PUBLIC_FILES), "Unexpected or missing public files"
+    for name, source in PUBLIC_FILES.items():
+        assert (output / name).read_bytes() == (ROOT / source).read_bytes(), f"Stale public file: {name}"
 print("Site metadata, structured data, local links, sitemap and public file boundary passed.")

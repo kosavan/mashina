@@ -12,11 +12,16 @@ function assets(directory, prefix='/assets') {
       : [`${prefix}/${item.name}`]);
 }
 const paths=assets('dist/assets').sort();
+const template=readFileSync('public/sw.js','utf8');
+const publicPaths=[...template.match(/const PRECACHE=\[([^\]]+)\]/)[1].matchAll(/['"]([^'"]+)['"]/g)]
+  .map(match=>match[1]).filter(path=>path!=='/'&&path!=='/index.html');
 const size=entry?gzipSync(readFileSync('dist'+entry)).length:0;
 if(size>180*1024)throw new Error(`Entry JS exceeds 180KB gzip: ${size}`);
 const hash=createHash('sha256').update(html);
 for(const path of paths)hash.update(path).update(readFileSync('dist'+path));
-let worker=readFileSync('public/sw.js','utf8').replace("'mashina-dev'",`'mashina-${hash.digest('hex').slice(0,12)}'`);
+for(const path of publicPaths)hash.update(path).update(readFileSync('dist'+path));
+hash.update(template);
+let worker=template.replace("'mashina-dev'",`'mashina-${hash.digest('hex').slice(0,12)}'`);
 worker=worker.replace("'/index.html',",`'/index.html',${paths.map(p=>JSON.stringify(p)).join(',')},`);
 writeFileSync('dist/sw.js',worker);
 console.log(`App shell precached. Entry gzip: ${(size/1024).toFixed(1)} KB / 180 KB budget.`);

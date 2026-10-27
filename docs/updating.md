@@ -15,6 +15,10 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.10.0: Dusk design
+
+Target tag: `v1.10.0` once published in Releases. This is a visual update relative to 1.9.0. Use `v1.10.0` for `TARGET_TAG` below. First take the complete backup and retain the previous image; then verify existing records, photos, both themes and offline synchronization.
+
 ## Dusk interface and Fold M identity
 
 This visual update changes bundled styles, images and icons, with no schema,

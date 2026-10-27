@@ -43,5 +43,13 @@ localization browser tests. `design/showcase/` contains the deterministic overvi
 composition; its four-second snapshot is the README overview PNG.
 Root `docs/assets/` images remain synchronized with the Russian counterparts.
 
-MASHINA artwork is the repository's existing identity. Manrope is locally bundled
+The owner selected the new Fold M identity on 2026-10-26 after reviewing three
+vector concepts. The primary mark is periwinkle on slate, with monochrome and
+daytime variants. See the [identity guide](../design/identity/usage.md).
+Earlier Apex concepts and explicitly named green exports remain historical assets.
+Manrope is locally bundled
 under the SIL Open Font License; the public-site copy includes `assets/OFL.txt`.
+
+Product-card captures have transparent empty margins and gutters. The glass and
+photo content is rendered by the actual application; images are decoded before
+capture. The public overview adds no enclosing frame or opaque blue backdrop.

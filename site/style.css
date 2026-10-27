@@ -2,7 +2,7 @@
  * hero: Settled · nav: edge-aligned · footer: mast · imagery: real landscape and actual product · signature: the owner's garage in smoked glass · dusk: ridge/periwinkle-apricot/glass
  * axes: dark/grotesk-sans/cool · posture: committed · contrast: pass · fold: pass · draw: 4ee719 · job: try · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V4 · weakest: proof, actual product captures replace decorative panels */
-/* Hallmark · dismissed 29 · requested Dusk glass frames actual garage imagery with a lit edge and readable caption. */
+/* Hallmark · product imagery · actual glass vehicle cards carry their own surfaces, with no enclosing frame. */
 /* Hallmark · waive 8 · existing product facts and FAQ are kept · the ordered answers remain useful while their compositions change */
 /* Hallmark · reworded: legacy eyebrows become headings; arrow suffixes and middle-dot metadata removed under gates 54/63; FAQ copy tightened from existing facts under 58. */
 /* Hallmark · reworded "From the first fill-up to the next service." to "The whole story, from the first fill-up." · gate 54 folds the label into the heading */
@@ -32,9 +32,9 @@ h1 { font-size: clamp(3rem, 4.7vw, 4.5rem); max-width: 10ch; line-height: 1.06; 
 .button:hover { background: var(--color-accent-hi); }
 .button:active { background: var(--color-accent-soft); }
 .language-link { font-size: 14px; font-weight: 500; text-decoration: none; white-space: nowrap; }
-.hero-product { position: relative; margin: 0; min-width: 0; padding: var(--space-sm); background: var(--glass); border-radius: 24px; box-shadow: var(--glass-hi), var(--shadow-card); -webkit-backdrop-filter: blur(var(--glass-blur)); backdrop-filter: blur(var(--glass-blur)); }
-.hero-product img { width: 100%; max-height: min(54svh, 520px); object-fit: cover; object-position: top; border-radius: 14px; }
-.hero-product figcaption { padding: var(--space-sm) var(--space-xs) var(--space-2xs); color: var(--color-ink-2); font-size: 12px; }
+.hero-product { position: relative; margin: 0; min-width: 0; }
+.hero-product img { width: 100%; height: auto; }
+.hero-product figcaption { margin-top: var(--space-md); color: var(--color-ink-2); font-size: 12px; }
 .product-facts { grid-column: 1 / -1; display: flex; gap: var(--space-lg); flex-wrap: wrap; list-style: none; margin: 32px 0 0; padding: var(--space-lg) 0 0; border-top: 1px solid color-mix(in oklab, var(--color-ink) 22%, transparent); color: var(--color-ink-2); font-size: 13px; }
 .product-facts li + li { padding-left: var(--space-lg); border-left: 1px solid color-mix(in oklab, var(--color-ink) 24%, transparent); }
 .features-section { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--gap-columns); padding-block: var(--section-gap-s) 0; }
@@ -75,23 +75,24 @@ a:active { text-decoration-thickness: 2px; }
 @media (min-width: 1600px) { .hero { min-height: 840px; } }
 @media (max-width: 70rem) { .hero { column-gap: 32px; } h1 { font-size: clamp(2.75rem, 4.5vw, 4rem); } .actions { align-items: flex-start; flex-direction: column; gap: 20px; } }
 @media (max-width: 60rem) {
-  .landscape, .landscape-scrim { height: 1200px; }
+  .landscape, .landscape-scrim { height: 1000px; }
   header { min-height: 80px; } nav { gap: var(--space-lg); }
   .hero { height: auto; min-height: auto; grid-template-rows: auto; grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); padding-block: 48px; }
   h1 { max-width: 16ch; font-size: clamp(3rem, 7.5vw, 4.5rem); }
   .opening-copy { max-width: 640px; } .intro { max-width: 36ch; } .actions { flex-direction: row; align-items: center; }
-  .hero-product { width: 100%; max-width: 720px; } .hero-product img { max-height: 540px; object-fit: contain; }
+  .hero-product { width: 100%; max-width: 720px; }
   .product-facts { margin-top: 0; }
   .landscape-scrim { background: linear-gradient(180deg, color-mix(in oklab, var(--color-fog) 87%, transparent), color-mix(in oklab, var(--color-fog) 65%, transparent) 32%, var(--color-paper) 93%); }
   .features-section, .privacy, .faq { grid-template-columns: minmax(0, 1fr); row-gap: var(--space-xl); }
   .closing { align-items: flex-start; flex-direction: column; }
 }
 @media (max-width: 40rem) {
+  .landscape, .landscape-scrim { height: 800px; }
   header { gap: var(--space-md); } .wordmark { font-size: 16px; gap: var(--space-xs); } .wordmark img { width: 24px; height: 24px; }
   nav { gap: var(--space-md); } nav a { font-size: 12px; } nav .nav-github { padding-inline: var(--space-sm); }
   .hero { padding-block: 32px var(--space-xl); row-gap: 32px; } h1 { font-size: 3rem; }
   .intro { font-size: 18px; margin-block: var(--space-lg); } .actions { gap: 20px; } .button { padding-inline: 20px; font-size: 13px; } .language-link { font-size: 13px; }
-  .hero-product { padding: var(--space-xs); border-radius: 20px; } .hero-product img { border-radius: 12px; } .hero-product figcaption { font-size: 11px; padding: var(--space-xs) var(--space-2xs) 0; }
+  .hero-product figcaption { font-size: 11px; }
   .product-facts { gap: var(--space-sm) 20px; font-size: 12px; } .product-facts li + li { padding-left: 0; border: 0; }
   .features h3 { font-size: 22px; } .showcase img { border-radius: 16px; } figcaption { font-size: 12px; }
   footer { flex-direction: column; gap: 28px; } .footer-details { font-size: 12px; }

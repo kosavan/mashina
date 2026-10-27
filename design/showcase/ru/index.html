@@ -8,30 +8,24 @@
 <script src="assets/gsap.min.js"></script>
 <style>
 /* Hallmark v2.0.0 · theme: dusk (by request) · redesign: full · scope: app · genre: modern-minimal · dusk: ridge/periwinkle-apricot/glass · signature: real isolated garage · nav: brand only · footer: ownership line */
-/* Critique: a static repository overview needs the real product at scale; the three jobs use open rules rather than boxed cards. */
-/* Waive 44d: fixed 1600 × 900 export composition, sized by HyperFrames. Answered 25: short feature captions use 36ch. Brand: local Manrope and original MASHINA mark retained. */
+/* Critique: the actual garage floats directly on neutral slate; no extra frame, opaque gutter or nested product card. */
+/* Waive 44d: fixed 1600 × 900 export composition, sized by HyperFrames. Brand: owner-selected Fold M with local Manrope and Dusk periwinkle. */
 @font-face { font-family: Manrope; src: url('assets/manrope-cyrillic-medium.woff2') format('woff2'); font-style: normal; font-display: swap; font-weight: 500; unicode-range: U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116; }
 @font-face { font-family: Manrope; src: url('assets/manrope-medium.woff2') format('woff2'); font-style: normal; font-display: swap; font-weight: 500; }
 :root {
-  --color-paper: oklch(17.5% 0.014 268);
-  --color-raised: oklch(23% 0.018 268);
+  --color-paper: oklch(17% 0.004 265);
   --color-ink: oklch(96% 0.006 75);
-  --color-muted: oklch(75% 0.018 262);
-  --color-rule: oklch(34% 0.020 266);
-  --color-accent: oklch(77% 0.10 274);
-  --color-accent-ink: oklch(17.5% 0.014 268);
+  --color-muted: oklch(75% 0.008 265);
+  --color-rule: oklch(32% 0.006 265);
+  --color-accent: #b9b5f4;
+  --color-accent-ink: oklch(17% 0.004 265);
   --color-apricot: oklch(83% 0.095 62);
-  --color-glass: oklch(25% 0.018 268 / 0.82);
-  --color-edge: oklch(100% 0 0 / 0.15);
-  --color-shadow: oklch(8% 0.02 268 / 0.5);
   --font-body: Manrope, ui-sans-serif, system-ui, sans-serif;
   --space-sm: 12px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 40px;
   --space-2xl: 64px;
-  --radius-card: 24px;
-  --radius-inner: 16px;
 }
 * { box-sizing: border-box; }
 ::selection { color: var(--color-accent-ink); background: var(--color-accent); }
@@ -50,9 +44,9 @@ h1 { margin: 0; max-width: 12ch; font-size: 80px; line-height: 1.06; font-weight
 html[lang='ru'] h1 { font-size: 70px; max-width: 13ch; }
 h1 span { display: block; }
 .intro { color: var(--color-muted); font-size: 23px; line-height: 1.6; margin: var(--space-lg) 0 0; max-width: 28ch; text-wrap: pretty; }
-.product { margin: 0; min-width: 0; padding: var(--space-sm); background: var(--color-glass); border-radius: var(--radius-card); box-shadow: inset 0 1px 0 var(--color-edge), 0 32px 64px -24px var(--color-shadow); backdrop-filter: blur(22px); }
-.product img { display: block; width: 100%; height: auto; aspect-ratio: 1120 / 507; object-fit: contain; border-radius: var(--radius-inner); }
-.demo { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-lg); padding: var(--space-sm) 4px 0; color: var(--color-muted); font-size: 14px; }
+.product { margin: 0; min-width: 0; }
+.product img { display: block; width: 100%; height: auto; object-fit: contain; }
+.demo { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-lg); padding-top: var(--space-md); color: var(--color-muted); font-size: 14px; }
 .demo strong { color: var(--color-accent); font-weight: 500; }
 .stages { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-xl); margin-top: var(--space-xl); }
 .stage { min-width: 0; padding-top: var(--space-lg); border-top: 1px solid var(--color-rule); }

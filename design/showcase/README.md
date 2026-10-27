@@ -16,10 +16,13 @@ The primary deliverable is a GitHub PNG. No MP4 has been requested or approved. 
 
 English source is `index.html`; Russian source is `ru/index.html`, with self-contained local assets. Run the same check/snapshot commands with `ru` as the project argument. Published snapshots live in `docs/assets/en/` and `docs/assets/ru/`. Recreate app screens with `frontend/tests/localization.spec.ts`; analytics deliberately selects Volvo XC60.
 
-The Dusk refresh uses local Manrope Medium, slate surfaces, a smoked product
-frame, periwinkle captions and an apricot ownership line. The original MASHINA
-identity remains intact. The overview contains real product captures with
-fictional demo records; it contains no owner data.
+The Dusk refresh uses local Manrope Medium, neutral slate, actual app cards
+directly on the canvas, periwinkle captions and an apricot ownership line. The
+owner-selected Fold M identity uses a periwinkle symbol and bone wordmark. The
+overview contains real product captures with
+fictional demo records; it contains no owner data. Factual labels sit below the
+image without another product frame. Empty margins and the gap between cards
+remain transparent in the captured PNG.
 
 To refresh both editions after building the application, run from `frontend`:
 

@@ -5,16 +5,19 @@ application, public GitHub Pages site and repository product imagery.
 
 ## Identity and material
 
-Keep MASHINA's existing M symbol and locally hosted Manrope. The logo's lime is
-an identity detail; operational controls use restrained periwinkle, and apricot
-marks waiting or upcoming work. Preserve product facts, actions and user data.
+Keep the MASHINA name and locally hosted Manrope. The owner selected the new
+Fold M identity on 2026-10-26: softened shoulders and a precise central fold,
+periwinkle on slate with a dark daytime counterpart. Apricot marks upcoming work.
+Preserve product facts, actions and user data. Earlier lime Apex artwork is history.
 Real application captures show only the isolated fictional demo garage.
 
 ## Dusk surfaces
 
 Slate canvas, warm off-white text, smoked glass with a subtle lit upper edge.
 Glass is reserved for navigation, overlays and independent product surfaces;
-interior rows use space and rules. The light counterpart uses warm bone surfaces
+interior rows use space and rules. Vehicle information uses neutral smoked glass
+over its actual photograph; avoid blue slabs, nested frames and full outlines.
+The light counterpart uses warm bone surfaces
 and dark ink with the same hierarchy. Local landscape photography gives the
 welcome screen and public hero an actual setting. Keep a readable solid fallback
 when backdrop filtering is unavailable.

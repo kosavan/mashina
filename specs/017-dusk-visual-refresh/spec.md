@@ -21,6 +21,15 @@ screenshots. This is visual work; vehicle and financial behavior stays compatibl
    migrations, secret scan and public-site validation pass. Publication follows
    exact-source CI; physical device verification is not inferred from emulation.
 
+## Expanded visual scope, 2026-10-26
+
+The user additionally requested a new logo and color suited to Dusk. Explore three
+original vector directions with the local logo-design skill. The owner selected
+A, Fold M, and approved the production kit and rollout. The MASHINA name stays.
+The user also requested rebuilding the website product image: remove nested
+outlines and the blue screenshot gutter, show readable smoked-glass vehicle
+surfaces, and capture real fully loaded images with transparent empty margins.
+
 ## Plan
 
 Keep the existing React components and handlers. Apply semantic theme tokens and
@@ -42,6 +51,12 @@ CI and the existing checked-source Pages workflow.
 - [x] Preserve exact-source CI and checked-source GitHub Pages publication
 
 ## Validation, 2026-10-26
+
+Final follow-up verification on 2026-10-27 covers the selected Fold M kit,
+neutral glass cards, fully decoded transparent-gutter captures, matching public
+icon copies and cache-version changes when bundled icon bytes change. The final
+app/profile/localization/PWA group passed 24 browser tests; four additional
+offline/font journeys passed after the cache versioning change.
 
 - Frontend TypeScript/ESLint/Prettier, production build and 36 unit tests passed.
 - Existing browser suite: 54 passed, including Chromium, WebKit PWA safe areas,

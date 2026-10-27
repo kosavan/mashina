@@ -15,6 +15,19 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Dusk interface and Fold M identity
+
+This visual update changes bundled styles, images and icons, with no schema,
+settings-key, API or queue-format change. Follow the existing backup procedure
+below and retain the previous image with its matching data backup. No data reset,
+account recreation or browser-storage clearing is needed.
+
+The public offline cache version now includes its bundled images/icons as well
+as application code. Reconnect and reopen the app to receive the new shell;
+pending operations remain in IndexedDB. Verify an existing vehicle, original
+photo, light/dark themes and a pending offline entry. For rollback, use the
+previous image and matching complete backup as described below.
+
 ## Release 1.9.0: OCR, output languages, streaming archives and vehicle suggestions
 
 Target tag: `v1.9.0` after publication; do not deploy an unverified tag. Read the [feature guide and limits](ocr-results-archives.md). There is no schema change from 007 and no new required dependency or configuration. Update frontend and server together: older servers do not support the new streaming-restore endpoint. Existing API payloads, machine CSV/JSON, IDs, exact amounts and offline queues remain compatible.

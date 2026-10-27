@@ -10,12 +10,16 @@ validation and future work are separate. Dates are not delivery promises.
 Accepted 2026-10-26: a shared Hallmark Dusk direction for the application, GitHub
 Pages and repository images. Smoked-glass navigation, slate/bone themes, restrained
 periwinkle/apricot signals, local landscape photography, refreshed fictional demo
-cars and recaptured English/Russian product screens. Manrope and MASHINA identity
-are retained. No schema, API, data-format or offline-queue changes; no reset or
+cars and recaptured English/Russian product screens. Manrope and the MASHINA name
+are retained, with the owner-selected Fold M logo. No schema, API, data-format or offline-queue changes; no reset or
 owner-server deployment. Implemented and verified locally; publication uses the
 existing exact-source CI gate and checked-source Pages workflow.
 [Acceptance and validation](../specs/017-dusk-visual-refresh/spec.md) ·
 [Asset sources](visual-assets.md).
+
+Additional scope accepted 2026-10-26: new Dusk-compatible logo/color exploration
+and a revised public product image without nested outlines or an opaque blue
+gutter. The owner selected A, Fold M; the new identity is included in the rollout.
 
 ## Prepared for 1.9.0: OCR, outputs, archives and vehicle selection
 

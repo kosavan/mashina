@@ -107,8 +107,9 @@
   --on-image: #f8f5f0;
   --image-muted: #dfdfe8;
   --image-shade: #11131d;
-  --logo-accent: #c1ee79;
-  --logo-ink: #182113;
+  --logo-accent: #b9b5f4;
+  --logo-ink: #11141c;
+  --logo-photo: #b9b5f4;
   --glass-surface: #1c202cd9;
   --glass-chrome: #171b25e8;
   --glass-edge: #ffffff12;
@@ -161,6 +162,8 @@
   --accent: #62539b;
   --accent-ink: #faf8ff;
   --accent-hover: #514388;
+  --logo-accent: #62539b;
+  --logo-ink: #f1eeeb;
   --apricot: #8c5438;
   --danger: #995037;
   --glass-surface: #faf8f5eb;

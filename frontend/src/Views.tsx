@@ -301,7 +301,17 @@ export function Garage() {
             )[0];
           const image = vehicleImage(v, true);
           return (
-            <article className="vehicle-card" key={v.id}>
+            <article
+              className="vehicle-card"
+              key={v.id}
+              style={
+                image
+                  ? ({
+                      "--vehicle-photo": `url(${JSON.stringify(image)})`,
+                    } as React.CSSProperties)
+                  : undefined
+              }
+            >
               <button
                 className="vehicle-open"
                 aria-label={tr("Открыть {0}", [v.name])}

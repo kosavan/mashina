@@ -311,9 +311,17 @@ test("every primary screen fits 360px and light theme is usable", async ({
     .getByRole("button", { name: "Сменить тему" })
     .evaluate((button: HTMLButtonElement) => button.click());
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.locator(".vehicle-cover img").evaluateAll(async images => {
+    await Promise.all(images.map(async image => {
+      const photo = image as HTMLImageElement;
+      photo.loading = "eager";
+      await photo.decode();
+    }));
+  });
   await page.screenshot({
     path: "../.cache/screenshots/garage-light-mobile.png",
     fullPage: true,
+    animations: "disabled",
   });
 });
 

@@ -15,9 +15,9 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
-## Release 1.10.0: UI polish, security hardening and performance
+## Release 1.10.1: UI polish, security hardening and performance
 
-Target tag: `v1.10.0` once published in Releases. This release refines interface navigation, visual contrast, server request streaming boundaries, cache headers, lock contention and offline sync. Schema remains 007 with no new dependencies. Use `v1.10.0` for `TARGET_TAG` below. Retain the pre-update backup and previous image before updating; verify records, attachments, both themes and offline synchronization after reopening the PWA online.
+Target tag: `v1.10.1` once published in Releases. This release refines interface navigation, visual contrast, server request streaming boundaries, cache headers, lock contention and offline sync. Schema remains 007 with no new dependencies. Use `v1.10.1` for `TARGET_TAG` below. Retain the pre-update backup and previous image before updating; verify records, attachments, both themes and offline synchronization after reopening the PWA online.
 
 ## Release 1.9.0: OCR, output languages, streaming archives and vehicle suggestions
 

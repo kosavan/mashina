@@ -1,4 +1,4 @@
-# MASHINA 1.10.0
+# MASHINA 1.10.1
 
 A quality, performance and polish release refining the classic MASHINA graphite and lime interface and strengthening system resilience:
 

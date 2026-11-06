@@ -5,7 +5,7 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-11-06**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
-## Release 1.10.0: UI polish, security hardening and performance
+## Release 1.10.1: UI polish, security hardening and performance
 
 Shipped 2026-11-06: semantic category icons and colors, topbar action pill, blurred vehicle card actions, single-row analytics filters and improved chart palette contrast; mobile browser Back navigation for modals; streaming body size limits, LRU rate limiting, HSTS and immutable asset caching; non-blocking preview generation and backup compression; physical disk attachment cleanup; pre-migration archive rotation; batch offline sync; strict OCR language verification. Preserves schema 007, graphite + lime identity, exact money and offline queues.
 

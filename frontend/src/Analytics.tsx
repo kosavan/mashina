@@ -56,17 +56,17 @@ type Data = {
 };
 const colors = [
   "#c1ee79",
-  "#84a961",
-  "#597548",
-  "#343f31",
-  "#c4b78b",
-  "#748a9a",
-  "#b9c4a4",
-  "#74876f",
-  "#829583",
-  "#a2aa92",
-  "#c9c7b7",
-  "#9b9f8a",
+  "#84b66c",
+  "#629489",
+  "#c8b478",
+  "#7b9bb5",
+  "#b48fb8",
+  "#d4937d",
+  "#8ea885",
+  "#a3b18a",
+  "#94a3b8",
+  "#cbb89d",
+  "#7f9183",
 ];
 function ChartEmpty() {
   return (
@@ -119,7 +119,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
   };
   const axis = {
     stroke: "var(--muted)",
-    fontSize: 11,
+    fontSize: 12,
     tickLine: false,
     axisLine: false,
   };
@@ -162,21 +162,6 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
           ))}
         </div>
         <select
-          aria-label={tr("Валюта аналитики")}
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-        >
-          {Array.from(
-            new Set(["RUB", ...state.events.map((e) => e.currency)]),
-          ).map((c) => (
-            <option key={c} value={c}>
-              {categoryLabel(c)}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div className="filters compact">
-        <select
           aria-label={tr("Категория аналитики")}
           value={category}
           onChange={(e) => setCategory(e.target.value)}
@@ -201,23 +186,36 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
           <option value="maintenance">{tr("Обслуживание")}</option>
           <option value="expense">{tr("Прочие расходы")}</option>
         </select>
-        {period === "custom" && (
-          <>
-            <input
-              aria-label={tr("С даты")}
-              type="date"
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-            />
-            <input
-              aria-label={tr("До даты")}
-              type="date"
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-            />
-          </>
-        )}
+        <select
+          aria-label={tr("Валюта аналитики")}
+          value={currency}
+          onChange={(e) => setCurrency(e.target.value)}
+        >
+          {Array.from(
+            new Set(["RUB", ...state.events.map((e) => e.currency)]),
+          ).map((c) => (
+            <option key={c} value={c}>
+              {categoryLabel(c)}
+            </option>
+          ))}
+        </select>
       </div>
+      {period === "custom" && (
+        <div className="filters compact">
+          <input
+            aria-label={tr("С даты")}
+            type="date"
+            value={start}
+            onChange={(e) => setStart(e.target.value)}
+          />
+          <input
+            aria-label={tr("До даты")}
+            type="date"
+            value={end}
+            onChange={(e) => setEnd(e.target.value)}
+          />
+        </div>
+      )}
       {query.isLoading ? (
         <div className="skeleton-panel" />
       ) : query.error ? (
@@ -502,45 +500,47 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                 )}
               </section>
             </div>
-            <div className="analytics-chart-grid equal">
-              {[
-                [tr("Сравнение автомобилей"), d.cars],
-                [tr("Сравнение годов"), d.years],
-              ].map(([title, data]) => (
-                <section className="panel chart-panel" key={String(title)}>
-                  <h3>{String(title)}</h3>
-                  {(data as any[]).length ? (
-                    <div className="chart-container small">
-                      <ResponsiveContainer>
-                        <BarChart data={data as any[]}>
-                          <CartesianGrid
-                            stroke="var(--border)"
-                            vertical={false}
-                          />
-                          <XAxis dataKey="name" {...axis} />
-                          <YAxis
-                            {...axis}
-                            width={55}
-                            tickFormatter={(v) => number(v / 1000) + tr("к")}
-                          />
-                          <Tooltip {...tooltip} />
-                          <Bar
-                            dataKey="amount"
-                            name={tr("Расходы")}
-                            fill="#b9e87a"
-                            radius={[5, 5, 0, 0]}
-                            maxBarSize={75}
-                            isAnimationActive={false}
-                          />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : (
-                    <ChartEmpty />
-                  )}
-                </section>
-              ))}
-            </div>
+            {(d.cars.length > 1 || d.years.length > 1) && (
+              <div className="analytics-chart-grid equal">
+                {(
+                  [
+                    [tr("Сравнение автомобилей"), d.cars],
+                    [tr("Сравнение годов"), d.years],
+                  ] as const
+                )
+                  .filter(([, data]) => data.length > 1)
+                  .map(([title, data]) => (
+                    <section className="panel chart-panel" key={String(title)}>
+                      <h3>{String(title)}</h3>
+                      <div className="chart-container small">
+                        <ResponsiveContainer>
+                          <BarChart data={data}>
+                            <CartesianGrid
+                              stroke="var(--border)"
+                              vertical={false}
+                            />
+                            <XAxis dataKey="name" {...axis} />
+                            <YAxis
+                              {...axis}
+                              width={55}
+                              tickFormatter={(v) => number(v / 1000) + tr("к")}
+                            />
+                            <Tooltip {...tooltip} />
+                            <Bar
+                              dataKey="amount"
+                              name={tr("Расходы")}
+                              fill="#b9e87a"
+                              radius={[5, 5, 0, 0]}
+                              maxBarSize={75}
+                              isAnimationActive={false}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </section>
+                  ))}
+              </div>
+            )}
             <section className="panel chart-panel">
               <h3>{tr("Динамика стоимости километра")}</h3>
               <p className="muted">

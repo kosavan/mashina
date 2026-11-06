@@ -1,5 +1,6 @@
 """Versioned, same-origin API and private file handlers for the MASHINA monolith."""
 
+from collections import OrderedDict
 from contextlib import asynccontextmanager
 import csv
 from datetime import date
@@ -79,7 +80,7 @@ def create_app(data_path=None, bootstrap_token=None):
     data_path = Path(data_path or os.getenv("MASHINA_DATA", "data"))
     store = Store(data_path)
     demos = {}
-    attempts = {}
+    attempts = OrderedDict()
     dummy_hash = HASHER.hash(secrets.token_urlsafe(32))
 
     @asynccontextmanager
@@ -91,7 +92,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.9.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.10.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -106,15 +107,23 @@ def create_app(data_path=None, bootstrap_token=None):
             if request.headers.get("origin") and request.headers["origin"].rstrip("/") != allowed:
                 return JSONResponse({"detail": "Недопустимый источник запроса"}, status_code=403)
             size = request.headers.get("content-length")
+            path = request.url.path
             body_limit = (
                 256 * 1024
-                if request.url.path.startswith("/api/machine/")
-                else (MAX_ARCHIVE + 1024 * 1024 if request.url.path == PREFIX + "/restore/stream"
-                      else 201 * 1024 * 1024)
+                if path.startswith("/api/machine/")
+                else (
+                    MAX_ARCHIVE + 1024 * 1024
+                    if path == PREFIX + "/restore/stream"
+                    else 201 * 1024 * 1024
+                    if path == PREFIX + "/restore"
+                    else 22 * 1024 * 1024
+                    if path in {PREFIX + "/attachments", PREFIX + "/ocr"}
+                    else 4 * 1024 * 1024
+                )
             )
             if size and (not size.isdigit() or int(size) > body_limit):
                 return JSONResponse({"detail": "Запрос слишком большой"}, status_code=413)
-            if request.url.path.startswith("/api/machine/"):
+            if path.startswith("/api/machine/") or (not size and path != PREFIX + "/restore/stream"):
                 chunks, received = [], 0
                 async for chunk in request.stream():
                     received += len(chunk)
@@ -128,11 +137,15 @@ def create_app(data_path=None, bootstrap_token=None):
         response.headers["Referrer-Policy"] = "same-origin"
         response.headers["X-Frame-Options"] = "SAMEORIGIN"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+        if os.getenv("MASHINA_SECURE_COOKIES") == "1":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; font-src 'self'; connect-src 'self'; frame-src 'self' blob: https://www.openstreetmap.org; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
         )
         if request.url.path.startswith((PREFIX, "/api/machine/")):
             response.headers["Cache-Control"] = "no-store"
+        elif request.url.path.startswith("/assets/"):
+            response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
         if request.url.path == "/sw.js":
             response.headers["Cache-Control"] = "no-cache"
         return response
@@ -149,8 +162,9 @@ def create_app(data_path=None, bootstrap_token=None):
         if len(recent) >= limit:
             raise HTTPException(429, "Слишком много попыток. Подождите 5 минут.")
         attempts[key] = recent + [now]
-        if len(attempts) > 10000:
-            attempts.clear()
+        attempts.move_to_end(key)
+        while len(attempts) > 10000:
+            attempts.popitem(last=False)
 
     def session(request: Request):
         token = request.cookies.get(cookie_name, "")
@@ -532,16 +546,16 @@ def create_app(data_path=None, bootstrap_token=None):
         active_store = s["store"]
         if variant == "card" and not download:
             # Authorization is rechecked even for conditional/cached requests.
-            with active_store.lock:
-                with active_store.transaction() as c:
-                    row, _ = attachment_access(c, uid(attachment_id), s["user_id"])
-                    meta = json.loads(row["data"])
-                    if meta["media_type"] == "image/jpeg":
-                        target, etag = card_preview(active_store, row["filename"], meta["sha256"])
-                        headers = {"Cache-Control": "no-store", "ETag": etag}
-                        if request.headers.get("if-none-match") == etag:
-                            return Response(status_code=304, headers=headers)
-                        return FileResponse(target, media_type="image/webp", headers=headers)
+            with active_store.transaction() as c:
+                row, _ = attachment_access(c, uid(attachment_id), s["user_id"])
+                meta = json.loads(row["data"])
+                filename = row["filename"]
+            if meta["media_type"] == "image/jpeg":
+                target, etag = card_preview(active_store, filename, meta["sha256"])
+                headers = {"Cache-Control": "no-store", "ETag": etag}
+                if request.headers.get("if-none-match") == etag:
+                    return Response(status_code=304, headers=headers)
+                return FileResponse(target, media_type="image/webp", headers=headers)
         with active_store.transaction() as c:
             row, _ = attachment_access(c, uid(attachment_id), s["user_id"])
         meta = json.loads(row["data"])
@@ -597,19 +611,26 @@ def create_app(data_path=None, bootstrap_token=None):
     @app.delete(PREFIX + "/attachments/{attachment_id}")
     def delete_file(attachment_id: str, s=Depends(session)):
         active_store = s["store"]
-        with active_store.transaction() as c:
-            attachment, _ = attachment_access(c, uid(attachment_id), s["user_id"], write=True)
-            for row in c.exec_driver_sql(
-                "SELECT id,data FROM vehicles WHERE id=?", (attachment["vehicle_id"],)
-            ).mappings():
-                data = json.loads(row["data"])
-                if data.get("photo_id") == attachment_id:
-                    data["photo_id"] = ""
-                    c.exec_driver_sql(
-                        "UPDATE vehicles SET data=?,version=version+1 WHERE id=?",
-                        (dumps(data), row["id"]),
-                    )
-            c.exec_driver_sql("DELETE FROM attachments WHERE id=?", (attachment_id,))
+        with active_store.lock:
+            with active_store.transaction() as c:
+                attachment, _ = attachment_access(c, uid(attachment_id), s["user_id"], write=True)
+                meta = json.loads(attachment["data"])
+                filename = attachment["filename"]
+                for row in c.exec_driver_sql(
+                    "SELECT id,data FROM vehicles WHERE id=?", (attachment["vehicle_id"],)
+                ).mappings():
+                    data = json.loads(row["data"])
+                    if data.get("photo_id") == attachment_id:
+                        data["photo_id"] = ""
+                        c.exec_driver_sql(
+                            "UPDATE vehicles SET data=?,version=version+1 WHERE id=?",
+                            (dumps(data), row["id"]),
+                        )
+                c.exec_driver_sql("DELETE FROM attachments WHERE id=?", (attachment_id,))
+            if Path(filename).name == filename:
+                (active_store.uploads / filename).unlink(missing_ok=True)
+                key = hashlib.sha256((filename + meta.get("sha256", "") + "card-v1").encode()).hexdigest()
+                (active_store.path / "previews" / (key + ".webp")).unlink(missing_ok=True)
         return {"ok": True}
 
     def real_only(s):

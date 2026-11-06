@@ -292,8 +292,11 @@ async function synchronizeOnce(
       // Refresh authorization before projecting or sending previously queued drafts.
       const fresh = await loadState(session);
       onChange(fresh, await queueFor(session.id));
+      let current = fresh;
       const blocked = new Set<string>();
-      for (const operation of await queueFor(session.id)) {
+      const pending = await queueFor(session.id);
+      let syncedAny = false;
+      for (const operation of pending) {
         const key = operation.entity + operation.id;
         if (operation.error || blocked.has(key)) {
           blocked.add(key);
@@ -305,31 +308,42 @@ async function synchronizeOnce(
             { method: "POST", body: JSON.stringify(operation) },
             session.csrf,
           );
-          let state = await api<State>("/state");
-          const remaining = (await queueFor(session.id)).filter(
-            (o) => o.operation_id !== operation.operation_id,
-          );
-          for (const o of remaining) state = project(state, o);
-          await commit(session, state, undefined, operation.operation_id);
-          onChange(state, remaining);
+          syncedAny = true;
+          await commit(session, current, undefined, operation.operation_id);
         } catch (error) {
           if (error instanceof APIError) {
             blocked.add(key);
-            const prior = await read<Cached>("cache", session.id);
-            if (prior) {
+            const base = syncedAny
+              ? await api<State>("/state")
+              : (await read<Cached>("cache", session.id))?.state;
+            syncedAny = false;
+            if (base) {
               const failed = {
                 ...operation,
                 error: error.message,
                 status: error.status,
               };
-              await commit(session, prior.state, failed);
-              const safe =
-                error.status === 403 ? await loadState(session) : prior.state;
-              onChange(safe, await queueFor(session.id));
+              await commit(session, base, failed);
+              let projected =
+                error.status === 403 ? await loadState(session) : base;
+              if (error.status !== 403) {
+                for (const o of await queueFor(session.id))
+                  projected = project(projected, o);
+                await commit(session, projected);
+              }
+              current = projected;
+              onChange(projected, await queueFor(session.id));
             }
             if (error.status === 401) break;
           } else break;
         }
+      }
+      if (syncedAny) {
+        let state = await api<State>("/state");
+        const remaining = await queueFor(session.id);
+        for (const o of remaining) state = project(state, o);
+        await commit(session, state);
+        onChange(state, remaining);
       }
     };
     if (navigator.locks) await navigator.locks.request("mashina-sync", run);

@@ -24,13 +24,14 @@ def file_hash(path):
 
 def write_backup(store, output):
     """Write format-1 ZIP64 to a path or seekable stream without loading files."""
-    with store.lock, tempfile.TemporaryDirectory(dir=store.path) as work:
+    with tempfile.TemporaryDirectory(dir=store.path) as work:
         snapshot = Path(work) / "database.sqlite"
-        with store.engine.connect() as connection, closing(sqlite3.connect(snapshot)) as target:
-            connection.connection.driver_connection.backup(target)
+        with store.lock:
+            with store.engine.connect() as connection, closing(sqlite3.connect(snapshot)) as target:
+                connection.connection.driver_connection.backup(target)
+            attachments = [a["filename"] for a in store.query("SELECT filename FROM attachments")]
         content = {"database.sqlite": snapshot}
-        for attachment in store.query("SELECT filename FROM attachments"):
-            filename = attachment["filename"]
+        for filename in attachments:
             if (PurePosixPath(filename).name != filename or "\\" in filename
                     or ":" in filename or not filename.endswith(".bin")):
                 raise ValueError("Недопустимое имя вложения")

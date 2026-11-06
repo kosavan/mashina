@@ -74,10 +74,15 @@ def test_recognition_is_private_transient_and_revocation_checked(client, monkeyp
 
 
 def require_engine():
-    if not shutil.which("tesseract") or not shutil.which("pdftoppm"):
+    langs = ""
+    if shutil.which("tesseract") and shutil.which("pdftoppm"):
+        langs = subprocess.run(
+            ["tesseract", "--list-langs"], capture_output=True, text=True, check=False
+        ).stdout
+    if not {"eng", "rus"} <= set(langs.split()):
         if os.environ.get("CI"):
-            pytest.fail("Real local OCR engine and renderer are mandatory in CI")
-        pytest.skip("Local Windows OCR engine not installed; actual-engine coverage required in CI")
+            pytest.fail("Real local OCR engine (eng+rus) and renderer are mandatory in CI")
+        pytest.skip("Local OCR engine with eng+rus not installed; actual-engine coverage required in CI")
 
 
 @pytest.mark.parametrize("pdf", [False, True])

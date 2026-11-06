@@ -184,9 +184,11 @@ def run_page(folder, deadline):
             [engine, str(folder / (source_name + ".png")), str(output), "-l", "eng+rus",
              "--psm", segmentation, "-c", f"thresholding_method={2 if index == 0 else 0}",
              "-c", "preserve_interword_spaces=1", "txt", "tsv"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=min(20, remaining),
+            stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, timeout=min(20, remaining),
             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
         )
+        if b"Failed loading language" in (result.stderr or b""):
+            raise ValueError("Установите локальный Tesseract с языками rus и eng на сервере")
         text_path, tsv_path = output.with_suffix(".txt"), output.with_suffix(".tsv")
         if result.returncode or not text_path.exists():
             continue

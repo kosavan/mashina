@@ -502,6 +502,27 @@ export default function App() {
     setPage("garage");
   }
   useEffect(() => {
+    const onPopState = (event: PopStateEvent) => {
+      if (modal) {
+        setModal(null);
+        return;
+      }
+      const nextPage = event.state?.page as Page | undefined;
+      const nextSelected = event.state?.selected as string | undefined;
+      if (nextPage) setPage(nextPage);
+      if (nextSelected !== undefined) setSelected(nextSelected);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [modal]);
+  useEffect(() => {
+    if (!session) return;
+    const current = window.history.state;
+    if (current?.page !== page || current?.selected !== selected) {
+      window.history.pushState({ page, selected }, "");
+    }
+  }, [session, page, selected]);
+  useEffect(() => {
     if (session && selected)
       localStorage.setItem(`mashina-selected:${session.id}`, selected);
   }, [session, selected]);
@@ -714,6 +735,13 @@ export default function App() {
               >
                 <Bell size={19} />
               </button>
+              <button
+                className="desktop-fab"
+                onClick={() => setModal({ type: "quick" })}
+              >
+                <Plus size={17} />
+                {tr("Добавить запись")}
+              </button>
             </div>
           </header>
           {session.demo && (
@@ -893,13 +921,6 @@ export default function App() {
             <span>{tr("Ещё")}</span>
           </button>
         </nav>
-        <button
-          className="desktop-fab"
-          onClick={() => setModal({ type: "quick" })}
-        >
-          <Plus size={20} />
-          {tr("Добавить запись")}
-        </button>
         {modal?.type === "quick" ? (
           <Sheet open onClose={() => setModal(null)} title={tr("Что запишем?")}>
             <p className="muted sheet-intro">

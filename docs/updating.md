@@ -15,9 +15,9 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
-## Withdrawal of 1.10.0
+## Release 1.10.0: UI polish, security hardening and performance
 
-The owner withdrew the 1.10.0 design on 2026-10-27. Returning to 1.9.0 keeps schema 007. Preserve a full current backup and image first. Check current data with the 1.9.0 image in isolation; after replacement compare records, attachments and settings. Do not overwrite newer records with an older backup. On failure use the matching retained image and data. Reopen the PWA online and reload the screen while preserving browser storage and offline queues.
+Target tag: `v1.10.0` once published in Releases. This release refines interface navigation, visual contrast, server request streaming boundaries, cache headers, lock contention and offline sync. Schema remains 007 with no new dependencies. Use `v1.10.0` for `TARGET_TAG` below. Retain the pre-update backup and previous image before updating; verify records, attachments, both themes and offline synchronization after reopening the PWA online.
 
 ## Release 1.9.0: OCR, output languages, streaming archives and vehicle suggestions
 

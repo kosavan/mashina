@@ -37,6 +37,13 @@ import {
   Pencil,
   ChevronLeft,
   FolderOpen,
+  Droplets,
+  CircleDot,
+  MapPin,
+  AlertTriangle,
+  Landmark,
+  Sparkles,
+  Package,
 } from "lucide-react";
 import { useApp } from "./context";
 import type { Attachment, Entry, Reminder } from "./types";
@@ -450,11 +457,21 @@ export function Garage() {
           {entries.length ? (
             <div className="mini-chart">
               {months.map((m, i) => (
-                <div key={i}>
+                <div key={i} className={m.value > 0 ? "has-value" : "is-zero"}>
                   <span className="chart-tooltip">{money(m.value)}</span>
                   <div
-                    style={{ height: `${Math.max(3, (m.value / max) * 100)}%` }}
-                    className={i === 5 ? "highlight" : ""}
+                    style={{
+                      height: `${m.value > 0 ? Math.max(12, (m.value / max) * 100) : 4}%`,
+                    }}
+                    className={
+                      !m.value
+                        ? "is-zero"
+                        : i === 5
+                          ? "highlight"
+                          : m.value === max && max > 0
+                            ? "peak"
+                            : "has-value"
+                    }
                   />
                   <small>{m.name}</small>
                 </div>
@@ -558,9 +575,26 @@ export function Garage() {
   );
 }
 
+const categoryIcons: Record<string, { icon: typeof Fuel; tone: string }> = {
+  Топливо: { icon: Fuel, tone: "fuel" },
+  "Плановое ТО": { icon: Wrench, tone: "maintenance" },
+  Ремонт: { icon: Wrench, tone: "maintenance" },
+  Запчасти: { icon: Package, tone: "maintenance" },
+  "Шины и диски": { icon: CircleDot, tone: "tires" },
+  Страхование: { icon: ShieldCheck, tone: "insurance" },
+  Налоги: { icon: Landmark, tone: "tax" },
+  "Мойка и детейлинг": { icon: Droplets, tone: "wash" },
+  "Парковки и дороги": { icon: MapPin, tone: "parking" },
+  Штрафы: { icon: AlertTriangle, tone: "fine" },
+  Аксессуары: { icon: Sparkles, tone: "expense" },
+};
+
 export function EventRow({ entry }: { entry: Entry }) {
   const { state, open, save, notify, refresh } = useApp();
   const [view, setView] = useState(false);
+  const categoryVisual = entry.category
+    ? categoryIcons[entry.category]
+    : undefined;
   const Icon =
     entry.kind === "fuel"
       ? Fuel
@@ -570,7 +604,11 @@ export function EventRow({ entry }: { entry: Entry }) {
           ? Gauge
           : entry.kind === "note"
             ? FileText
-            : ArrowUpRight;
+            : categoryVisual?.icon || ArrowUpRight;
+  const iconTone =
+    entry.kind === "expense" && categoryVisual
+      ? `${entry.kind} ${categoryVisual.tone}`
+      : entry.kind;
   const vehicle = state.vehicles.find((v) => v.id === entry.vehicle_id);
   const attachments = state.attachments.filter((a) => a.event_id === entry.id);
   const [preview, setPreview] = useState<Attachment | null>(null);
@@ -593,7 +631,7 @@ export function EventRow({ entry }: { entry: Entry }) {
     <>
       <div className="event-row">
         <button className="event-main" onClick={() => setView(true)}>
-          <span className={`event-icon ${entry.kind}`}>
+          <span className={`event-icon ${iconTone}`}>
             <Icon size={19} />
           </span>
           <div className="event-text">

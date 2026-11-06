@@ -134,6 +134,8 @@ class Store:
                 )
                 save_backup(self, snapshot)
                 snapshot.chmod(0o600)
+                for old in sorted(directory.glob("before-*.zip"), reverse=True)[3:]:
+                    old.unlink(missing_ok=True)
             cfg.attributes["connection"] = connection
             with connection.begin():
                 command.upgrade(cfg, "head")
@@ -164,7 +166,7 @@ class Store:
             return self._state(owner)
 
     def _state(self, owner):
-        from backend.access import attachment_access, vehicle_access
+        from backend.access import vehicle_access
 
         result = {}
         with self.transaction() as c:
@@ -211,18 +213,16 @@ class Store:
                     result[table].append({**row_data(row), "can_edit": can_edit})
             result["attachments"] = []
             for car in cars:
+                role = roles[car["id"]]
+                cover_id = json.loads(car["data"]).get("photo_id")
                 for raw in c.exec_driver_sql(
                     "SELECT * FROM attachments WHERE vehicle_id=?", (car["id"],)
                 ).mappings():
                     row = dict(raw)
-                    try:
-                        _, role = attachment_access(c, row["id"], owner)
-                    except Denied:
+                    own = row["created_by"] == owner
+                    if role != "owner" and not own and row["visibility"] != "shared":
                         continue
-                    can_edit = role == "owner" or (
-                        row["created_by"] == owner
-                        and json.loads(car["data"]).get("photo_id") != row["id"]
-                    )
+                    can_edit = role == "owner" or (own and cover_id != row["id"])
                     result["attachments"].append(
                         {
                             **json.loads(row["data"]),

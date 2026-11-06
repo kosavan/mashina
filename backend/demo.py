@@ -55,7 +55,7 @@ def seed(store):
         )
         for month in range(8):
             for fill in range(3):
-                days = 230 - month * 29 - fill * 8
+                days = 223 - month * 29 - fill * 8
                 km = base + (month * 3 + fill) * (470 if idx == 0 else 320)
                 data = {
                     "vehicle_id": vehicle_id,
@@ -82,7 +82,7 @@ def seed(store):
             data = {
                 "vehicle_id": vehicle_id,
                 "kind": "maintenance" if month % 3 == 0 else "expense",
-                "occurred_at": (today - timedelta(days=230 - month * 29 - 20)).isoformat(),
+                "occurred_at": (today - timedelta(days=223 - month * 29 - 20)).isoformat(),
                 "description": "Замена масла и фильтров"
                 if month % 3 == 0
                 else "Бережная мойка кузова",

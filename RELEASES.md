@@ -1,4 +1,19 @@
-# MASHINA 1.9.0 (prepared; publication gated by exact-source CI)
+# MASHINA 1.10.0
+
+A quality, performance and polish release refining the classic MASHINA graphite and lime interface and strengthening system resilience:
+
+- **Visual and UX Polish**: Dedicated semantic category icons and color coding (wash, tires, insurance, parking/tolls, fines, taxes, accessories, parts) in events feed and expense history; relocated '+ Add record' action to the top navigation bar; relocated vehicle card actions button with blurred background; consolidated single-row analytics filter toolbar with high-contrast chart palettes; mobile History API integration for seamless modal closing and subpage navigation via browser and hardware Back buttons; WCAG AA contrast enhancements and tabular numbers.
+- **Security Hardening**: Enforced streaming request body size limits in `secure_headers` for chunked uploads without `Content-Length` (4 MB default, 22 MB for attachments/OCR, 201 MB for restores, 256 KB for machine endpoints); protected rate limiter against eviction denial-of-service using an OrderedDict LRU cache; enabled Strict-Transport-Security (HSTS) when secure cookies are configured; added immutable long-term caching for static web assets.
+- **Performance and Durability**: Off-lock WebP card preview generation and backup ZIP64/SHA-256 compression outside SQLite `store.lock`; physical cleanup of deleted attachment and preview files from disk; automatic retention rotation of pre-migration backup archives; eliminated N+1 SQL queries on attachment cover lookups; batched offline synchronization fetching updated state once after flushing pending operations.
+- **OCR and Demo Reliability**: Strict Tesseract OCR language verification preventing silent degradation when language packs are missing; updated synthetic demo history ensuring realistic current-month fuel and expense metrics throughout the entire calendar month.
+
+Schema remains 007. API payloads, database models, exact money arithmetic, settings, attachments and offline operation formats remain fully backward compatible.
+
+[Update instructions](docs/updating.md) · [Russian update instructions](docs/updating.ru.md) · [Roadmap](docs/roadmap.md)
+
+---
+
+# MASHINA 1.9.0
 
 Local OCR first reads native PDF text and uses complementary image-recognition passes for scans/photos. Review conflicting candidates and reconciled service lines with tax/discounts; the experimental seven-segment reader only suggests values for cropped panels. Nothing creates financial or odometer records without review and save.
 

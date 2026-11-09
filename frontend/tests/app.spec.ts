@@ -582,3 +582,78 @@ test("offline tire draft survives reload and synchronizes once", async ({
     state.tire_sets.filter((t: any) => t.brand === "Offline tires"),
   ).toHaveLength(1);
 });
+
+test("global currency and unit settings support UK miles with litres and vehicle currency inheritance", async ({
+  page,
+}) => {
+  await demo(page);
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Настройки", exact: true })
+    .click();
+  await page
+    .getByLabel("Валюта по умолчанию", { exact: true })
+    .selectOption("GBP");
+  await expect(
+    page.getByText("Настройки единиц и валюты сохранены", { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByLabel("Единицы расстояния", { exact: true })
+    .selectOption("mi");
+  await page
+    .getByLabel("Единицы объёма топлива", { exact: true })
+    .selectOption("l");
+  await page
+    .getByLabel("Единицы расхода топлива", { exact: true })
+    .selectOption("mpg_uk");
+
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Мой гараж", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Добавить автомобиль", exact: true })
+    .click();
+  const vDialog = page.getByRole("dialog");
+  await expect(vDialog.getByLabel("Валюта", { exact: true })).toHaveValue(
+    "GBP",
+  );
+  await vDialog
+    .getByLabel("Название автомобиля", { exact: true })
+    .fill("Mini UK");
+  await vDialog
+    .getByLabel("Пробег при покупке, ми", { exact: true })
+    .fill("10000");
+  await vDialog.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+  await page.getByRole("heading", { name: "Mini UK", exact: true }).click();
+
+  await page
+    .getByRole("button", { name: "Добавить запись", exact: true })
+    .first()
+    .click();
+  await page
+    .getByRole("button", { name: /^Заправка / })
+    .click();
+  const rDialog = page.getByRole("dialog");
+  await expect(rDialog.getByLabel("Валюта", { exact: true })).toHaveValue(
+    "GBP",
+  );
+  await rDialog.getByLabel("Пробег, ми", { exact: true }).fill("10100");
+  await rDialog.getByLabel("Литры", { exact: true }).fill("10");
+  await rDialog.getByLabel("Сумма, £", { exact: true }).fill("15.00");
+  await rDialog.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(page.getByRole("dialog")).toHaveCount(0);
+
+  await page
+    .locator(".sidebar")
+    .getByRole("button", { name: "Аналитика", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Валюта аналитики", { exact: true }),
+  ).toHaveValue("GBP");
+  await expect(
+    page.getByText("Стоимость мили", { exact: true }),
+  ).toBeVisible();
+});
+

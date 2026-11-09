@@ -33,6 +33,75 @@ export const kindNames: Record<string, string> = {
 };
 export const categoryLabel = (name: string) =>
   categories.includes(name) ? tr(name) : name;
+export const CURRENCIES = [
+  "RUB",
+  "USD",
+  "EUR",
+  "GBP",
+  "CNY",
+  "INR",
+  "KZT",
+  "BYN",
+  "TRY",
+  "AED",
+  "CHF",
+  "CAD",
+  "AUD",
+  "PLN",
+  "BRL",
+] as const;
+export const CURRENCY_SYMBOLS: Record<string, string> = {
+  RUB: "₽",
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  CNY: "¥",
+  INR: "₹",
+  KZT: "₸",
+  BYN: "Br",
+  TRY: "₺",
+  AED: "AED",
+  CHF: "CHF",
+  CAD: "CA$",
+  AUD: "A$",
+  PLN: "zł",
+  BRL: "R$",
+};
+export type DistanceUnit = "km" | "mi";
+export type VolumeUnit = "l" | "gal_us" | "gal_uk";
+export type ConsumptionUnit =
+  "l_100km" | "mpg_uk" | "mpg_us" | "km_l" | "l_100mi";
+export const currencySymbol = (code = "RUB") => CURRENCY_SYMBOLS[code] || code;
+export const defaultCurrency = (s: State, v?: Vehicle | null) =>
+  v?.currency ||
+  (typeof s.settings.currency === "string" && s.settings.currency) ||
+  "RUB";
+export const distanceUnit = (s: State): DistanceUnit =>
+  s.settings.distance_unit === "mi" ? "mi" : "km";
+export const volumeUnit = (s: State): VolumeUnit =>
+  s.settings.volume_unit === "gal_us" || s.settings.volume_unit === "gal_uk"
+    ? (s.settings.volume_unit as VolumeUnit)
+    : "l";
+export const consumptionUnit = (s: State): ConsumptionUnit =>
+  s.settings.consumption_unit === "mpg_uk" ||
+  s.settings.consumption_unit === "mpg_us" ||
+  s.settings.consumption_unit === "km_l" ||
+  s.settings.consumption_unit === "l_100mi"
+    ? (s.settings.consumption_unit as ConsumptionUnit)
+    : "l_100km";
+export const distanceShort = (u: DistanceUnit) => tr(u === "mi" ? "ми" : "км");
+export const volumeShort = (u: VolumeUnit) =>
+  tr(u === "gal_us" || u === "gal_uk" ? "гал" : "л");
+export const consumptionShort = (u: ConsumptionUnit) =>
+  u === "mpg_uk"
+    ? "mpg (UK)"
+    : u === "mpg_us"
+      ? "mpg (US)"
+      : u === "km_l"
+        ? tr("км/л")
+        : u === "l_100mi"
+          ? tr("л / 100 ми")
+          : tr("л / 100 км");
 export const number = (
   n: number | null | undefined,
   maximumFractionDigits = 0,
@@ -40,12 +109,17 @@ export const number = (
   n == null
     ? "—"
     : new Intl.NumberFormat(intlLocale(), { maximumFractionDigits }).format(n);
-export const money = (minor: number, currency = "RUB") =>
-  new Intl.NumberFormat(intlLocale(), {
-    style: "currency",
-    currency,
-    maximumFractionDigits: minor % 100 ? 2 : 0,
-  }).format(minor / 100);
+export const money = (minor: number, currency = "RUB") => {
+  try {
+    return new Intl.NumberFormat(intlLocale(), {
+      style: "currency",
+      currency,
+      maximumFractionDigits: minor % 100 ? 2 : 0,
+    }).format(minor / 100);
+  } catch {
+    return `${(minor / 100).toFixed(minor % 100 ? 2 : 0)} ${currency}`;
+  }
+};
 export const dateLabel = (d: string) =>
   new Intl.DateTimeFormat(intlLocale(), {
     day: "numeric",

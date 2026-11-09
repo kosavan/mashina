@@ -14,6 +14,17 @@ def user_locale(store, actor):
     return output_locale(json.loads(rows[0]["settings"]).get("locale", "ru")) if rows else "ru"
 
 
+def user_units(store, actor):
+    rows = store.query("SELECT settings FROM users WHERE id=?", (actor,))
+    settings = json.loads(rows[0]["settings"]) if rows else {}
+    return {
+        "currency": settings.get("currency", "RUB"),
+        "distance_unit": settings.get("distance_unit", "km"),
+        "volume_unit": settings.get("volume_unit", "l"),
+        "consumption_unit": settings.get("consumption_unit", "l_100km"),
+    }
+
+
 def translate(label, locale):
     return CATALOG.get(label, {}).get(output_locale(locale), label)
 

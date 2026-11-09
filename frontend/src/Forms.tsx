@@ -1,5 +1,16 @@
 import { VehicleIdentityFields } from "./VehicleIdentityFields";
-import { categoryLabel } from "./utils";
+import {
+  CURRENCIES,
+  categories,
+  categoryLabel,
+  currencySymbol,
+  defaultCurrency,
+  distanceUnit,
+  kindNames,
+  money,
+  today,
+  volumeUnit,
+} from "./utils";
 import { tr } from "./i18n";
 import { useRef, useState } from "react";
 import {
@@ -13,7 +24,6 @@ import {
 } from "lucide-react";
 import { useApp } from "./context";
 import type { Item, Kind, RecordBase } from "./types";
-import { categories, kindNames, money, today } from "./utils";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { OcrReview, type OcrFields } from "./OcrReview";
@@ -36,6 +46,7 @@ function Field({
   required = false,
   placeholder = "",
   step,
+  list,
   children,
 }: {
   label: string;
@@ -45,6 +56,7 @@ function Field({
   required?: boolean;
   placeholder?: string;
   step?: string;
+  list?: string;
   children?: React.ReactNode;
 }) {
   return (
@@ -58,6 +70,7 @@ function Field({
           required={required}
           placeholder={placeholder}
           step={step}
+          list={list}
           inputMode={type === "number" ? "decimal" : undefined}
         />
       )}
@@ -283,6 +296,37 @@ export function RecordForm({
     if (recognizedItems.length) setItems(recognizedItems);
     setDirty(true);
   }
+  const dUnit = distanceUnit(state);
+  const vUnit = volumeUnit(state);
+  const activeCurrency =
+    record?.currency ||
+    (type === "vehicle"
+      ? defaultCurrency(state)
+      : defaultCurrency(state, vehicle));
+  const sym = currencySymbol(activeCurrency);
+  const purchasePriceLabel =
+    activeCurrency === "RUB"
+      ? tr("Цена покупки, ₽")
+      : `${tr("Цена покупки")}, ${sym}`;
+  const amountLabel =
+    activeCurrency === "RUB" ? tr("Сумма, ₽") : `${tr("Сумма")}, ${sym}`;
+  const unitPriceLabel =
+    activeCurrency === "RUB" ? tr("Цена, ₽") : `${tr("Цена")}, ${sym}`;
+  const discountLabel =
+    activeCurrency === "RUB" ? tr("Скидка, ₽") : `${tr("Скидка")}, ${sym}`;
+  const adjustmentLabel =
+    activeCurrency === "RUB"
+      ? tr("Корректировка итога, ₽ (можно отрицательную)")
+      : `${tr("Корректировка итога (можно отрицательную)")}, ${sym}`;
+  const fuelVolumeLabel = vUnit === "l" ? tr("Литры") : tr("Галлоны");
+  const fuelPriceLabel =
+    vUnit === "l"
+      ? activeCurrency === "RUB"
+        ? tr("Цена за литр, ₽")
+        : `${tr("Цена за литр")}, ${sym}`
+      : activeCurrency === "RUB"
+        ? tr("Цена за галлон, ₽")
+        : `${tr("Цена за галлон")}, ${sym}`;
   return (
     <Sheet open onClose={close} title={tr(title)} wide={type === "vehicle"}>
       <form
@@ -291,6 +335,11 @@ export function RecordForm({
         onSubmit={submit}
         onChange={() => setDirty(true)}
       >
+        <datalist id="currency-options">
+          {CURRENCIES.map((c) => (
+            <option key={c} value={c} />
+          ))}
+        </datalist>
         {type !== "vehicle" && type !== "category" && (
           <label>
             {tr("Автомобиль")}
@@ -344,7 +393,11 @@ export function RecordForm({
               />
             </div>
             <Field
-              label={tr("Пробег при покупке, км")}
+              label={
+                dUnit === "mi"
+                  ? tr("Пробег при покупке, ми")
+                  : tr("Пробег при покупке, км")
+              }
               name="purchase_odometer"
               type="number"
               step="1"
@@ -359,7 +412,7 @@ export function RecordForm({
                 value={record?.purchase_date}
               />
               <Field
-                label={tr("Цена покупки, ₽")}
+                label={purchasePriceLabel}
                 name="purchase_amount"
                 type="number"
                 step="0.01"
@@ -417,7 +470,8 @@ export function RecordForm({
                 <Field
                   label={tr("Валюта")}
                   name="currency"
-                  value={record?.currency || "RUB"}
+                  value={record?.currency || defaultCurrency(state)}
+                  list="currency-options"
                 />
               </div>
               <Field label={tr("Статус")} name="status">
@@ -532,7 +586,9 @@ export function RecordForm({
                 value={record?.due_date}
               />
               <Field
-                label={tr("На пробеге, км")}
+                label={
+                  dUnit === "mi" ? tr("На пробеге, ми") : tr("На пробеге, км")
+                }
                 name="due_odometer"
                 type="number"
                 step="1"
@@ -550,7 +606,11 @@ export function RecordForm({
                 value={record?.warning_days ?? 30}
               />
               <Field
-                label={tr("Предупредить за, км")}
+                label={
+                  dUnit === "mi"
+                    ? tr("Предупредить за, ми")
+                    : tr("Предупредить за, км")
+                }
                 name="warning_km"
                 type="number"
                 value={record?.warning_km ?? 1000}
@@ -562,7 +622,11 @@ export function RecordForm({
                 value={record?.repeat_days || 0}
               />
               <Field
-                label={tr("Повтор каждые, км")}
+                label={
+                  dUnit === "mi"
+                    ? tr("Повтор каждые, ми")
+                    : tr("Повтор каждые, км")
+                }
                 name="repeat_km"
                 type="number"
                 value={record?.repeat_km || 0}
@@ -602,9 +666,13 @@ export function RecordForm({
                   }
                 />
                 <Field
+                  key={`cost-curr-${vehicleId}`}
                   label={tr("Валюта оценки")}
                   name="cost_currency"
-                  value={record?.cost_currency || vehicle?.currency || "RUB"}
+                  value={
+                    record?.cost_currency || defaultCurrency(state, vehicle)
+                  }
+                  list="currency-options"
                 />
               </div>
             </details>
@@ -623,7 +691,7 @@ export function RecordForm({
                 required
               />
               <Field
-                label={tr("Пробег, км")}
+                label={dUnit === "mi" ? tr("Пробег, ми") : tr("Пробег, км")}
                 name="odometer"
                 type="number"
                 step="1"
@@ -640,9 +708,9 @@ export function RecordForm({
                 <div className="field-grid three">
                   {(
                     [
-                      ["liters", tr("Литры")],
-                      ["price", tr("Цена за литр, ₽")],
-                      ["amount", tr("Сумма, ₽")],
+                      ["liters", fuelVolumeLabel],
+                      ["price", fuelPriceLabel],
+                      ["amount", amountLabel],
                     ] as const
                   ).map(([key, label]) => (
                     <label key={key}>
@@ -736,7 +804,7 @@ export function RecordForm({
                 )}
                 <div className="field-grid">
                   <Field
-                    label={tr("Сумма, ₽")}
+                    label={amountLabel}
                     name="amount"
                     type="number"
                     step="0.01"
@@ -825,8 +893,8 @@ export function RecordForm({
                         {(
                           [
                             ["quantity", tr("Кол-во")],
-                            ["unit_price", tr("Цена, ₽")],
-                            ["discount", tr("Скидка, ₽")],
+                            ["unit_price", unitPriceLabel],
+                            ["discount", discountLabel],
                           ] as const
                         ).map(([key, label]) => (
                           <label key={key}>
@@ -847,7 +915,7 @@ export function RecordForm({
                       {item.amount_minor != null && (
                         <small>
                           {tr("Сохранённый итог: ")}
-                          {money(item.amount_minor)}
+                          {money(item.amount_minor, activeCurrency)}
                         </small>
                       )}
                     </div>
@@ -874,7 +942,7 @@ export function RecordForm({
                   {tr("Добавить позицию")}
                 </Button>
                 <Field
-                  label={tr("Корректировка итога, ₽ (можно отрицательную)")}
+                  label={adjustmentLabel}
                   name="adjustment"
                   type="number"
                   step="0.01"
@@ -919,9 +987,11 @@ export function RecordForm({
                 />
                 <Field label={tr("Теги")} name="tags" value={record?.tags} />
                 <Field
+                  key={`curr-${vehicleId}`}
                   label={tr("Валюта")}
                   name="currency"
-                  value={record?.currency || "RUB"}
+                  value={record?.currency || defaultCurrency(state, vehicle)}
+                  list="currency-options"
                 />
               </div>
               <p className="field-help">

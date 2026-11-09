@@ -15,6 +15,10 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.11.0: Global unit and currency settings
+
+Target tag: `v1.11.0` once published in Releases. This release adds global default currency (`settings.currency`), 15 popular two-decimal currencies (`RUB`, `USD`, `EUR`, `GBP`, `CNY`, `INR`, `KZT`, `BYN`, `TRY`, `AED`, `CHF`, `CAD`, `AUD`, `PLN`, `BRL`) plus any custom 3-letter ISO currency code, and independent distance (`km`/`mi`), fuel volume (`l`/`gal_us`/`gal_uk`) and fuel consumption (`l_100km`/`mpg_uk`/`mpg_us`/`km_l`/`l_100mi`) settings. Schema remains 007 with no new dependencies. Update server and frontend together so the backend accepts the new unit and currency preferences. Existing records, attachments, exact money arithmetic and offline queues remain fully compatible.
+
 ## Release 1.10.1: UI polish, security hardening and performance
 
 Target tag: `v1.10.1` once published in Releases. This release refines interface navigation, visual contrast, server request streaming boundaries, cache headers, lock contention and offline sync. Schema remains 007 with no new dependencies. Use `v1.10.1` for `TARGET_TAG` below. Retain the pre-update backup and previous image before updating; verify records, attachments, both themes and offline synchronization after reopening the PWA online.

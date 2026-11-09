@@ -33,7 +33,16 @@ import type {
   RecordBase,
 } from "./types";
 import { tr, useLocale } from "./i18n";
-import { dateLabel, fileURL, money, number, today } from "./utils";
+import {
+  dateLabel,
+  defaultCurrency,
+  distanceShort,
+  distanceUnit,
+  fileURL,
+  money,
+  number,
+  today,
+} from "./utils";
 import { pendingMoney } from "./calculations";
 import "./body-damage.css";
 
@@ -84,6 +93,7 @@ function Status({ record }: { record: Damage }) {
 export default function BodyDamage({ vehicleId }: { vehicleId: string }) {
   useLocale();
   const { state, save, notify, open } = useApp();
+  const dUnit = distanceUnit(state);
   const [view, setView] = useState<BodyView>("left");
   const [filter, setFilter] = useState("unresolved");
   const [limit, setLimit] = useState(6);
@@ -311,7 +321,7 @@ export default function BodyDamage({ vehicleId }: { vehicleId: string }) {
                 <div>
                   <dt>{tr("Пробег при обнаружении")}</dt>
                   <dd>
-                    {number(record.odometer)} {tr("км")}
+                    {number(record.odometer)} {distanceShort(dUnit)}
                   </dd>
                 </div>
               )}
@@ -484,6 +494,7 @@ function DamageEditor({
 }) {
   const { state, save, upload, notify } = useApp();
   const car = state.vehicles.find((v) => v.id === vehicleId)!;
+  const carCur = defaultCurrency(state, car);
   const [draft, setDraft] = useState({
     ...placement,
     title: original?.title || "",
@@ -569,7 +580,7 @@ function DamageEditor({
       if (draft.estimate !== "") pendingMoney({ amount: draft.estimate });
       stored = await save(
         "body_damage",
-        { ...draft, vehicle_id: vehicleId, currency: car.currency || "RUB" },
+        { ...draft, vehicle_id: vehicleId, currency: carCur },
         stored,
       );
       setPersisted(stored);
@@ -754,7 +765,7 @@ function DamageEditor({
                 />
               </label>
               <label>
-                {tr("Оценка ремонта")} · {car.currency || "RUB"}
+                {tr("Оценка ремонта")} · {carCur}
                 <input
                   inputMode="decimal"
                   value={draft.estimate}

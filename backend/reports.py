@@ -33,7 +33,7 @@ from reportlab.platypus import (
 from backend.access import vehicle_access
 from backend.domain import analytics
 from backend.storage import row_data
-from backend.output_locale import translate, user_locale, number
+from backend.output_locale import translate, user_locale, user_units, number
 
 MAX_WORKS = 500
 MAX_EVENTS = 5000
@@ -81,6 +81,7 @@ class ReportSnapshot:
     demo: bool
     generated: str
     locale: str = "ru"
+    distance_unit: str = "km"
 
 
 def report_snapshot(store, actor: str, vehicle_id: str, options: ReportOptions, demo=False):
@@ -235,6 +236,7 @@ def report_snapshot(store, actor: str, vehicle_id: str, options: ReportOptions, 
             demo,
             date.today().isoformat(),
             user_locale(store, actor),
+            user_units(store, actor)["distance_unit"],
         )
 
 
@@ -258,6 +260,12 @@ def render_report(snapshot: ReportSnapshot):
     def t(label):
         return translate(label, snapshot.locale)
 
+    dist_suffix = t(" ми") if snapshot.distance_unit == "mi" else t(" км")
+    per_dist_label = (
+        t("Эксплуатация на милю")
+        if snapshot.distance_unit == "mi"
+        else t("Эксплуатация на километр")
+    )
     money_label = partial(money, locale=snapshot.locale)
     date_value = partial(date_label, locale=snapshot.locale)
 
@@ -399,8 +407,8 @@ def render_report(snapshot: ReportSnapshot):
             [
                 [p(t("ПОСЛЕДНИЙ ИЗВЕСТНЫЙ ПРОБЕГ"), "small"), p(t("ПРОБЕГ ЗА ПЕРИОД ВЛАДЕНИЯ"), "small")],
                 [
-                    p(current + t(" км"), "number"),
-                    p(distance + (t(" км") if snapshot.mileage is not None else ""), "number"),
+                    p(current + dist_suffix, "number"),
+                    p(distance + (dist_suffix if snapshot.mileage is not None else ""), "number"),
                 ],
             ],
             [width / 2, width / 2],
@@ -486,14 +494,14 @@ def render_report(snapshot: ReportSnapshot):
                 value = number(Decimal(str(totals["cost_per_km"])), snapshot.locale, 2)
                 rows.append(
                     [
-                        p(t("Эксплуатация на километр"), "small"),
+                        p(per_dist_label, "small"),
                         p(value + " " + ("₽" if code == "RUB" else code), "right"),
                     ]
                 )
             else:
                 rows.append(
                     [
-                        p(t("Эксплуатация на километр"), "small"),
+                        p(per_dist_label, "small"),
                         p(t("Недостаточно подтверждённых показаний"), "small"),
                     ]
                 )
@@ -518,7 +526,7 @@ def render_report(snapshot: ReportSnapshot):
         story.append(CondPageBreak(85))
         stamp = date_value(work["occurred_at"])
         if work.get("odometer") is not None:
-            stamp += " · " + number(work["odometer"], snapshot.locale) + t(" км")
+            stamp += " · " + number(work["odometer"], snapshot.locale) + dist_suffix
         story.extend(
             [
                 Spacer(1, 14),

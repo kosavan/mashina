@@ -12,7 +12,15 @@ import {
 } from "lucide-react";
 import { useApp } from "./context";
 import { api, cachedAPI } from "./offline";
-import { money, number, today } from "./utils";
+import {
+  CURRENCIES,
+  defaultCurrency,
+  distanceShort,
+  distanceUnit,
+  money,
+  number,
+  today,
+} from "./utils";
 import type { RecordBase, Mutation } from "./types";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
@@ -449,8 +457,14 @@ function ToolForm({
                   pattern="[A-Za-z]{3}"
                   maxLength={3}
                   required
-                  defaultValue={record?.currency || "RUB"}
+                  list="tool-currency-options"
+                  defaultValue={record?.currency || defaultCurrency(state, car)}
                 />
+                <datalist id="tool-currency-options">
+                  {CURRENCIES.map((c) => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
               </label>
             </div>
             <label>
@@ -805,6 +819,8 @@ export default function OwnershipTools({
         remaining_minor: Number(BigInt(row.amount_minor) - actual),
       };
     });
+  const dUnit = distanceUnit(state);
+  const activeCar = state.vehicles.find((v) => v.id === selected);
   async function remove(entity: Mutation["entity"], row: RecordBase) {
     if (!confirm(tr("Удалить запись? Действие можно отменить."))) return;
     try {
@@ -946,7 +962,7 @@ export default function OwnershipTools({
                   <div className="tire-distance">
                     <strong>
                       {number(tire.confirmed_km || 0)}
-                      <small> {tr(" км")}</small>
+                      <small> {dUnit === "mi" ? tr(" ми") : tr(" км")}</small>
                     </strong>
                     <span>
                       {tire.pending
@@ -967,7 +983,7 @@ export default function OwnershipTools({
                             {interval.removed_km !== null
                               ? number(Number(interval.removed_km))
                               : "…"}{" "}
-                            {tr("км")}
+                            {distanceShort(dUnit)}
                           </strong>
                         </div>
                       ),
@@ -1274,14 +1290,16 @@ export default function OwnershipTools({
                         : tr("Оценка: {0}", [
                             money(
                               row.estimated_cost_minor,
-                              row.cost_currency || "RUB",
+                              row.cost_currency ||
+                                defaultCurrency(state, activeCar),
                             ),
                           ])}
                     </small>
                   </strong>
                   <span>
                     {row.due_odometer !== null && row.due_odometer !== undefined
-                      ? number(row.due_odometer) + tr(" км")
+                      ? number(row.due_odometer) +
+                        (dUnit === "mi" ? tr(" ми") : tr(" км"))
                       : ""}
                   </span>
                 </button>

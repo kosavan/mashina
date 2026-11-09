@@ -13,7 +13,7 @@ from backend.tests.test_ocr import require_engine
 
 def test_health_identifies_release_without_changing_schema(client):
     result = client.get("/api/v1/health").json()
-    assert result == {"status": "ok", "schema": "007", "version": "1.10.1"}
+    assert result == {"status": "ok", "schema": "007", "version": "1.11.0"}
 
 
 def upload(client, image):
@@ -143,3 +143,112 @@ def test_native_rotated_crop_reads_only_selected_region():
     result = recognize(stream.getvalue(), "receipt", 1, rotation=90, crop=[.15, .25, .7, .5])
     assert result["fields"]["amount"] == "456.78", result
     assert "999.99" not in result["text"]
+
+
+def test_global_units_and_currency_settings_inheritance_and_validation(client):
+    assert mutate(client, "settings", {"currency": "bad1"}).status_code == 422
+    assert mutate(client, "settings", {"distance_unit": "yd"}).status_code == 422
+    assert mutate(client, "settings", {"volume_unit": "ml"}).status_code == 422
+    assert mutate(client, "settings", {"consumption_unit": "wh_km"}).status_code == 422
+
+    res = mutate(client, "settings", {
+        "currency": "GBP",
+        "distance_unit": "mi",
+        "volume_unit": "l",
+        "consumption_unit": "mpg_uk",
+    })
+    assert res.status_code == 200
+    settings = client.get("/api/v1/state").json()["settings"]
+    assert settings["currency"] == "GBP"
+    assert settings["distance_unit"] == "mi"
+    assert settings["volume_unit"] == "l"
+    assert settings["consumption_unit"] == "mpg_uk"
+
+    uk_car = mutate(client, "vehicle", {"name": "Mini Cooper", "purchase_odometer": 1000}).json()["record"]
+    assert uk_car["currency"] == "GBP"
+
+    ev = mutate(client, "event", {
+        "vehicle_id": uk_car["id"],
+        "occurred_at": "2026-02-01",
+        "kind": "fuel",
+        "odometer": 1000,
+        "liters": "40",
+        "amount": "58.00",
+        "full": True,
+    }).json()["record"]
+    assert ev["currency"] == "GBP"
+
+    ev2 = mutate(client, "event", {
+        "vehicle_id": uk_car["id"],
+        "occurred_at": "2026-02-10",
+        "kind": "fuel",
+        "odometer": 1100,
+        "liters": "10",
+        "amount": "14.50",
+        "full": True,
+    }).json()["record"]
+    assert ev2["currency"] == "GBP"
+
+    eu_car = mutate(client, "vehicle", {"name": "BMW", "currency": "EUR"}).json()["record"]
+    assert eu_car["currency"] == "EUR"
+    eu_ev = mutate(client, "event", {
+        "vehicle_id": eu_car["id"],
+        "occurred_at": "2026-02-12",
+        "kind": "expense",
+        "amount": "25.00",
+        "category": "Парковки и дороги",
+    }).json()["record"]
+    assert eu_ev["currency"] == "EUR"
+
+
+def test_fuel_consumption_conversions_and_uk_mixed_units(client):
+    from backend.domain import convert_consumption
+
+    # 100 miles (~160.9344 km) using 10 litres -> ~6.21 L/100 km, ~45.46 mpg (UK)
+    assert convert_consumption(10.0, 100.0, "mi", "l", "l_100km") == pytest.approx(6.21, abs=0.02)
+    assert convert_consumption(10.0, 100.0, "mi", "l", "mpg_uk") == pytest.approx(45.46, abs=0.02)
+    assert convert_consumption(10.0, 100.0, "mi", "l", "l_100mi") == 10.0
+    assert convert_consumption(8.0, 100.0, "km", "l", "l_100km") == 8.0
+    assert convert_consumption(8.0, 100.0, "km", "l", "km_l") == 12.5
+
+    mutate(client, "settings", {
+        "currency": "GBP",
+        "distance_unit": "mi",
+        "volume_unit": "l",
+        "consumption_unit": "l_100km",
+    })
+    car = mutate(client, "vehicle", {"name": "UK Estate", "purchase_odometer": 5000}).json()["record"]
+    mutate(client, "event", {
+        "vehicle_id": car["id"],
+        "occurred_at": "2026-03-01",
+        "kind": "fuel",
+        "odometer": 5000,
+        "liters": "45",
+        "amount": "65.00",
+        "full": True,
+    })
+    mutate(client, "event", {
+        "vehicle_id": car["id"],
+        "occurred_at": "2026-03-15",
+        "kind": "fuel",
+        "odometer": 5100,
+        "liters": "10",
+        "amount": "14.50",
+        "full": True,
+    })
+
+    report = client.get(f"/api/v1/analytics?vehicle_id={car['id']}&currency=GBP").json()
+    assert report["currency"] == "GBP"
+    assert report["distance_unit"] == "mi"
+    assert report["volume_unit"] == "l"
+    assert report["consumption_unit"] == "l_100km"
+    assert report["consumption"] == pytest.approx(6.21, abs=0.02)
+
+    mpg_report = client.get(
+        f"/api/v1/analytics?vehicle_id={car['id']}&currency=GBP&consumption_unit=mpg_uk"
+    ).json()
+    assert mpg_report["consumption"] == pytest.approx(45.46, abs=0.02)
+
+    csv_text = client.get("/api/v1/export.csv?readable=true").text
+    assert "Пробег, ми" in csv_text
+

@@ -18,6 +18,10 @@ from sqlalchemy import create_engine, event as sa_event
 from sqlalchemy.pool import StaticPool
 
 from backend.domain import (
+    CONSUMPTION_UNITS,
+    DISTANCE_UNITS,
+    VOLUME_UNITS,
+    currency,
     normalize_vehicle,
     normalize_event,
     normalize_reminder,
@@ -268,11 +272,25 @@ class Store:
                     raise Conflict("Этот идентификатор операции уже использован с другими данными")
                 return json.loads(prior["response"])
             if entity == "settings":
-                if "locale" in payload["data"] and (
-                    not isinstance(payload["data"]["locale"], str)
-                    or payload["data"]["locale"] not in {"ru", "en", "de", "zh", "hi", "es", "ar", "fr"}
+                raw_data = dict(payload.get("data") or {})
+                if "locale" in raw_data and (
+                    not isinstance(raw_data["locale"], str)
+                    or raw_data["locale"] not in {"ru", "en", "de", "zh", "hi", "es", "ar", "fr"}
                 ):
                     raise ValueError("Неподдерживаемый язык интерфейса")
+                if "currency" in raw_data:
+                    if not isinstance(raw_data["currency"], str) or not raw_data["currency"].strip():
+                        raise ValueError("Валюта: трёхбуквенный код")
+                    raw_data["currency"] = currency(raw_data["currency"].strip())
+                if "distance_unit" in raw_data and raw_data["distance_unit"] not in DISTANCE_UNITS:
+                    raise ValueError("Неподдерживаемая единица расстояния")
+                if "volume_unit" in raw_data and raw_data["volume_unit"] not in VOLUME_UNITS:
+                    raise ValueError("Неподдерживаемая единица объёма топлива")
+                if (
+                    "consumption_unit" in raw_data
+                    and raw_data["consumption_unit"] not in CONSUMPTION_UNITS
+                ):
+                    raise ValueError("Неподдерживаемая единица расхода топлива")
                 prior_settings = c.exec_driver_sql(
                     "SELECT settings FROM users WHERE id=?", (owner,)
                 ).scalar_one()
@@ -280,8 +298,19 @@ class Store:
                     **json.loads(prior_settings),
                     **{
                         k: v
-                        for k, v in payload["data"].items()
-                        if k in {"theme", "locale", "units", "last_vehicle", "last_category"}
+                        for k, v in raw_data.items()
+                        if k
+                        in {
+                            "theme",
+                            "locale",
+                            "currency",
+                            "distance_unit",
+                            "volume_unit",
+                            "consumption_unit",
+                            "units",
+                            "last_vehicle",
+                            "last_category",
+                        }
                     },
                 }
                 c.exec_driver_sql(
@@ -355,6 +384,28 @@ class Store:
                     vehicle_access(c, vehicle_id, owner, write=entity != "event")
                     if before and vehicle_id != before["vehicle_id"]:
                         raise ValueError("Перенос записи между автомобилями не поддерживается")
+                if action == "create":
+                    user_settings_raw = c.exec_driver_sql(
+                        "SELECT settings FROM users WHERE id=?", (owner,)
+                    ).scalar()
+                    user_settings = json.loads(user_settings_raw) if user_settings_raw else {}
+                    default_curr = user_settings.get("currency") or "RUB"
+                    if entity == "vehicle" and not data.get("currency"):
+                        data["currency"] = default_curr
+                    elif entity in {"event", "budget", "recurring_cost", "body_damage"} and not data.get("currency"):
+                        car_raw = c.exec_driver_sql(
+                            "SELECT data FROM vehicles WHERE id=?", (vehicle_id,)
+                        ).scalar()
+                        data["currency"] = (
+                            json.loads(car_raw).get("currency") if car_raw else None
+                        ) or default_curr
+                    elif entity == "reminder" and not data.get("cost_currency"):
+                        car_raw = c.exec_driver_sql(
+                            "SELECT data FROM vehicles WHERE id=?", (vehicle_id,)
+                        ).scalar()
+                        data["cost_currency"] = (
+                            json.loads(car_raw).get("currency") if car_raw else None
+                        ) or default_curr
                 if entity == "vehicle":
                     data = normalize_vehicle(data)
                     if data.get("photo_id"):

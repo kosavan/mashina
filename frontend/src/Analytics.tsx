@@ -1,4 +1,17 @@
-import { categoryLabel } from "./utils";
+import {
+  CURRENCIES,
+  categories,
+  categoryLabel,
+  consumptionShort,
+  consumptionUnit,
+  defaultCurrency,
+  distanceShort,
+  distanceUnit,
+  money,
+  number,
+  today,
+  volumeUnit,
+} from "./utils";
 import { tr } from "./i18n";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -29,7 +42,6 @@ import {
 import { useApp } from "./context";
 import { cachedAPI } from "./offline";
 import { PageHeading, Metric } from "./Views";
-import { categories, money, number, today } from "./utils";
 type Data = {
   total_minor: number;
   fuel_minor: number;
@@ -78,13 +90,20 @@ function ChartEmpty() {
 }
 export default function Analytics({ fuel = false }: { fuel?: boolean }) {
   const { state, session, selected } = useApp();
-  const [car, setCar] = useState(fuel ? selected : "");
+  const initialCarId = fuel ? selected : "";
+  const initialCar = state.vehicles.find((v) => v.id === initialCarId);
+  const [car, setCar] = useState(initialCarId);
   const [period, setPeriod] = useState(fuel ? "all" : "year");
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
   const [category, setCategory] = useState("");
   const [kind, setKind] = useState(fuel ? "fuel" : "");
-  const [currency, setCurrency] = useState("RUB");
+  const [currency, setCurrency] = useState(defaultCurrency(state, initialCar));
+  const dUnit = distanceUnit(state);
+  const vUnit = volumeUnit(state);
+  const cUnit = consumptionUnit(state);
+  const cUnitLabel =
+    cUnit === "l_100km" ? tr("л/100 км") : consumptionShort(cUnit);
   const from =
     period === "year"
       ? today().slice(0, 4) + "-01-01"
@@ -101,6 +120,9 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
     category,
     kind,
     currency,
+    distance_unit: dUnit,
+    volume_unit: vUnit,
+    consumption_unit: cUnit,
   });
   const query = useQuery({
     queryKey: ["analytics", session.id, params.toString(), state.events],
@@ -123,6 +145,16 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
     tickLine: false,
     axisLine: false,
   };
+  const currencyOptions = Array.from(
+    new Set(
+      [
+        defaultCurrency(state),
+        ...state.vehicles.map((v) => v.currency),
+        ...state.events.map((e) => e.currency),
+        ...CURRENCIES,
+      ].filter(Boolean),
+    ),
+  );
   return (
     <>
       <PageHeading
@@ -136,7 +168,12 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
         <select
           aria-label={tr("Автомобиль аналитики")}
           value={car}
-          onChange={(e) => setCar(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            setCar(next);
+            const v = state.vehicles.find((x) => x.id === next);
+            if (v?.currency) setCurrency(v.currency);
+          }}
         >
           <option value="">{tr("Все автомобили")}</option>
           {state.vehicles.map((v) => (
@@ -191,9 +228,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
           value={currency}
           onChange={(e) => setCurrency(e.target.value)}
         >
-          {Array.from(
-            new Set(["RUB", ...state.events.map((e) => e.currency)]),
-          ).map((c) => (
+          {currencyOptions.map((c) => (
             <option key={c} value={c}>
               {categoryLabel(c)}
             </option>
@@ -241,16 +276,31 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                 icon={Fuel}
                 detail={
                   d.average_liter_price != null
-                    ? tr("{0} за литр в среднем", [
-                        number(d.average_liter_price, 2),
-                      ])
+                    ? tr(
+                        vUnit === "l"
+                          ? "{0} за литр в среднем"
+                          : "{0} за галлон в среднем",
+                        [number(d.average_liter_price, 2)],
+                      )
                     : tr("Заправки появятся здесь")
                 }
               />
               <Metric
-                label={tr("Стоимость километра")}
+                label={
+                  dUnit === "mi"
+                    ? tr("Стоимость мили")
+                    : tr("Стоимость километра")
+                }
                 value={number(d.cost_per_km, 2)}
-                unit={currency === "RUB" ? tr("₽/км") : currency + tr("/км")}
+                unit={
+                  dUnit === "mi"
+                    ? currency === "RUB"
+                      ? tr("₽/ми")
+                      : currency + tr("/ми")
+                    : currency === "RUB"
+                      ? tr("₽/км")
+                      : currency + tr("/км")
+                }
                 icon={Gauge}
                 detail={
                   d.cost_per_km == null
@@ -395,7 +445,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               <div>
                 <span>{tr("Пробег за период")}</span>
                 <strong>
-                  {number(d.mileage)} <small>{tr("км")}</small>
+                  {number(d.mileage)} <small>{distanceShort(dUnit)}</small>
                 </strong>
               </div>
               <div>
@@ -424,7 +474,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               <Metric
                 label={tr("Средний расход")}
                 value={number(d.consumption, 2)}
-                unit={tr("л/100 км")}
+                unit={cUnitLabel}
                 detail={
                   d.consumption == null
                     ? tr("Нужны два полных бака без пропусков")
@@ -432,14 +482,22 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                 }
               />
               <Metric
-                label={tr("Средняя цена литра")}
+                label={
+                  vUnit === "l"
+                    ? tr("Средняя цена литра")
+                    : tr("Средняя цена галлона")
+                }
                 value={number(d.average_liter_price, 2)}
                 unit={currency}
               />
               <Metric
-                label={tr("Топливо на километр")}
+                label={
+                  dUnit === "mi"
+                    ? tr("Топливо на милю")
+                    : tr("Топливо на километр")
+                }
                 value={number(d.fuel_cost_per_km, 2)}
-                unit={tr("{0}/км", [currency])}
+                unit={tr(dUnit === "mi" ? "{0}/ми" : "{0}/км", [currency])}
               />
             </section>
             <div className="analytics-chart-grid equal">
@@ -458,7 +516,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         <Tooltip {...tooltip} />
                         <Line
                           dataKey="consumption"
-                          name={tr("л/100 км")}
+                          name={cUnitLabel}
                           stroke="#b9e87a"
                           strokeWidth={2}
                           dot={{ r: 3 }}
@@ -472,7 +530,11 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                 )}
               </section>
               <section className="panel chart-panel">
-                <h3>{tr("Цена литра топлива")}</h3>
+                <h3>
+                  {vUnit === "l"
+                    ? tr("Цена литра топлива")
+                    : tr("Цена галлона топлива")}
+                </h3>
                 {d.fuel_prices.length ? (
                   <div className="chart-container small">
                     <ResponsiveContainer>
@@ -486,7 +548,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                         <Tooltip {...tooltip} />
                         <Line
                           dataKey="price"
-                          name={currency + tr("/л")}
+                          name={currency + tr(vUnit === "l" ? "/л" : "/гал")}
                           stroke="#a4b5c9"
                           strokeWidth={2}
                           dot={false}
@@ -542,7 +604,11 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
               </div>
             )}
             <section className="panel chart-panel">
-              <h3>{tr("Динамика стоимости километра")}</h3>
+              <h3>
+                {dUnit === "mi"
+                  ? tr("Динамика стоимости мили")
+                  : tr("Динамика стоимости километра")}
+              </h3>
               <p className="muted">
                 {tr(
                   "Накопленные расходы и подтверждённый пробег с начала выбранного периода. Пробел означает недостаток показаний.",
@@ -558,7 +624,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                       <Tooltip {...tooltip} />
                       <Line
                         dataKey="cost"
-                        name={currency + tr("/км")}
+                        name={currency + tr(dUnit === "mi" ? "/ми" : "/км")}
                         stroke="#c1ee79"
                         dot={false}
                         strokeWidth={2}
@@ -580,13 +646,18 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                     <div key={i}>
                       <span>{c.date}</span>
                       <strong>
-                        {number(c.distance)} {tr(" км")}
+                        {number(c.distance)}{" "}
+                        {dUnit === "mi" ? tr(" ми") : tr(" км")}
                       </strong>
                       <span>
-                        {number(c.liters, 2)} {tr(" л")}
+                        {number(c.liters, 2)}{" "}
+                        {vUnit === "l" ? tr(" л") : tr(" гал")}
                       </span>
                       <span>
-                        {number(c.consumption, 2)} {tr(" л/100 км")}
+                        {number(c.consumption, 2)}{" "}
+                        {cUnit === "l_100km"
+                          ? tr(" л/100 км")
+                          : " " + cUnitLabel}
                       </span>
                     </div>
                   ))}

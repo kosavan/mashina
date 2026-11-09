@@ -49,9 +49,16 @@ import { useApp } from "./context";
 import type { Attachment, Entry, Reminder } from "./types";
 import { api } from "./offline";
 import {
+  CURRENCIES,
   activeEvents,
   categories,
+  consumptionShort,
+  consumptionUnit,
+  currencySymbol,
   dateLabel,
+  defaultCurrency,
+  distanceShort,
+  distanceUnit,
   download,
   fileURL,
   kindNames,
@@ -61,6 +68,8 @@ import {
   sumEvents,
   today,
   vehicleImage,
+  volumeShort,
+  volumeUnit,
 } from "./utils";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
@@ -176,6 +185,8 @@ function VehicleSelect({
 export function Garage() {
   const { state, open, setPage, setSelected, selected } = useApp();
   const [tab, setTab] = useState("active");
+  const dUnit = distanceUnit(state);
+  const globalCur = defaultCurrency(state);
   const entries = activeEvents(state);
   const month = entries.filter(
     (e) => e.occurred_at.slice(0, 10) >= monthStart(),
@@ -196,7 +207,10 @@ export function Garage() {
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     return {
       name: new Intl.DateTimeFormat(intlLocale(), { month: "short" }).format(d),
-      value: sumEvents(entries.filter((e) => e.occurred_at.startsWith(key))),
+      value: sumEvents(
+        entries.filter((e) => e.occurred_at.startsWith(key)),
+        globalCur,
+      ),
     };
   });
   const max = Math.max(1, ...months.map((m) => m.value));
@@ -232,7 +246,7 @@ export function Garage() {
           </span>
           <div>
             <small>{tr("Расходы в этом месяце")}</small>
-            <strong>{money(sumEvents(month))}</strong>
+            <strong>{money(sumEvents(month, globalCur), globalCur)}</strong>
           </div>
         </div>
         <div>
@@ -249,7 +263,7 @@ export function Garage() {
                   0,
                 ),
               )}
-              <span>{tr("км")}</span>
+              <span>{distanceShort(dUnit)}</span>
             </strong>
           </div>
         </div>
@@ -296,6 +310,7 @@ export function Garage() {
       <section className="vehicle-grid">
         {cars.map((v) => {
           const events = activeEvents(state, v.id);
+          const carCur = defaultCurrency(state, v);
           const next = state.reminders
             .filter(
               (r) =>
@@ -369,7 +384,7 @@ export function Garage() {
                       <small>{tr("Пробег")}</small>
                       <strong>
                         {number(v.current_odometer)}
-                        <span>{tr("км")}</span>
+                        <span>{distanceShort(dUnit)}</span>
                       </strong>
                     </div>
                     <div>
@@ -380,7 +395,9 @@ export function Garage() {
                             events.filter(
                               (e) => e.occurred_at.slice(0, 10) >= monthStart(),
                             ),
+                            carCur,
                           ),
+                          carCur,
                         )}
                       </strong>
                     </div>
@@ -396,7 +413,9 @@ export function Garage() {
                     <small>
                       {next
                         ? next.remaining_km != null
-                          ? tr("{0} км", [number(next.remaining_km)])
+                          ? tr(dUnit === "mi" ? "{0} ми" : "{0} км", [
+                              number(next.remaining_km),
+                            ])
                           : next.due_date
                             ? dateLabel(next.due_date)
                             : tr("Запланировано")
@@ -451,14 +470,20 @@ export function Garage() {
             </button>
           </div>
           <div className="spending-total">
-            {money(sumEvents(month))}
-            <span>{tr("в этом месяце · RUB")}</span>
+            {money(sumEvents(month, globalCur), globalCur)}
+            <span>
+              {globalCur === "RUB"
+                ? tr("в этом месяце · RUB")
+                : `${tr("в этом месяце")} · ${globalCur}`}
+            </span>
           </div>
           {entries.length ? (
             <div className="mini-chart">
               {months.map((m, i) => (
                 <div key={i} className={m.value > 0 ? "has-value" : "is-zero"}>
-                  <span className="chart-tooltip">{money(m.value)}</span>
+                  <span className="chart-tooltip">
+                    {money(m.value, globalCur)}
+                  </span>
                   <div
                     style={{
                       height: `${m.value > 0 ? Math.max(12, (m.value / max) * 100) : 4}%`,
@@ -511,7 +536,9 @@ export function Garage() {
                   <small>
                     {state.vehicles.find((v) => v.id === r.vehicle_id)?.name} ·{" "}
                     {r.remaining_km != null
-                      ? tr("{0} км", [number(r.remaining_km)])
+                      ? tr(dUnit === "mi" ? "{0} ми" : "{0} км", [
+                          number(r.remaining_km),
+                        ])
                       : dateLabel(r.due_date)}
                   </small>
                 </div>
@@ -592,6 +619,8 @@ const categoryIcons: Record<string, { icon: typeof Fuel; tone: string }> = {
 export function EventRow({ entry }: { entry: Entry }) {
   const { state, open, save, notify, refresh } = useApp();
   const [view, setView] = useState(false);
+  const dUnit = distanceUnit(state);
+  const vUnit = volumeUnit(state);
   const categoryVisual = entry.category
     ? categoryIcons[entry.category]
     : undefined;
@@ -641,7 +670,8 @@ export function EventRow({ entry }: { entry: Entry }) {
               {entry.odometer != null && (
                 <>
                   {" "}
-                  <i>·</i> {number(entry.odometer)} {tr(" км")}
+                  <i>·</i> {number(entry.odometer)}{" "}
+                  {dUnit === "mi" ? tr(" ми") : tr(" км")}
                 </>
               )}
               {entry.pending && <em> {tr(" · На устройстве")}</em>}
@@ -649,13 +679,15 @@ export function EventRow({ entry }: { entry: Entry }) {
           </div>
           <div className="event-amount">
             {entry.kind === "odometer"
-              ? tr("{0} км", [number(entry.odometer)])
+              ? tr(dUnit === "mi" ? "{0} ми" : "{0} км", [
+                  number(entry.odometer),
+                ])
               : entry.kind === "note"
                 ? tr("Заметка")
                 : money(entry.amount_minor, entry.currency)}
             <small>
               {entry.kind === "fuel"
-                ? tr("{0} л · {1}", [
+                ? tr(vUnit === "l" ? "{0} л · {1}" : "{0} гал · {1}", [
                     number(Number(entry.liters), 2),
                     entry.station || entry.fuel,
                   ])
@@ -698,15 +730,20 @@ export function EventRow({ entry }: { entry: Entry }) {
               [
                 tr("Пробег"),
                 entry.odometer != null
-                  ? tr("{0} км", [number(entry.odometer)])
+                  ? tr(dUnit === "mi" ? "{0} ми" : "{0} км", [
+                      number(entry.odometer),
+                    ])
                   : tr("Не указан"),
               ],
               [tr("Категория"), entry.category],
               [tr("Сервис / продавец"), entry.vendor],
               [tr("АЗС"), entry.station],
               [tr("Топливо"), entry.fuel],
-              [tr("Литры"), entry.liters],
-              [tr("Цена литра"), entry.price],
+              [vUnit === "l" ? tr("Литры") : tr("Галлоны"), entry.liters],
+              [
+                vUnit === "l" ? tr("Цена литра") : tr("Цена галлона"),
+                entry.price,
+              ],
               [
                 tr("Полный бак"),
                 entry.kind === "fuel"
@@ -821,12 +858,16 @@ export function VehiclePage() {
         description={tr("Вернитесь в гараж, чтобы открыть историю.")}
       />
     );
+  const dUnit = distanceUnit(state);
+  const carCur = defaultCurrency(state, v);
   const events = activeEvents(state, v.id);
   const month = sumEvents(
     events.filter((e) => e.occurred_at.slice(0, 10) >= monthStart()),
+    carCur,
   );
   const year = sumEvents(
     events.filter((e) => e.occurred_at.startsWith(today().slice(0, 4))),
+    carCur,
   );
   return (
     <>
@@ -870,7 +911,7 @@ export function VehiclePage() {
           <span className="eyebrow">{tr("ТЕКУЩИЙ ПРОБЕГ")}</span>
           <strong>
             {number(v.current_odometer)}
-            <small>{tr("км")}</small>
+            <small>{distanceShort(dUnit)}</small>
           </strong>
           <button className="text-link" onClick={() => open("odometer")}>
             {tr("Обновить показание")}
@@ -885,10 +926,11 @@ export function VehiclePage() {
                 tr("Приобретён"),
                 v.purchase_date ? dateLabel(v.purchase_date) : tr("Не указано"),
               ],
-              [tr("Цена покупки"), money(v.purchase_minor || 0, v.currency)],
+              [tr("Цена покупки"), money(v.purchase_minor || 0, carCur)],
               [
                 tr("Пробег при покупке"),
-                number(v.purchase_odometer) + tr(" км"),
+                number(v.purchase_odometer) +
+                  (dUnit === "mi" ? tr(" ми") : tr(" км")),
               ],
             ]
               .filter(([, value]) => value)
@@ -904,15 +946,15 @@ export function VehiclePage() {
       <section className="metrics-grid">
         <Metric
           label={tr("За всё время")}
-          value={money(sumEvents(events))}
+          value={money(sumEvents(events, carCur), carCur)}
           detail={tr("Эксплуатационные расходы")}
         />
-        <Metric label={tr("В этом месяце")} value={money(month)} />
-        <Metric label={tr("В этом году")} value={money(year)} />
+        <Metric label={tr("В этом месяце")} value={money(month, carCur)} />
+        <Metric label={tr("В этом году")} value={money(year, carCur)} />
         <Metric
           label={tr("Пробег владения")}
           value={number(Math.max(0, v.current_odometer - v.purchase_odometer))}
-          unit={tr("км")}
+          unit={distanceShort(dUnit)}
         />
       </section>
       <Suspense
@@ -1187,6 +1229,9 @@ export function Timeline({ fixedKind }: { fixedKind?: string }) {
 
 export function FuelPage() {
   const { open, setPage, state, selected } = useApp();
+  const vUnit = volumeUnit(state);
+  const selectedCar = state.vehicles.find((v) => v.id === selected);
+  const cur = defaultCurrency(state, selectedCar);
   const events = activeEvents(state, selected).filter((e) => e.kind === "fuel");
   return (
     <>
@@ -1227,17 +1272,15 @@ export function FuelPage() {
         />
         <Metric
           label={tr("Потрачено на топливо")}
-          value={money(sumEvents(events))}
+          value={money(sumEvents(events, cur), cur)}
         />
         <Metric
           label={tr("Заправлено")}
           value={number(
-            events
-              .filter((e) => e.currency === "RUB")
-              .reduce((s, e) => s + Number(e.liters), 0),
+            events.reduce((s, e) => s + Number(e.liters || 0), 0),
             1,
           )}
-          unit={tr("л")}
+          unit={volumeShort(vUnit)}
         />
       </section>
       <Timeline fixedKind="fuel" />
@@ -1306,6 +1349,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
   const { state, save, open, notify } = useApp();
   const [complete, setComplete] = useState(false);
   const [busy, setBusy] = useState(false);
+  const dUnit = distanceUnit(state);
   const car = state.vehicles.find((v) => v.id === r.vehicle_id);
   const warningKm = r.warning_km || 1000;
   const remaining = r.remaining_km;
@@ -1352,7 +1396,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
       <div className="reminder-resource">
         <strong>
           {remaining != null ? number(remaining) : number(r.remaining_days)}
-          <small>{remaining != null ? tr("км") : tr("дней")}</small>
+          <small>{remaining != null ? distanceShort(dUnit) : tr("дней")}</small>
         </strong>
         <span>
           {tr("до обслуживания")}
@@ -1373,7 +1417,7 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
         {r.due_odometer != null && (
           <span>
             <Gauge size={14} />
-            {number(r.due_odometer)} {tr(" км")}
+            {number(r.due_odometer)} {dUnit === "mi" ? tr(" ми") : tr(" км")}
           </span>
         )}
       </div>
@@ -1439,7 +1483,9 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
             />
           </label>
           <label>
-            {tr("Подтверждённый пробег, км")}
+            {dUnit === "mi"
+              ? tr("Подтверждённый пробег, ми")
+              : tr("Подтверждённый пробег, км")}
             <input
               name="completion_odometer"
               type="number"
@@ -1792,6 +1838,27 @@ export function SettingsPage() {
   const { session, state, save, open, notify, logout, resetDemo } = useApp();
   const [busy, setBusy] = useState(false);
   const [install, setInstall] = useState(false);
+  const cur = defaultCurrency(state);
+  const dUnit = distanceUnit(state);
+  const vUnit = volumeUnit(state);
+  const cUnit = consumptionUnit(state);
+  const isDefaultUnits =
+    cur === "RUB" && dUnit === "km" && vUnit === "l" && cUnit === "l_100km";
+  const localeTitle = {
+    ru: "Русский",
+    en: "English",
+    de: "Deutsch",
+    zh: "简体中文",
+    hi: "हिन्दी",
+    es: "Español",
+    ar: "العربية",
+    fr: "Français",
+  }[getLocale()];
+  function updateUnits(patch: Record<string, string>) {
+    void save("settings", patch)
+      .then(() => notify(tr("Настройки единиц и валюты сохранены")))
+      .catch((error) => notify(tr(error.message)));
+  }
   return (
     <>
       <PageHeading
@@ -1810,6 +1877,70 @@ export function SettingsPage() {
                 .catch((error) => notify(tr(error.message)));
             }}
           />
+          <div className="record-form">
+            <div className="field-grid">
+              <label>
+                {tr("Валюта по умолчанию")}
+                <select
+                  aria-label={tr("Валюта по умолчанию")}
+                  value={cur}
+                  onChange={(e) => updateUnits({ currency: e.target.value })}
+                >
+                  {Array.from(new Set([cur, ...CURRENCIES])).map((code) => {
+                    const s = currencySymbol(code);
+                    return (
+                      <option key={code} value={code}>
+                        {s !== code ? `${code} · ${s}` : code}
+                      </option>
+                    );
+                  })}
+                </select>
+              </label>
+              <label>
+                {tr("Единицы расстояния")}
+                <select
+                  aria-label={tr("Единицы расстояния")}
+                  value={dUnit}
+                  onChange={(e) =>
+                    updateUnits({ distance_unit: e.target.value })
+                  }
+                >
+                  <option value="km">{tr("Километры (км)")}</option>
+                  <option value="mi">{tr("Мили (ми)")}</option>
+                </select>
+              </label>
+              <label>
+                {tr("Единицы объёма топлива")}
+                <select
+                  aria-label={tr("Единицы объёма топлива")}
+                  value={vUnit}
+                  onChange={(e) => updateUnits({ volume_unit: e.target.value })}
+                >
+                  <option value="l">{tr("Литры (л)")}</option>
+                  <option value="gal_uk">
+                    {tr("Галлоны Великобритании (UK gal)")}
+                  </option>
+                  <option value="gal_us">{tr("Галлоны США (US gal)")}</option>
+                </select>
+              </label>
+              <label>
+                {tr("Единицы расхода топлива")}
+                <select
+                  aria-label={tr("Единицы расхода топлива")}
+                  value={cUnit}
+                  onChange={(e) =>
+                    updateUnits({ consumption_unit: e.target.value })
+                  }
+                >
+                  <option value="l_100km">{tr("л / 100 км")}</option>
+                  <option value="mpg_uk">mpg (UK)</option>
+                  <option value="mpg_us">mpg (US)</option>
+                  <option value="km_l">{tr("км/л")}</option>
+                  <option value="l_100mi">{tr("л / 100 ми")}</option>
+                </select>
+              </label>
+            </div>
+          </div>
         </section>
         <section className="panel settings-panel">
           <ShieldCheck size={27} />
@@ -1835,18 +1966,18 @@ export function SettingsPage() {
             <div>
               <dt>{tr("Язык и единицы")}</dt>
               <dd>
-                {
-                  {
-                    ru: "Русский · ₽ · км · л",
-                    en: "English · ₽ · km · L",
-                    de: "Deutsch · ₽ · km · l",
-                    zh: "简体中文 · ₽ · km · L",
-                    hi: "हिन्दी · ₽ · km · L",
-                    es: "Español · ₽ · km · L",
-                    ar: "العربية · ₽ · km · L",
-                    fr: "Français · ₽ · km · L",
-                  }[getLocale()]
-                }
+                {isDefaultUnits
+                  ? {
+                      ru: "Русский · ₽ · км · л",
+                      en: "English · ₽ · km · L",
+                      de: "Deutsch · ₽ · km · l",
+                      zh: "简体中文 · ₽ · km · L",
+                      hi: "हिन्दी · ₽ · km · L",
+                      es: "Español · ₽ · km · L",
+                      ar: "العربية · ₽ · km · L",
+                      fr: "Français · ₽ · km · L",
+                    }[getLocale()]
+                  : `${localeTitle} · ${currencySymbol(cur)} · ${distanceShort(dUnit)} · ${volumeShort(vUnit)} · ${consumptionShort(cUnit)}`}
               </dd>
             </div>
           </dl>

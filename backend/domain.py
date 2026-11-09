@@ -20,6 +20,29 @@ CATEGORIES = [
     "Прочее",
 ]
 KINDS = {"expense", "fuel", "maintenance", "odometer", "note"}
+CURRENCIES = (
+    "RUB",
+    "USD",
+    "EUR",
+    "GBP",
+    "CNY",
+    "INR",
+    "KZT",
+    "BYN",
+    "TRY",
+    "AED",
+    "CHF",
+    "CAD",
+    "AUD",
+    "PLN",
+    "BRL",
+)
+DISTANCE_UNITS = {"km", "mi"}
+VOLUME_UNITS = {"l", "gal_us", "gal_uk"}
+CONSUMPTION_UNITS = {"l_100km", "mpg_uk", "mpg_us", "km_l", "l_100mi"}
+KM_PER_MILE = Decimal("1.609344")
+LITERS_PER_GAL_US = Decimal("3.785411784")
+LITERS_PER_GAL_UK = Decimal("4.54609")
 
 
 def decimal(value, name="Значение", positive=False):
@@ -280,7 +303,44 @@ def reminder_status(reminder, odometer, today=None):
     return {"status": status, "remaining_km": km, "remaining_days": days}
 
 
-def fuel_cycles(events):
+def convert_consumption(
+    volume,
+    distance,
+    distance_unit="km",
+    volume_unit="l",
+    consumption_unit="l_100km",
+):
+    vol = Decimal(str(volume))
+    dist = Decimal(distance)
+    if vol <= 0 or dist <= 0:
+        return None
+    if distance_unit == "km" and volume_unit == "l" and consumption_unit == "l_100km":
+        return round(float(vol * 100 / dist), 2)
+    dist_km = dist * KM_PER_MILE if distance_unit == "mi" else dist
+    dist_mi = dist if distance_unit == "mi" else dist / KM_PER_MILE
+    vol_l = (
+        vol * LITERS_PER_GAL_US
+        if volume_unit == "gal_us"
+        else vol * LITERS_PER_GAL_UK
+        if volume_unit == "gal_uk"
+        else vol
+    )
+    if consumption_unit == "l_100mi":
+        val = vol_l * 100 / dist_mi
+    elif consumption_unit == "mpg_uk":
+        val = dist_mi / (vol_l / LITERS_PER_GAL_UK)
+    elif consumption_unit == "mpg_us":
+        val = dist_mi / (vol_l / LITERS_PER_GAL_US)
+    elif consumption_unit == "km_l":
+        val = dist_km / vol_l
+    else:
+        val = vol_l * 100 / dist_km
+    return round(float(val), 2)
+
+
+def fuel_cycles(
+    events, distance_unit="km", volume_unit="l", consumption_unit="l_100km"
+):
     groups = defaultdict(list)
     for e in events:
         if e.get("kind") == "fuel" and not e.get("deleted"):
@@ -307,7 +367,13 @@ def fuel_cycles(events):
                                 "date": e["occurred_at"][:10],
                                 "distance": distance,
                                 "liters": float(liters),
-                                "consumption": round(float(liters * 100 / distance), 2),
+                                "consumption": convert_consumption(
+                                    liters,
+                                    distance,
+                                    distance_unit,
+                                    volume_unit,
+                                    consumption_unit,
+                                ),
                                 "cost_minor": cost,
                             }
                         )
@@ -317,7 +383,18 @@ def fuel_cycles(events):
     return sorted(result, key=lambda c: c["date"])
 
 
-def analytics(vehicles, events, start="", end="", category="", kind="", currency_code="RUB"):
+def analytics(
+    vehicles,
+    events,
+    start="",
+    end="",
+    category="",
+    kind="",
+    currency_code="RUB",
+    distance_unit="km",
+    volume_unit="l",
+    consumption_unit="l_100km",
+):
     active = [e for e in events if not e.get("deleted")]
     selected = [
         e
@@ -366,7 +443,12 @@ def analytics(vehicles, events, start="", end="", category="", kind="", currency
             distance_known = False
         else:
             distance += max(r[1] for r in within) - baseline
-    cycles = fuel_cycles(active)
+    cycles = fuel_cycles(
+        active,
+        distance_unit=distance_unit,
+        volume_unit=volume_unit,
+        consumption_unit=consumption_unit,
+    )
     cycles = [
         c
         for c in cycles
@@ -378,6 +460,7 @@ def analytics(vehicles, events, start="", end="", category="", kind="", currency
     liters = sum((decimal(e["liters"]) for e in fuel), Decimal(0))
     fuel_total = sum(e["amount_minor"] for e in fuel)
     cycle_km = sum(c["distance"] for c in cycles)
+    cycle_volume = sum((Decimal(str(c["liters"])) for c in cycles), Decimal(0))
     dates = [e["occurred_at"][:10] for e in selected]
     first = start or (min(dates) if dates else date.today().isoformat())
     last = end or date.today().isoformat()
@@ -461,7 +544,9 @@ def analytics(vehicles, events, start="", end="", category="", kind="", currency
         "average_liter_price": round(float(Decimal(fuel_total) / 100 / liters), 2)
         if liters
         else None,
-        "consumption": round(sum(c["liters"] for c in cycles) * 100 / cycle_km, 2)
+        "consumption": convert_consumption(
+            cycle_volume, cycle_km, distance_unit, volume_unit, consumption_unit
+        )
         if cycle_km
         else None,
         "fuel_cost_per_km": round(sum(c["cost_minor"] for c in cycles) / 100 / cycle_km, 2)
@@ -484,7 +569,11 @@ def analytics(vehicles, events, start="", end="", category="", kind="", currency
             for e in sorted(fuel, key=lambda e: e["occurred_at"])
         ],
         "currency": currency_code,
+        "distance_unit": distance_unit,
+        "volume_unit": volume_unit,
+        "consumption_unit": consumption_unit,
         "missing_reason": "Недостаточно подтверждённых показаний пробега на границах периода"
         if not distance_known or distance == 0
         else "",
     }
+

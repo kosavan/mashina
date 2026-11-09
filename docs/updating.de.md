@@ -2,7 +2,7 @@
 
 Deutsch · [English](updating.md) · [Russisch](updating.ru.md) · [Einführung](../README.de.md)
 
-Verwende das Ziel-Tag **v1.8.0**, sobald es in den [Releases](https://github.com/kosavan/mashina/releases/tag/v1.8.0) veröffentlicht ist. Diese Version ergänzt PWA-Safe-Areas, private Bildvorschauen, fünf weitere Sprachen und OCR-Zuschnitt/Drehung/Mehrseitenauswahl. Originaldateien und Schema 007 bleiben erhalten. Ältere Installationen führen die erforderlichen Zwischenmigrationen mit einem vollständigen Wiederherstellungsarchiv aus. Aktualisiere Server und Oberfläche zusammen; alte Server akzeptieren die neuen Sprach-/OCR-Optionen nicht.
+Verwende das Ziel-Tag **v1.11.0**, sobald es in den [Releases](https://github.com/kosavan/mashina/releases/tag/v1.11.0) veröffentlicht ist. Diese Version ergänzt globale Standardwährungs- und Einheiteneinstellungen (Entfernung, Kraftstoffvolumen und unabhängige Verbrauchseinheiten sowie 15 beliebte Weltwährungen). Originaldateien und Schema 007 bleiben erhalten. Ältere Installationen führen die erforderlichen Zwischenmigrationen mit einem vollständigen Wiederherstellungsarchiv aus. Aktualisiere Server und Oberfläche zusammen; alte Server akzeptieren die neuen Einheiten-/Währungsoptionen nicht.
 
 Die Befehle laufen im **bestehenden Installationsverzeichnis**. Bewahre `data`,
 die private `.env` und das vorherige Image auf. Führe keine Neueinrichtung durch,

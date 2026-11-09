@@ -167,8 +167,13 @@ function project(state: State, operation: Mutation): State {
   };
   if (operation.action === "delete") record.deleted = true;
   if (operation.action === "restore") record.deleted = false;
+  const fallbackCurrency =
+    result.vehicles.find((v) => v.id === record.vehicle_id)?.currency ||
+    (typeof result.settings?.currency === "string" &&
+      result.settings.currency) ||
+    "RUB";
   if (operation.entity === "event") {
-    record.currency ||= "RUB";
+    record.currency ||= fallbackCurrency;
     try {
       record.amount_minor = pendingMoney(record);
     } catch {
@@ -183,7 +188,7 @@ function project(state: State, operation: Mutation): State {
     record.severity ||= "minor";
     record.photos ||= [];
     record.status_history ||= [];
-    record.currency ||= "RUB";
+    record.currency ||= fallbackCurrency;
     if ("estimate" in operation.data) {
       record.estimate_minor =
         operation.data.estimate === ""
@@ -218,11 +223,15 @@ function project(state: State, operation: Mutation): State {
     );
   }
   if (operation.entity === "budget" || operation.entity === "recurring_cost") {
+    record.currency ||= fallbackCurrency;
     record.amount_minor = pendingMoney({ ...record, kind: "expense" });
   }
   if (operation.entity === "vehicle") {
     record.purchase_odometer = Number(record.purchase_odometer || 0);
-    record.currency ||= "RUB";
+    record.currency ||=
+      (typeof result.settings?.currency === "string" &&
+        result.settings.currency) ||
+      "RUB";
     record.status ||= "active";
   }
   if (operation.entity === "reminder")

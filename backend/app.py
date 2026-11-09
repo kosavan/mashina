@@ -26,7 +26,14 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, Field, ConfigDict
 
 from backend.storage import Store, Conflict, Denied, dumps, uid
-from backend.domain import analytics, iso, text
+from backend.domain import (
+    CONSUMPTION_UNITS,
+    DISTANCE_UNITS,
+    VOLUME_UNITS,
+    analytics,
+    iso,
+    text,
+)
 from backend.backup import save_backup, restore_backup, MAX_ARCHIVE
 from backend.demo import seed
 from backend.ownership import ownership_report, csv_rows, import_row
@@ -38,7 +45,7 @@ from backend.bank_api import install_bank
 from backend.machine_api import install_machine
 from backend.ocr import recognize, MAX_SOURCE
 from backend.previews import card_preview
-from backend.output_locale import user_locale, translate, number
+from backend.output_locale import user_locale, user_units, translate, number
 from starlette.concurrency import run_in_threadpool
 
 
@@ -92,7 +99,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.10.1", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.11.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -336,12 +343,22 @@ def create_app(data_path=None, bootstrap_token=None):
 
     @app.get(PREFIX + "/analytics")
     def get_analytics(
-        vehicle_id="", start="", end="", category="", kind="", currency="RUB", s=Depends(session)
+        vehicle_id="",
+        start="",
+        end="",
+        category="",
+        kind="",
+        currency="",
+        distance_unit="",
+        volume_unit="",
+        consumption_unit="",
+        s=Depends(session),
     ):
         if vehicle_id:
             with s["store"].transaction() as c:
                 vehicle_access(c, uid(vehicle_id), s["user_id"])
         state = s["store"].state(s["user_id"])
+        settings = state.get("settings") or {}
         vehicles = [v for v in state["vehicles"] if not vehicle_id or v["id"] == vehicle_id]
         ids = {v["id"] for v in vehicles}
         if start:
@@ -350,6 +367,16 @@ def create_app(data_path=None, bootstrap_token=None):
             iso(end)
         if start and end and start > end:
             raise ValueError("Начало периода позже конца")
+        active_currency = (currency or settings.get("currency") or "RUB").strip().upper()
+        d_unit = distance_unit or settings.get("distance_unit") or "km"
+        v_unit = volume_unit or settings.get("volume_unit") or "l"
+        c_unit = consumption_unit or settings.get("consumption_unit") or "l_100km"
+        if d_unit not in DISTANCE_UNITS:
+            raise ValueError("Неизвестные единицы расстояния")
+        if v_unit not in VOLUME_UNITS:
+            raise ValueError("Неизвестные единицы объёма топлива")
+        if c_unit not in CONSUMPTION_UNITS:
+            raise ValueError("Неизвестные единицы расхода топлива")
         return analytics(
             vehicles,
             [e for e in state["events"] if e["vehicle_id"] in ids],
@@ -357,7 +384,10 @@ def create_app(data_path=None, bootstrap_token=None):
             end,
             category,
             kind,
-            currency,
+            active_currency,
+            d_unit,
+            v_unit,
+            c_unit,
         )
 
     @app.get(PREFIX + "/ownership")
@@ -654,7 +684,9 @@ def create_app(data_path=None, bootstrap_token=None):
         writer = csv.writer(buffer)
         if readable:
             locale = user_locale(s["store"], s["user_id"])
-            labels = ["Дата", "Автомобиль", "Тип", "Категория", "Описание", "Сумма", "Валюта", "Пробег, км"]
+            units = user_units(s["store"], s["user_id"])
+            odo_label = "Пробег, ми" if units["distance_unit"] == "mi" else "Пробег, км"
+            labels = ["Дата", "Автомобиль", "Тип", "Категория", "Описание", "Сумма", "Валюта", odo_label]
             writer.writerow([translate(label, locale) for label in labels])
             cars = {car["id"]: car["name"] for car in state["vehicles"]}
             kinds = {"expense": "Расход", "fuel": "Заправка", "maintenance": "Обслуживание и ремонт",

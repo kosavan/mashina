@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { useApp } from "./context";
 import { api } from "./offline";
-import { money } from "./utils";
+import { CURRENCIES, defaultCurrency, money } from "./utils";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import {
@@ -39,7 +39,7 @@ type Mapping = {
   currency: string | null;
   date_format: "iso" | "russian";
   outgoing_sign: "negative" | "positive";
-  default_currency: "RUB" | "EUR" | "USD";
+  default_currency: string;
 };
 type Preview = { batch_id: string; expires: number; rows: BankRow[] };
 type Result = {
@@ -84,6 +84,11 @@ function Field({
 
 export default function BankImport() {
   const { selected, session, state, queue, refresh, notify } = useApp();
+  const car = state.vehicles.find((v) => v.id === selected);
+  const preferredCur = defaultCurrency(state, car);
+  const defaultBankCur = CURRENCIES.includes(preferredCur as any)
+    ? preferredCur
+    : "RUB";
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [sources, setSources] = useState<Source[]>([]);
@@ -94,7 +99,10 @@ export default function BankImport() {
   const [delimiter, setDelimiter] = useState("semicolon");
   const [headers, setHeaders] = useState<string[]>([]);
   const [rowCount, setRowCount] = useState(0);
-  const [mapping, setMapping] = useState<Mapping>(initial);
+  const [mapping, setMapping] = useState<Mapping>({
+    ...initial,
+    default_currency: defaultBankCur,
+  });
   const [preview, setPreview] = useState<Preview>();
   const [choices, setChoices] = useState<Choices>({});
   const [page, setPage] = useState(0);
@@ -116,7 +124,6 @@ export default function BankImport() {
       window.removeEventListener("offline", update);
     };
   }, []);
-  const car = state.vehicles.find((v) => v.id === selected);
   const ready = online && queue.length === 0;
   const summary = reviewSummary(preview?.rows || [], choices);
   const count = selectedDecisions(choices).length;
@@ -407,7 +414,10 @@ export default function BankImport() {
                   onChange={(e) => {
                     setFile(e.target.files?.[0]);
                     setHeaders([]);
-                    setMapping(initial);
+                    setMapping({
+                      ...initial,
+                      default_currency: defaultBankCur,
+                    });
                     setError("");
                   }}
                 />
@@ -433,7 +443,10 @@ export default function BankImport() {
                     );
                     setHeaders(inspected.headers);
                     setRowCount(inspected.row_count);
-                    setMapping(initial);
+                    setMapping({
+                      ...initial,
+                      default_currency: defaultBankCur,
+                    });
                   })
                 }
               >
@@ -535,8 +548,10 @@ export default function BankImport() {
                           }))
                         }
                       >
-                        {["RUB", "EUR", "USD"].map((c) => (
-                          <option key={c}>{c}</option>
+                        {CURRENCIES.map((c) => (
+                          <option key={c} value={c}>
+                            {c}
+                          </option>
                         ))}
                       </select>
                     </Field>

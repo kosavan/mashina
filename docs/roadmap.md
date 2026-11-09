@@ -2,8 +2,12 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-06**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-09**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
+
+## Release 1.11.0: Global unit and currency settings
+
+Shipped 2026-11-09 ([community requests #29](https://github.com/kosavan/mashina/issues/29) and [#30](https://github.com/kosavan/mashina/issues/30)): global default currency (`settings.currency`) with per-vehicle overrides (`vehicle.currency`); built-in symbols and selectors for 15 popular two-decimal currencies (`RUB`, `USD`, `EUR`, `GBP`, `CNY`, `INR`, `KZT`, `BYN`, `TRY`, `AED`, `CHF`, `CAD`, `AUD`, `PLN`, `BRL`) plus any custom 3-letter ISO currency code across forms, analytics and bank CSV statement review; independent distance (`km` / `mi`), fuel volume (`l` / `gal_us` / `gal_uk`) and fuel consumption (`l_100km` / `mpg_uk` / `mpg_us` / `km_l` / `l_100mi`) preferences supporting mixed regional setups such as UK miles with litres; localized across all eight UI languages and RU/EN/DE PDF/CSV outputs. Schema remains 007; currencies are never implicitly converted or summed across codes.
 
 ## Release 1.10.1: UI polish, security hardening and performance
 
@@ -41,8 +45,8 @@ Accepted [community request #20](https://github.com/kosavan/mashina/issues/20): 
 |---|---|---|
 | Body condition 1.6 | Five-view panel/point map, before/after images, repair statuses/history, service links | [Guide](body-damage.md); offline text/markers, online photo upload |
 | Garage | Multiple cars, profiles/photos, ownership, archive/sale, manual VIN | Profile/history tests; automatic VIN lookup is planned |
-| Daily records | Exact expenses, service items/parts, fuel, mileage, notes | Financial invariants, edit/delete/replay tests |
-| Analytics | Period/category/car filters, full-to-full fuel cycles | Missing measurements stay unknown; purchase/sale separate |
+| Daily records | Exact expenses, service items/parts, fuel, mileage, notes; global & per-vehicle currencies and units (1.11) | Financial invariants, edit/delete/replay tests |
+| Analytics | Period/category/car filters, full-to-full fuel cycles, configurable distance/volume/consumption units (1.11) | Missing measurements stay unknown; purchase/sale separate |
 | History / files | Search, filters, private images/PDF, JSON/CSV, full archive | Authorization and restore tests |
 | Reminders | Dates/mileage, repeats, confirmed completion, estimates | Forecasts do not create expenses/readings |
 | Tires | Dedicated section, mounting, DOT, tread measurements, thresholds | No claim of measured technical condition |
@@ -80,6 +84,7 @@ ownership confirmation and sitemap submission remain owner actions.
 |---|---|---|
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
 | Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |
+| Next | CSV fuel-table column mapping ([#31](https://github.com/kosavan/mashina/issues/31)) | Interactive column mapping for arbitrary fuel spreadsheets with preview, odometer chronology checks and duplicate protection |
 | Later | Natural-language search | Local processing, permissions, measured resource budget |
 | Later | Expense bot and OBD-II | Optional owner-configured components, confirmed writes |
 | Later | Passkeys and more languages | Preserve existing login/data |

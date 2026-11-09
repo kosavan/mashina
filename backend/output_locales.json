@@ -207,6 +207,18 @@
     "en": "Odometer, km",
     "de": "Kilometerstand, km"
   },
+  "Пробег, ми": {
+    "en": "Odometer, mi",
+    "de": "Kilometerstand, mi"
+  },
+  " ми": {
+    "en": " mi",
+    "de": " mi"
+  },
+  "Эксплуатация на милю": {
+    "en": "Running cost per mile",
+    "de": "Betriebskosten pro Meile"
+  },
   "Расход": {
     "en": "Expense",
     "de": "Ausgabe"

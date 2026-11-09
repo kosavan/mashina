@@ -1,3 +1,18 @@
+# MASHINA 1.11.0
+
+Global unit and currency preferences for international garages:
+
+- **Global Default Currency (`#29`)**: Choose a global default currency in **Settings** (`settings.currency`, default `RUB`) alongside per-vehicle currency overrides (`vehicle.currency`). New vehicles inherit the global currency, and new financial records (fuel, expenses, maintenance, reminders, budgets, recurring costs, body damage estimates and bank CSV imports) inherit `vehicle.currency` or fall back to `settings.currency` -> `RUB`.
+- **Popular World Currencies**: Added built-in support and symbols for the 15 most popular two-decimal currencies (`RUB`, `USD`, `EUR`, `GBP`, `CNY`, `INR`, `KZT`, `BYN`, `TRY`, `AED`, `CHF`, `CAD`, `AUD`, `PLN`, `BRL`) across vehicle/record forms, analytics currency selector and bank CSV statement review, while continuing to accept any 3-letter ISO currency code `[A-Z]{3}`. Currencies are never implicitly converted or summed across codes.
+- **Distance, Fuel Volume and Independent Fuel Consumption Units (`#30`)**: Configure distance (`km` or `mi`), fuel volume (`l`, `gal_us` or `gal_uk`) and fuel consumption (`l_100km`, `mpg_uk`, `mpg_us`, `km_l` or `l_100mi`) independently in **Settings**. Supports regional combinations such as UK miles (`mi`) paired with litres (`l`) and either `mpg (UK)` or `L / 100 km`.
+- **Complete Localization**: All new unit and currency labels and messages are localized across all eight supported languages (`ru`, `en`, `de`, `zh`, `hi`, `es`, `ar`, `fr`), as well as PDF sale reports and readable CSV exports (`RU`/`EN`/`DE`).
+
+Schema remains 007. Existing records, attachments, exact money arithmetic and offline operation queues remain fully backward compatible.
+
+[Update instructions](docs/updating.md) · [Russian update instructions](docs/updating.ru.md) · [Roadmap](docs/roadmap.md)
+
+---
+
 # MASHINA 1.10.1
 
 A quality, performance and polish release refining the classic MASHINA graphite and lime interface and strengthening system resilience:

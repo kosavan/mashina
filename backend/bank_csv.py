@@ -10,10 +10,11 @@ from decimal import Decimal
 from typing import Literal, TypedDict
 
 from pydantic import BaseModel, ConfigDict, Field
+from backend.domain import CURRENCIES as DOMAIN_CURRENCIES
 
 MAX_CSV = 2 * 1024 * 1024
 DELIMITERS = {"comma": ",", "semicolon": ";", "tab": "\t"}
-CURRENCIES = {"RUB", "EUR", "USD"}
+CURRENCIES = set(DOMAIN_CURRENCIES)
 
 
 class Mapping(BaseModel):
@@ -25,7 +26,23 @@ class Mapping(BaseModel):
     currency: str | None = Field(default=None, max_length=120)
     date_format: Literal["iso", "russian"]
     outgoing_sign: Literal["negative", "positive"]
-    default_currency: Literal["RUB", "EUR", "USD"]
+    default_currency: Literal[
+        "RUB",
+        "USD",
+        "EUR",
+        "GBP",
+        "CNY",
+        "INR",
+        "KZT",
+        "BYN",
+        "TRY",
+        "AED",
+        "CHF",
+        "CAD",
+        "AUD",
+        "PLN",
+        "BRL",
+    ]
 
 
 class BankData(TypedDict):

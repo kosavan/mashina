@@ -31,7 +31,7 @@ test("English fill-ups use 24-hour time, car mileage and editable suggestions", 
     await page.getByRole("button", { name: /^Fill-up / }).click();
   };
   const dialog = page.getByRole("dialog");
-  const vehicle = dialog.getByLabel("Vehicle", { exact: true });
+  const vehicle = dialog.getByRole("combobox", { name: "Vehicle", exact: true });
   const odometer = dialog.getByLabel("Odometer, km", { exact: true });
   const fuel = dialog.getByRole("combobox", { name: "Fuel", exact: true });
   const station = dialog.getByRole("combobox", {
@@ -71,8 +71,12 @@ test("English fill-ups use 24-hour time, car mileage and editable suggestions", 
   await station.fill("Independent station");
 
   await dialog.getByLabel("Date", { exact: true }).fill("2026-01-10");
-  await dialog.getByLabel("Hour (24 h)", { exact: true }).selectOption("23");
-  await dialog.getByLabel("Minute", { exact: true }).selectOption("47");
+  await dialog
+    .getByRole("combobox", { name: "Hour (24 h)", exact: true })
+    .selectOption("23");
+  await dialog
+    .getByRole("combobox", { name: "Minute", exact: true })
+    .selectOption("47");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

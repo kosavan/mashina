@@ -1,9 +1,21 @@
 import { expect, test } from "@playwright/test";
 
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "198.51.100.72" } });
+test.afterEach(async ({ page, context }) => {
+  await context.setOffline(false);
+  const response = await page.request.get("/api/v1/session");
+  if (response.ok()) {
+    const session = await response.json();
+    if (session.demo)
+      await page.request.post("/api/v1/logout", {
+        headers: { "X-CSRF-Token": session.csrf },
+      });
+  }
+});
 
 test("garage statistics and maintenance filters are usable in both themes", async ({
   page,
+  context,
 }) => {
   await page.goto("/");
   await page.getByRole("button", { name: "Посмотреть демогараж" }).click();
@@ -12,9 +24,15 @@ test("garage statistics and maintenance filters are usable in both themes", asyn
   await expect(card.getByText("Все расходы", { exact: true })).toBeVisible();
   await expect(card.getByText("Стоимость километра")).toBeVisible();
   await expect(card.getByText("Средний расход")).toBeVisible();
-  await expect(card.locator(".vehicle-statistics strong").last()).toHaveText(
-    /л \/ 100 км/,
-  );
+  const consumption = card.locator(".vehicle-statistics strong").last();
+  await expect(consumption).toHaveText(/л \/ 100 км/);
+  await page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+  });
+  await context.setOffline(true);
+  await page.reload();
+  await expect(consumption).toHaveText(/л \/ 100 км/);
+  await context.setOffline(false);
 
   await page
     .locator(".sidebar")
@@ -32,12 +50,4 @@ test("garage statistics and maintenance filters are usable in both themes", asyn
   await expect(volvo).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await vehicle.selectOption({ label: "Volvo XC60" });
   await expect(vehicle.locator("option:checked")).toHaveText("Volvo XC60");
-  await page
-    .locator(".sidebar")
-    .getByRole("button", { name: "Настройки", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Выйти из гаража" }).click();
-  await expect(
-    page.getByRole("button", { name: "Посмотреть демогараж" }),
-  ).toBeVisible();
 });

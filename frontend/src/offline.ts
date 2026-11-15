@@ -1,3 +1,4 @@
+import { createUuid } from "./uuid";
 import type { Cached, Mutation, Session, State } from "./types";
 import { currentKm, today } from "./utils";
 import { pendingMoney } from "./calculations";
@@ -387,7 +388,7 @@ export async function resolveOperation(
     const row = (state[table] as any[]).find((r) => r.id === operation.id);
     const next = {
       ...operation,
-      operation_id: crypto.randomUUID(),
+      operation_id: createUuid(),
       expected_version: row?.version,
     };
     delete next.error;

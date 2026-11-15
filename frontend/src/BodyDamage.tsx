@@ -1,3 +1,4 @@
+import { createUuid } from "./uuid";
 import { useEffect, useState } from "react";
 import {
   Plus,
@@ -858,7 +859,7 @@ function DamageEditor({
                   setFiles((rest) => [
                     ...rest,
                     ...chosen.map((file) => ({
-                      id: crypto.randomUUID(),
+                      id: createUuid(),
                       file,
                       phase,
                     })),

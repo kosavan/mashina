@@ -1,5 +1,8 @@
 import { test, expect } from "@playwright/test";
 
+// Keep this suite in a separate demo rate-limit bucket.
+test.use({ extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.33" } });
+
 test("mobile sale report keeps disclosure explicit and downloads a real PDF", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/");

@@ -2,8 +2,12 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-09**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-15**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
+
+## Release 1.12.0
+
+This release fixes vehicle creation in browsers without `crypto.randomUUID` and improves the fuel form with localized defaults, editable suggestions, explicit 24-hour time and vehicle-specific odometer suggestions. It also adds spending and consumption figures to garage cards and fixes option contrast in Maintenance. [Issue #32](https://github.com/kosavan/mashina/issues/32) · [Issue #33](https://github.com/kosavan/mashina/issues/33)
 
 ## Release 1.11.0: Global unit and currency settings
 

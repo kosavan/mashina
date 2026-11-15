@@ -1182,6 +1182,34 @@ small {
   margin-left: 5px;
   letter-spacing: 0;
 }
+.vehicle-statistics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 16px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.vehicle-statistics > small {
+  grid-column: 1 / -1;
+}
+.vehicle-statistics small,
+.vehicle-statistics strong {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.vehicle-statistics small,
+.vehicle-statistics strong span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.vehicle-statistics strong {
+  margin-top: 3px;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.garage-statistics-status {
+  margin-bottom: 12px;
+}
 .vehicle-next {
   display: flex;
   align-items: center;
@@ -1692,6 +1720,10 @@ dd {
   min-height: 40px;
   padding-left: 0;
   max-width: 200px;
+}
+.filter-select select option {
+  background-color: var(--panel);
+  color: var(--text);
 }
 .search {
   display: flex;

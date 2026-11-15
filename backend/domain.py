@@ -383,6 +383,82 @@ def fuel_cycles(
     return sorted(result, key=lambda c: c["date"])
 
 
+def observed_mileage(vehicle, events, start="", end=""):
+    ownership_start = vehicle.get("purchase_date") or "0001-01-01"
+    purchase_odometer = vehicle.get("purchase_odometer", 0)
+    readings = [(ownership_start, purchase_odometer)] + [
+        (e["occurred_at"][:10], e["odometer"])
+        for e in events
+        if e.get("vehicle_id") == vehicle["id"] and e.get("odometer") is not None
+    ]
+    before = [
+        r
+        for r in readings
+        if r[0] >= ownership_start and (not start or r[0] <= max(start, ownership_start))
+    ]
+    within = [
+        r for r in readings if r[0] >= ownership_start and (not end or r[0] <= end)
+    ]
+    baseline = max(before)[1] if start and before else purchase_odometer
+    if (start and not before) or not within:
+        return None
+    mileage = max(r[1] for r in within) - baseline
+    return mileage if mileage >= 0 else None
+
+
+def fuel_cycle_totals(cycles):
+    return (
+        sum(c["distance"] for c in cycles),
+        sum((Decimal(str(c["liters"])) for c in cycles), Decimal(0)),
+    )
+
+
+def cost_per_distance(total_minor, distance):
+    return round(total_minor / 100 / distance, 2) if distance else None
+
+
+def garage_statistics(state):
+    settings = state["settings"]
+    distance_unit = settings.get("distance_unit") or "km"
+    volume_unit = settings.get("volume_unit") or "l"
+    consumption_unit = settings.get("consumption_unit") or "l_100km"
+    events = defaultdict(list)
+    for event in state["events"]:
+        if not event.get("deleted"):
+            events[event["vehicle_id"]].append(event)
+    stats = {}
+    for vehicle in state["vehicles"]:
+        vehicle_id = vehicle["id"]
+        rows = events[vehicle_id]
+        totals = defaultdict(int)
+        for event in rows:
+            if event.get("amount_minor"):
+                totals[event.get("currency") or "RUB"] += event["amount_minor"]
+        if not totals:
+            totals[vehicle.get("currency") or settings.get("currency") or "RUB"] = 0
+        mileage = observed_mileage(vehicle, rows)
+        cycles = fuel_cycles(rows, distance_unit, volume_unit, consumption_unit)
+        cycle_distance, cycle_volume = fuel_cycle_totals(cycles)
+        stats[vehicle_id] = {
+            "expenses": [
+                {
+                    "currency": code,
+                    "total_minor": total,
+                    "cost_per_distance": cost_per_distance(total, mileage),
+                }
+                for code, total in sorted(totals.items())
+            ],
+            "consumption": convert_consumption(
+                cycle_volume, cycle_distance, distance_unit, volume_unit, consumption_unit
+            ),
+        }
+    return {
+        "vehicles": stats,
+        "distance_unit": distance_unit,
+        "consumption_unit": consumption_unit,
+    }
+
+
 def analytics(
     vehicles,
     events,
@@ -418,31 +494,8 @@ def analytics(
         years[e["occurred_at"][:4]] += amount
         cars[e.get("vehicle_id")] += amount
     total = sum(e.get("amount_minor", 0) for e in selected)
-    distance, distance_known = 0, True
-    for v in vehicles:
-        readings = [(v.get("purchase_date") or "0001-01-01", v.get("purchase_odometer", 0))]
-        readings += [
-            (e["occurred_at"][:10], e["odometer"])
-            for e in active
-            if e.get("vehicle_id") == v["id"] and e.get("odometer") is not None
-        ]
-        readings.sort()
-        ownership_start = v.get("purchase_date") or "0001-01-01"
-        before = [
-            r
-            for r in readings
-            if r[0] >= ownership_start and (not start or r[0] <= max(start, ownership_start))
-        ]
-        within = [
-            r
-            for r in readings
-            if (not end or r[0] <= end) and r[0] >= (v.get("purchase_date") or "0001-01-01")
-        ]
-        baseline = before[-1][1] if start and before else v.get("purchase_odometer", 0)
-        if (start and not before) or not within or max(r[1] for r in within) < baseline:
-            distance_known = False
-        else:
-            distance += max(r[1] for r in within) - baseline
+    mileages = [observed_mileage(v, active, start, end) for v in vehicles]
+    distance = sum(m or 0 for m in mileages) if None not in mileages else 0
     cycles = fuel_cycles(
         active,
         distance_unit=distance_unit,
@@ -459,8 +512,7 @@ def analytics(
     fuel = [e for e in selected if e["kind"] == "fuel"]
     liters = sum((decimal(e["liters"]) for e in fuel), Decimal(0))
     fuel_total = sum(e["amount_minor"] for e in fuel)
-    cycle_km = sum(c["distance"] for c in cycles)
-    cycle_volume = sum((Decimal(str(c["liters"])) for c in cycles), Decimal(0))
+    cycle_km, cycle_volume = fuel_cycle_totals(cycles)
     dates = [e["occurred_at"][:10] for e in selected]
     first = start or (min(dates) if dates else date.today().isoformat())
     last = end or date.today().isoformat()
@@ -527,10 +579,8 @@ def analytics(
             for e in selected
             if e["kind"] == "maintenance" or e.get("category") == "Ремонт"
         ),
-        "mileage": distance if distance_known and distance > 0 else None,
-        "cost_per_km": round(total / 100 / distance, 2)
-        if distance_known and distance > 0
-        else None,
+        "mileage": distance or None,
+        "cost_per_km": cost_per_distance(total, distance),
         "average_month_minor": int(
             (Decimal(total) * Decimal("30.4375") / span).quantize(
                 Decimal("1"), rounding=ROUND_HALF_UP
@@ -573,7 +623,7 @@ def analytics(
         "volume_unit": volume_unit,
         "consumption_unit": consumption_unit,
         "missing_reason": "Недостаточно подтверждённых показаний пробега на границах периода"
-        if not distance_known or distance == 0
+        if distance == 0
         else "",
     }
 

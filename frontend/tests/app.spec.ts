@@ -1,8 +1,13 @@
 import { test, expect } from "@playwright/test";
 
+// Keep this suite in a separate demo rate-limit bucket.
+test.use({ extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.32" } });
+
 async function demo(page: any) {
   await page.goto("/");
+  const login = page.waitForResponse("**/api/v1/demo");
   await page.getByRole("button", { name: "Посмотреть демогараж" }).click();
+  expect((await login).ok()).toBeTruthy();
   await expect(
     page.getByRole("heading", { name: "Мой гараж", exact: true }),
   ).toBeVisible();
@@ -185,7 +190,12 @@ test("offline durable outbox survives reload and syncs exactly once", async ({
   expect(rows[0].amount_minor).toBe(77777);
 });
 
-test("new vehicle, document upload and reminder workflow", async ({ page }) => {
+test("new vehicle, document upload and reminder workflow without randomUUID", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(window.crypto, "randomUUID", { value: undefined });
+  });
   await demo(page);
   await page
     .getByRole("button", { name: "Добавить автомобиль", exact: true })

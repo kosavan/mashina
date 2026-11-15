@@ -31,6 +31,7 @@ from backend.domain import (
     DISTANCE_UNITS,
     VOLUME_UNITS,
     analytics,
+    garage_statistics,
     iso,
     text,
 )
@@ -99,7 +100,7 @@ def create_app(data_path=None, bootstrap_token=None):
         store.close()
 
     app = FastAPI(
-        title="MASHINA", version="1.11.0", lifespan=lifespan, docs_url=None, redoc_url=None
+        title="MASHINA", version="1.12.0", lifespan=lifespan, docs_url=None, redoc_url=None
     )
     app.state.store = store
     cookie_name = (
@@ -336,6 +337,10 @@ def create_app(data_path=None, bootstrap_token=None):
     @app.get(PREFIX + "/state")
     def state(s=Depends(session)):
         return s["store"].state(s["user_id"])
+
+    @app.get(PREFIX + "/garage-statistics")
+    def get_garage_statistics(s=Depends(session)):
+        return garage_statistics(s["store"].state(s["user_id"]))
 
     @app.post(PREFIX + "/mutate")
     def mutate(body: Mutation, s=Depends(session)):

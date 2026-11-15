@@ -27,6 +27,7 @@ import type { Item, Kind, RecordBase } from "./types";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { OcrReview, type OcrFields } from "./OcrReview";
+import { FuelDetailsFields } from "./FuelDetailsFields";
 
 const maintenanceTemplates = [
   "Замена моторного масла",
@@ -38,6 +39,10 @@ const maintenanceTemplates = [
   "Замена аккумулятора",
   "Сезонная смена шин",
 ];
+const clockOptions = Array.from({ length: 60 }, (_, value) =>
+  String(value).padStart(2, "0"),
+);
+
 function Field({
   label,
   name,
@@ -98,11 +103,6 @@ export function RecordForm({
       "",
   );
   const vehicle = state.vehicles.find((v) => v.id === vehicleId);
-  const lastFuel = state.events
-    .filter(
-      (e) => !e.deleted && e.kind === "fuel" && e.vehicle_id === vehicleId,
-    )
-    .sort((a, b) => b.occurred_at.localeCompare(a.occurred_at))[0];
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [dirty, setDirty] = useState(false);
@@ -178,7 +178,13 @@ export function RecordForm({
         ) {
           data.kind = type;
           data.items = items;
-          if (type === "fuel") Object.assign(data, fuelValues);
+          if (type === "fuel") {
+            const { occurred_hour, occurred_minute } = data;
+            data.occurred_at += `T${occurred_hour}:${occurred_minute}`;
+            delete data.occurred_hour;
+            delete data.occurred_minute;
+            Object.assign(data, fuelValues);
+          }
         }
         const entity =
           type === "vehicle"
@@ -283,7 +289,8 @@ export function RecordForm({
       const input = form.current?.elements.namedItem(name) as
         HTMLInputElement | HTMLTextAreaElement | null;
       if (input)
-        input.value = name === "occurred_at" ? value + "T12:00" : value;
+        input.value =
+          name === "occurred_at" && type !== "fuel" ? value + "T12:00" : value;
     }
     if (type === "fuel")
       setFuelValues((current) => ({
@@ -684,23 +691,58 @@ export function RecordForm({
             )}
             <div className="field-grid">
               <Field
-                label={tr("Дата и время")}
+                label={type === "fuel" ? "Дата" : "Дата и время"}
                 name="occurred_at"
-                type="datetime-local"
-                value={record?.occurred_at?.slice(0, 16) || today() + "T12:00"}
+                type={type === "fuel" ? "date" : "datetime-local"}
+                value={
+                  type === "fuel"
+                    ? record?.occurred_at?.slice(0, 10) || today()
+                    : record?.occurred_at?.slice(0, 16) || today() + "T12:00"
+                }
                 required
               />
               <Field
+                key={type === "fuel" ? vehicleId : undefined}
                 label={dUnit === "mi" ? tr("Пробег, ми") : tr("Пробег, км")}
                 name="odometer"
                 type="number"
                 step="1"
-                value={record?.odometer ?? vehicle?.current_odometer ?? ""}
+                value={
+                  (type !== "fuel" || record?.vehicle_id === vehicleId
+                    ? record?.odometer
+                    : undefined) ??
+                  vehicle?.current_odometer ??
+                  ""
+                }
                 required={type === "fuel" || type === "odometer"}
               />
             </div>
             {type === "fuel" ? (
               <>
+                <div className="field-grid">
+                  <Field label="Часы (24 ч)" name="occurred_hour">
+                    <select
+                      name="occurred_hour"
+                      defaultValue={record?.occurred_at?.slice(11, 13) || "12"}
+                      required
+                    >
+                      {clockOptions.slice(0, 24).map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </Field>
+                  <Field label="Минуты" name="occurred_minute">
+                    <select
+                      name="occurred_minute"
+                      defaultValue={record?.occurred_at?.slice(14, 16) || "00"}
+                      required
+                    >
+                      {clockOptions.map((value) => (
+                        <option key={value}>{value}</option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
                 <div className="fuel-form-heading">
                   <Fuel size={21} />
                   <span>{tr("Любые два значения — третье рассчитаем")}</span>
@@ -732,22 +774,13 @@ export function RecordForm({
                     </label>
                   ))}
                 </div>
-                <div className="field-grid">
-                  <Field
-                    key={`fuel-${vehicleId}`}
-                    label={tr("Топливо")}
-                    name="fuel"
-                    value={
-                      record?.fuel || lastFuel?.fuel || vehicle?.fuel || "АИ-95"
-                    }
-                  />
-                  <Field
-                    key={`station-${vehicleId}`}
-                    label={tr("АЗС")}
-                    name="station"
-                    value={record?.station ?? lastFuel?.station}
-                  />
-                </div>
+                <FuelDetailsFields
+                  key={vehicleId}
+                  record={record}
+                  vehicle={vehicle}
+                  events={state.events}
+                  onDirty={() => setDirty(true)}
+                />
                 <label className="check-field">
                   <input
                     name="full"

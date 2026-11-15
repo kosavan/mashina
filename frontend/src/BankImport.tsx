@@ -1,3 +1,4 @@
+import { createUuid } from "./uuid";
 import { intlLocale } from "./i18n";
 import { tr } from "./i18n";
 import {
@@ -904,7 +905,7 @@ export default function BankImport() {
                   onClick={() =>
                     void run(async () => {
                       submitted.current ??= {
-                        operation_id: crypto.randomUUID(),
+                        operation_id: createUuid(),
                         batch_id: preview.batch_id,
                         decisions: selectedDecisions(choices),
                       };

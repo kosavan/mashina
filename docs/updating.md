@@ -15,6 +15,10 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.12.0
+
+Use `v1.12.0` as `TARGET_TAG` in the steps below. Schema stays at 007. Synchronize pending entries first, then retain the verified backup and previous image. After rebuilding and starting MASHINA, verify version 1.12.0 in `/api/v1/health`, reopen the browser or installed app while online, and check the garage cards and fuel form. The rollback steps below pair the previous image with its pre-update data copy.
+
 ## Release 1.11.0: Global unit and currency settings
 
 Target tag: `v1.11.0` once published in Releases. This release adds global default currency (`settings.currency`), 15 popular two-decimal currencies (`RUB`, `USD`, `EUR`, `GBP`, `CNY`, `INR`, `KZT`, `BYN`, `TRY`, `AED`, `CHF`, `CAD`, `AUD`, `PLN`, `BRL`) plus any custom 3-letter ISO currency code, and independent distance (`km`/`mi`), fuel volume (`l`/`gal_us`/`gal_uk`) and fuel consumption (`l_100km`/`mpg_uk`/`mpg_us`/`km_l`/`l_100mi`) settings. Schema remains 007 with no new dependencies. Update server and frontend together so the backend accepts the new unit and currency preferences. Existing records, attachments, exact money arithmetic and offline queues remain fully compatible.

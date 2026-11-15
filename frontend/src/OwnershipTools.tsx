@@ -1,3 +1,4 @@
+import { createUuid } from "./uuid";
 import { tr } from "./i18n";
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -256,7 +257,7 @@ function ToolForm({
                   setMeasurements((rows) => [
                     ...rows,
                     {
-                      id: crypto.randomUUID(),
+                      id: createUuid(),
                       measured_at: today(),
                       depth_mm: "",
                       notes: "",

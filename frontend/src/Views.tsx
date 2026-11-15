@@ -4,6 +4,7 @@ import { LanguagePicker } from "./LanguagePicker";
 import { getLocale } from "./i18n";
 import { tr } from "./i18n";
 import { useState, lazy, Suspense } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 const BodyDamage = lazy(() => import("./BodyDamage"));
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Sharing = lazy(() => import("./Sharing"));
@@ -47,7 +48,8 @@ import {
 } from "lucide-react";
 import { useApp } from "./context";
 import type { Attachment, Entry, Reminder } from "./types";
-import { api } from "./offline";
+import { api, cachedAPI } from "./offline";
+import type { ConsumptionUnit, DistanceUnit } from "./utils";
 import {
   CURRENCIES,
   activeEvents,
@@ -182,11 +184,45 @@ function VehicleSelect({
   );
 }
 
+type GarageStatistics = {
+  distance_unit: DistanceUnit;
+  consumption_unit: ConsumptionUnit;
+  vehicles: Record<
+    string,
+    {
+      consumption: number | null;
+      expenses: {
+        currency: string;
+        total_minor: number;
+        cost_per_distance: number | null;
+      }[];
+    }
+  >;
+};
+
 export function Garage() {
-  const { state, open, setPage, setSelected, selected } = useApp();
+  const { state, open, setPage, setSelected, selected, session, queue } =
+    useApp();
   const [tab, setTab] = useState("active");
   const dUnit = distanceUnit(state);
   const globalCur = defaultCurrency(state);
+  const pendingStatistics = queue.some(
+    (operation) =>
+      operation.entity === "vehicle" ||
+      operation.entity === "event" ||
+      operation.entity === "settings",
+  );
+  const queryClient = useQueryClient();
+  const statistics = useQuery({
+    queryKey: [
+      "garage-statistics",
+      session.id,
+      queryClient.getQueryState(["state", session.id])?.dataUpdatedAt,
+    ],
+    queryFn: () => cachedAPI<GarageStatistics>(session, "/garage-statistics"),
+    enabled: state.vehicles.length > 0 && !pendingStatistics,
+    networkMode: "always",
+  });
   const entries = activeEvents(state);
   const month = entries.filter(
     (e) => e.occurred_at.slice(0, 10) >= monthStart(),
@@ -307,6 +343,11 @@ export function Garage() {
           {tr("У каждого автомобиля своя история")}
         </span>
       </div>
+      {cars.length > 0 && (pendingStatistics || statistics.isError) && (
+        <p className="muted tiny garage-statistics-status" role="status">
+          {tr(pendingStatistics ? "Ожидает синхронизации" : "Нет данных")}
+        </p>
+      )}
       <section className="vehicle-grid">
         {cars.map((v) => {
           const events = activeEvents(state, v.id);
@@ -324,6 +365,8 @@ export function Garage() {
                 (a.remaining_days ?? 99999) - (b.remaining_days ?? 99999),
             )[0];
           const image = vehicleImage(v, true);
+          const report = pendingStatistics ? undefined : statistics.data;
+          const stats = report?.vehicles[v.id];
           return (
             <article className="vehicle-card" key={v.id}>
               <button
@@ -402,6 +445,50 @@ export function Garage() {
                       </strong>
                     </div>
                   </div>
+                  {report && stats && (
+                    <div className="vehicle-statistics">
+                      <small>{tr("За всё время")}</small>
+                      <div>
+                        <small>{tr("Все расходы")}</small>
+                        {stats.expenses.map((expense) => (
+                          <strong key={expense.currency}>
+                            {money(expense.total_minor, expense.currency)}
+                          </strong>
+                        ))}
+                      </div>
+                      <div>
+                        <small>
+                          {tr(
+                            report.distance_unit === "mi"
+                              ? "Стоимость мили"
+                              : "Стоимость километра",
+                          )}
+                        </small>
+                        {stats.expenses.map((expense) => (
+                          <strong key={expense.currency}>
+                            {expense.cost_per_distance == null
+                              ? "—"
+                              : money(
+                                  Math.round(expense.cost_per_distance * 100),
+                                  expense.currency,
+                                )}
+                          </strong>
+                        ))}
+                      </div>
+                      <div>
+                        <small>{tr("Средний расход")}</small>
+                        <strong>
+                          {number(stats.consumption, 2)}
+                          {stats.consumption != null && (
+                            <span>
+                              {" "}
+                              {consumptionShort(report.consumption_unit)}
+                            </span>
+                          )}
+                        </strong>
+                      </div>
+                    </div>
+                  )}
                   <div
                     className={`vehicle-next ${next?.status === "overdue" ? "danger" : ""}`}
                   >

@@ -2,7 +2,7 @@
 
 Deutsch · [English](updating.md) · [Russisch](updating.ru.md) · [Einführung](../README.de.md)
 
-Verwende das Ziel-Tag **v1.11.0**, sobald es in den [Releases](https://github.com/kosavan/mashina/releases/tag/v1.11.0) veröffentlicht ist. Diese Version ergänzt globale Standardwährungs- und Einheiteneinstellungen (Entfernung, Kraftstoffvolumen und unabhängige Verbrauchseinheiten sowie 15 beliebte Weltwährungen). Originaldateien und Schema 007 bleiben erhalten. Ältere Installationen führen die erforderlichen Zwischenmigrationen mit einem vollständigen Wiederherstellungsarchiv aus. Aktualisiere Server und Oberfläche zusammen; alte Server akzeptieren die neuen Einheiten-/Währungsoptionen nicht.
+Verwende das Ziel-Tag **v1.12.0** aus den [Releases](https://github.com/kosavan/mashina/releases/tag/v1.12.0). Synchronisiere ausstehende Einträge vor dem Update. Prüfe nach dem Start Version 1.12.0 unter `/api/v1/health` und öffne die App erneut, während sie mit dem Server verbunden ist. Schema 007 bleibt erhalten.
 
 Die Befehle laufen im **bestehenden Installationsverzeichnis**. Bewahre `data`,
 die private `.env` und das vorherige Image auf. Führe keine Neueinrichtung durch,

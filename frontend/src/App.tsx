@@ -1,3 +1,4 @@
+import { createUuid } from "./uuid";
 import { tr } from "./i18n";
 import {
   useState,
@@ -407,8 +408,8 @@ export default function App() {
   ) {
     if (!session || !state) throw new Error(tr("Гараж ещё загружается"));
     const operation: Mutation = {
-      operation_id: crypto.randomUUID(),
-      id: record?.id || crypto.randomUUID(),
+      operation_id: createUuid(),
+      id: record?.id || createUuid(),
       entity,
       action,
       data,

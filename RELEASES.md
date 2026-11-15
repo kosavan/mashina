@@ -1,3 +1,15 @@
+# MASHINA 1.12.0
+
+- Vehicle creation and operation IDs work in browsers that provide secure random bytes but lack `crypto.randomUUID`, including browsers on HTTP LAN installations. ([#32](https://github.com/kosavan/mashina/issues/32))
+- The fuel form localizes the default fuel, suggests fuel types and previously used stations, accepts custom names, and uses explicit 24-hour time fields. Changing the vehicle refreshes the odometer suggestion. ([#33](https://github.com/kosavan/mashina/issues/33))
+- Garage cards show spending, cost per distance and average consumption when the history supports those calculations. Vehicle options on the Maintenance page are readable in both themes. ([#33](https://github.com/kosavan/mashina/issues/33))
+
+Schema stays at 007. Existing installations keep their records, attachments, settings and pending offline operations.
+
+[Update and rollback](docs/updating.md) · [Russian update guide](docs/updating.ru.md) · [Roadmap](docs/roadmap.md)
+
+---
+
 # MASHINA 1.11.0
 
 Global unit and currency preferences for international garages:

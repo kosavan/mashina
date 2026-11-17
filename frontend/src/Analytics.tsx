@@ -644,7 +644,16 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
                 <div className="cycle-list">
                   {d.cycles.map((c, i) => (
                     <div key={i}>
-                      <span>{c.date}</span>
+                      <span className="cycle-reading">
+                        <span>{c.date}</span>
+                        {c.start_odometer != null && c.end_odometer != null && (
+                          <span>
+                            {tr("Пробег")}: {number(c.start_odometer)} →{" "}
+                            {number(c.end_odometer)}{" "}
+                            {dUnit === "mi" ? tr(" ми") : tr(" км")}
+                          </span>
+                        )}
+                      </span>
                       <strong>
                         {number(c.distance)}{" "}
                         {dUnit === "mi" ? tr(" ми") : tr(" км")}

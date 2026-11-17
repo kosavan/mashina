@@ -2,8 +2,12 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-15**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-18**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
+
+## Release 1.12.1: fuel analytics and fractional prices
+
+Accepted issues [#35](https://github.com/kosavan/mashina/issues/35) and [#36](https://github.com/kosavan/mashina/issues/36). Same-timestamp fill-ups use confirmed odometer order so each completed full-tank cycle contributes to analytics. The cycle list shows its starting and ending odometer in the selected distance unit. Fuel unit prices accept three or more decimal places, including imported and offline-edited records; totals still round exactly to currency minor units. Schema remains 007. Release publication requires regression checks and exact-source CI.
 
 ## Release 1.12.0
 

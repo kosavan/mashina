@@ -1,3 +1,14 @@
+# MASHINA 1.12.1
+
+- Multiple fill-ups with the same date and time are ordered by confirmed odometer, preserving completed full-tank cycles regardless of import/storage order. The cycle list includes starting and ending odometers in kilometres or miles. ([#35](https://github.com/kosavan/mashina/issues/35))
+- Fuel unit prices accept three or more decimal places, such as GBP 1.759 per litre. Existing imported prices can be saved and edited online or offline. Totals keep exact rounding to currency minor units. ([#36](https://github.com/kosavan/mashina/issues/36))
+
+Schema stays at 007, with no migration, dependency or configuration change. Existing records, attachments, IDs, settings and pending offline operations remain compatible. Existing fuel history is recalculated automatically; do not reimport or recreate entries. A full-tank baseline is still required, and partial fills, missing-entry flags, fuel types and currencies retain their existing calculation rules.
+
+Synchronize every device and retain a verified full backup plus the previous image before updating. Follow the [update and matching data/image rollback guide](docs/updating.md) or [Russian guide](docs/updating.ru.md). Use tag `v1.12.1`, rebuild and restart, check `/api/v1/health` for version `1.12.1` and schema `007`, then reopen the browser/PWA online and check fuel analytics and a fractional unit price. Never clear browser storage with pending entries.
+
+---
+
 # MASHINA 1.12.0
 
 - Vehicle creation and operation IDs work in browsers that provide secure random bytes but lack `crypto.randomUUID`, including browsers on HTTP LAN installations. ([#32](https://github.com/kosavan/mashina/issues/32))

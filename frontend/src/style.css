@@ -2414,6 +2414,12 @@ dd {
   font-size: 12px;
   color: var(--muted);
 }
+.cycle-reading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
 .cycle-list > div strong {
   margin-left: auto;
   color: var(--text);

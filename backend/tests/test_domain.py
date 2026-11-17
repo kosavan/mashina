@@ -1,4 +1,5 @@
 import pytest
+from itertools import permutations
 from backend.domain import normalize_event, fuel_cycles, analytics, reminder_status
 
 
@@ -115,3 +116,41 @@ def test_fuel_cycles_currency_isolation():
         row["price"] = "60"
     assert analytics([], rows, currency_code="RUB")["consumption"] is None
     assert analytics([], rows, currency_code="USD")["consumption"] == 6
+
+
+@pytest.mark.parametrize("order", list(permutations(range(3))))
+@pytest.mark.parametrize("timestamp", ["2026-01-19", "2026-01-19T12:00:00"])
+def test_same_timestamp_full_tanks_follow_odometer_not_storage_order(order, timestamp):
+    rows = [fuel(1000, 20), fuel(1200, 10), fuel(1500, 15)]
+    for i, row in enumerate(rows):
+        row.update(id=str(i), occurred_at=timestamp, vehicle_id="car", price="60")
+    result = fuel_cycles([rows[i] for i in order])
+    assert [(c["start_odometer"], c["end_odometer"]) for c in result] == [
+        (1000, 1200),
+        (1200, 1500),
+    ]
+    assert [c["distance"] for c in result] == [200, 300]
+    assert [c["consumption"] for c in result] == [5, 5]
+    assert sum(c["cost_minor"] for c in result) == 150000
+    summary = analytics([], [rows[i] for i in order], start="2026-01-19", end="2026-01-19")
+    assert len(summary["cycles"]) == 2
+    assert summary["consumption"] == 5
+
+
+def test_same_timestamp_partial_fill_is_included_and_gap_still_breaks_cycle():
+    rows = [fuel(1000, 20), fuel(1100, 5, False), fuel(1300, 10)]
+    for row in rows:
+        row["occurred_at"] = "2026-01-19T00:00:00"
+    result = fuel_cycles(rows[::-1])
+    assert len(result) == 1
+    assert result[0]["distance"] == 300
+    assert result[0]["liters"] == 15
+    rows[1]["gap"] = True
+    assert fuel_cycles(rows[::-1]) == []
+
+
+def test_explicit_fill_up_time_takes_precedence_over_odometer():
+    rows = [fuel(1500, 20), fuel(1000, 10)]
+    rows[0]["occurred_at"] = "2026-01-19T08:00:00"
+    rows[1]["occurred_at"] = "2026-01-19T12:00:00"
+    assert fuel_cycles(rows) == []

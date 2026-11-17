@@ -348,7 +348,9 @@ def fuel_cycles(
     result = []
     for rows in groups.values():
         base, liters, cost = None, Decimal(0), 0
-        for e in sorted(rows, key=lambda e: e["occurred_at"]):
+        # CSV imports and date-only entries can share a timestamp. Their
+        # confirmed odometers determine the order, independently of storage order.
+        for e in sorted(rows, key=lambda e: (e["occurred_at"], e["odometer"], e.get("id", ""))):
             if e.get("gap") or (
                 base
                 and (base.get("fuel") != e.get("fuel") or base.get("currency") != e.get("currency"))
@@ -365,6 +367,9 @@ def fuel_cycles(
                                 "vehicle_id": e.get("vehicle_id"),
                                 "currency": e.get("currency", "RUB"),
                                 "date": e["occurred_at"][:10],
+                                "occurred_at": e["occurred_at"],
+                                "start_odometer": base["odometer"],
+                                "end_odometer": e["odometer"],
                                 "distance": distance,
                                 "liters": float(liters),
                                 "consumption": convert_consumption(
@@ -380,7 +385,7 @@ def fuel_cycles(
                     base, liters, cost = e, Decimal(0), 0
             elif e.get("full"):
                 base = e
-    return sorted(result, key=lambda c: c["date"])
+    return sorted(result, key=lambda c: (c["occurred_at"], c["end_odometer"]))
 
 
 def observed_mileage(vehicle, events, start="", end=""):

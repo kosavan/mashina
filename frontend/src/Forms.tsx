@@ -759,8 +759,20 @@ export function RecordForm({
                       {tr(label)}
                       <input
                         type="number"
-                        min={key === "liters" ? "0.001" : "0.01"}
-                        step={key === "liters" ? "0.001" : "0.01"}
+                        min={
+                          key === "amount"
+                            ? "0.01"
+                            : key === "price"
+                              ? "0"
+                              : "0.001"
+                        }
+                        step={
+                          key === "price"
+                            ? "any"
+                            : key === "liters"
+                              ? "0.001"
+                              : "0.01"
+                        }
                         inputMode="decimal"
                         value={fuelValues[key]}
                         placeholder={tr("Автоматически")}

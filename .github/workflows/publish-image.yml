@@ -169,22 +169,25 @@ jobs:
             source_images+=("$IMAGE@$digest")
           done
 
-          if docker buildx imagetools inspect --raw "$target" > existing.json 2> inspect-error; then
-            # An already published version is immutable. A retry can confirm it.
-            jq -e --arg commit "$COMMIT" '.annotations["org.opencontainers.image.revision"] == $commit' existing.json
-          elif grep -Eqi 'not found|manifest unknown|name unknown' inspect-error; then
-            docker buildx imagetools create --tag "$target" \
-              --annotation "index:org.opencontainers.image.source=$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
-              --annotation "index:org.opencontainers.image.revision=$COMMIT" \
-              --annotation "index:org.opencontainers.image.version=$VERSION" \
-              "${source_images[@]}"
-          else
-            cat inspect-error >&2
-            exit 1
+          if ! docker buildx imagetools inspect --raw "$target" > manifest.json 2> inspect-error; then
+            if ! grep -Eqi 'not found|manifest unknown|name unknown' inspect-error; then
+              cat inspect-error >&2
+              exit 1
+            fi
+            # Engine pushes can produce Docker manifests, whose index does not support OCI annotations.
+            docker buildx imagetools create --tag "$target" "${source_images[@]}"
+            docker buildx imagetools inspect --raw "$target" > manifest.json
           fi
 
-          docker buildx imagetools inspect --raw "$target" |
-            jq -e '[.manifests[].platform | select(.os == "linux") | .architecture] | sort == ["amd64", "arm64"]'
+          # Confirm existing tags without replacing them. Read the commit and version from both image configs.
+          jq -e '[.manifests[].platform | select(.os == "linux") | .architecture] | sort == ["amd64", "arm64"]' manifest.json
+          for arch in amd64 arm64; do
+            digest=$(jq -er --arg arch "$arch" '.manifests[] | select(.platform.os == "linux" and .platform.architecture == $arch) | .digest' manifest.json)
+            [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+            docker buildx imagetools inspect --format '{{json .Image}}' "$IMAGE@$digest" |
+              jq -e --arg commit "$COMMIT" --arg version "$VERSION" \
+                '.config.Labels | .["org.opencontainers.image.revision"] == $commit and .["org.opencontainers.image.version"] == $version'
+          done
           published_digest=$(docker buildx imagetools inspect --format '{{.Manifest.Digest}}' "$target")
           [[ "$published_digest" =~ ^sha256:[0-9a-f]{64}$ ]]
           printf 'Image: `%s`\n\nDigest: `%s@%s`\n' "$target" "$IMAGE" "$published_digest" >> "$GITHUB_STEP_SUMMARY"

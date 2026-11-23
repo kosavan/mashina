@@ -1,3 +1,13 @@
+# MASHINA 1.13.0
+
+- New fill-ups open with the device’s local date and 24-hour time. Existing fill-ups open with their saved timestamp. [Issue #38](https://github.com/kosavan/mashina/issues/38)
+- Install from the [MASHINA container registry](docs/container-image.md) or run in the background on Linux, macOS or Windows with the [Docker-free distribution](docs/standalone.md). [Issue #39](https://github.com/kosavan/mashina/issues/39)
+- The shared API transport and [mobile client architecture](docs/mobile-clients.md) prepare future iOS and Android development. Installable mobile apps are planned.
+
+Schema remains 007. Synchronize pending offline entries and retain a complete backup paired with the previous image or standalone release. [Update and rollback](docs/updating.md) · [Русская инструкция](docs/updating.ru.md)
+
+---
+
 # MASHINA 1.12.1
 
 - Multiple fill-ups with the same date and time are ordered by confirmed odometer, preserving completed full-tank cycles regardless of import/storage order. The cycle list includes starting and ending odometers in kilometres or miles. ([#35](https://github.com/kosavan/mashina/issues/35))

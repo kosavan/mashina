@@ -69,6 +69,8 @@ MASHINA — приложение с открытым кодом для само�
 
 ## Запустить у себя
 
+Можно скачать [готовый Docker-образ](docs/container-image.ru.md) или установить MASHINA [без Docker](docs/standalone.ru.md) для фонового запуска в Linux, macOS или Windows.
+
 Linux с Docker Engine и Compose:
 
 ~~~sh

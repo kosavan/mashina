@@ -5,6 +5,12 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-11-18**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
+## 1.13.0 distribution and fill-up time
+
+- In 1.13.0, new fill-ups use the device's local date and time when opened. Existing records retain their saved time when opened for editing. [Issue #38](https://github.com/kosavan/mashina/issues/38)
+- Release delivery includes [registry-based installation](container-image.md) and [standalone background installation](standalone.md) for Linux, macOS and Windows. Verify published artifacts from the release before installing. [Issue #39](https://github.com/kosavan/mashina/issues/39)
+- Planned native iOS and Android clients will start with the identity and synchronization slice in the [mobile client notes](mobile-clients.md). The mobile PWA remains available.
+
 ## Release 1.12.1: fuel analytics and fractional prices
 
 Accepted issues [#35](https://github.com/kosavan/mashina/issues/35) and [#36](https://github.com/kosavan/mashina/issues/36). Same-timestamp fill-ups use confirmed odometer order so each completed full-tank cycle contributes to analytics. The cycle list shows its starting and ending odometer in the selected distance unit. Fuel unit prices accept three or more decimal places, including imported and offline-edited records; totals still round exactly to currency minor units. Schema remains 007. Release publication requires regression checks and exact-source CI.

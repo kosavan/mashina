@@ -4,46 +4,9 @@ import { currentKm, today } from "./utils";
 import { pendingMoney } from "./calculations";
 import { projectReminder, reminderStatus } from "./reminders";
 import { permissionError, scopeKey } from "./permissions";
+import { api, APIError } from "./api";
 
-export class APIError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
-    super(message);
-  }
-}
-export async function api<T>(
-  path: string,
-  options: RequestInit = {},
-  csrf = "",
-): Promise<T> {
-  const headers = new Headers(options.headers);
-  if (
-    !(options.body instanceof FormData) &&
-    options.body &&
-    !headers.has("Content-Type")
-  )
-    headers.set("Content-Type", "application/json");
-  if (csrf) headers.set("X-CSRF-Token", csrf);
-  const response = await fetch("/api/v1" + path, {
-    ...options,
-    headers,
-    credentials: "same-origin",
-  });
-  if (!response.ok) {
-    const body = await response
-      .json()
-      .catch(() => ({ detail: "Ошибка сервера" }));
-    throw new APIError(
-      response.status,
-      typeof body.detail === "string"
-        ? body.detail
-        : "Проверьте заполнение полей",
-    );
-  }
-  return response.json();
-}
+export { api, APIError };
 let database: Promise<IDBDatabase> | undefined;
 function db() {
   return (database ??= new Promise<IDBDatabase>((resolve, reject) => {

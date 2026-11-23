@@ -48,6 +48,8 @@ Start MASHINA and choose **Explore the demo garage** (select English first) on t
 
 ## Self-host in a few commands
 
+Use the [pre-built container](docs/container-image.md) with Docker Engine or Docker Desktop, or install [without Docker](docs/standalone.md) as a background service on Linux, macOS or Windows.
+
 Linux with Docker Engine + Compose:
 
 ~~~sh

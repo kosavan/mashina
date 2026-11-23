@@ -240,10 +240,14 @@ def serve(data, port, ocr_path):
 
     data.mkdir(parents=True, exist_ok=True)
     with FileLock(data / ".standalone.lock", timeout=0), server_socket(port) as listener:
-        uvicorn.run(
-            "backend.app:app", host="127.0.0.1", port=port, sockets=[listener],
+        config = uvicorn.Config(
+            "backend.app:app", host="127.0.0.1", port=port,
             proxy_headers=False, access_log=False,
         )
+        server = uvicorn.Server(config)
+        server.run(sockets=[listener])
+        if not server.started:
+            raise RuntimeError("MASHINA did not start.")
 
 
 def wait_for_server(port):

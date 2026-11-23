@@ -9,7 +9,7 @@ test("English fill-ups use 24-hour time, car mileage and editable suggestions", 
   page,
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await page.clock.setFixedTime(new Date("2026-01-10T15:07:00Z"));
+  await page.clock.setFixedTime(new Date("2026-11-17T15:07:00Z"));
   await page.goto("/");
   await page.getByLabel("Язык / Language", { exact: true }).selectOption("en");
   await page.getByRole("button", { name: "Explore the demo garage" }).click();
@@ -55,7 +55,7 @@ test("English fill-ups use 24-hour time, car mileage and editable suggestions", 
 
   await openFillUp();
   await expect(dialog.getByLabel("Date", { exact: true })).toHaveValue(
-    "2026-01-11",
+    "2026-11-18",
   );
   await expect(
     dialog.getByRole("combobox", { name: "Hour (24 h)", exact: true }),
@@ -103,7 +103,7 @@ test("English fill-ups use 24-hour time, car mileage and editable suggestions", 
     occurred_at: "2026-01-10T23:47:00",
   });
 
-  await page.clock.setFixedTime(new Date("2026-01-11T10:34:00Z"));
+  await page.clock.setFixedTime(new Date("2026-11-18T10:34:00Z"));
   await openFillUp();
   await vehicle.selectOption(added.id);
   await expect(fuel).toHaveValue("AI-98");
@@ -112,6 +112,6 @@ test("English fill-ups use 24-hour time, car mileage and editable suggestions", 
   expect(await saveFillUp("Manual fuel label")).toMatchObject({
     fuel: "AI-95",
     station: "Independent station",
-    occurred_at: "2026-01-11T19:34:00",
+    occurred_at: "2026-11-18T19:34:00",
   });
 });

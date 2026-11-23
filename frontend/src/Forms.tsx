@@ -109,6 +109,7 @@ export function RecordForm({
   const [saved, setSaved] = useState<RecordBase | undefined>(undefined);
   const [files, setFiles] = useState<File[]>([]);
   const [items, setItems] = useState<Item[]>(record?.items || []);
+  const [openedAt] = useState(() => new Date());
   const [fuelValues, setFuelValues] = useState({
     liters: record?.liters || "",
     price: record?.price || "",
@@ -696,7 +697,7 @@ export function RecordForm({
                 type={type === "fuel" ? "date" : "datetime-local"}
                 value={
                   type === "fuel"
-                    ? record?.occurred_at?.slice(0, 10) || today()
+                    ? record?.occurred_at?.slice(0, 10) || today(openedAt)
                     : record?.occurred_at?.slice(0, 16) || today() + "T12:00"
                 }
                 required
@@ -723,7 +724,11 @@ export function RecordForm({
                   <Field label="Часы (24 ч)" name="occurred_hour">
                     <select
                       name="occurred_hour"
-                      defaultValue={record?.occurred_at?.slice(11, 13) || "12"}
+                      defaultValue={
+                        record
+                          ? record.occurred_at?.slice(11, 13) || "12"
+                          : clockOptions[openedAt.getHours()]
+                      }
                       required
                     >
                       {clockOptions.slice(0, 24).map((value) => (
@@ -734,7 +739,11 @@ export function RecordForm({
                   <Field label="Минуты" name="occurred_minute">
                     <select
                       name="occurred_minute"
-                      defaultValue={record?.occurred_at?.slice(14, 16) || "00"}
+                      defaultValue={
+                        record
+                          ? record.occurred_at?.slice(14, 16) || "00"
+                          : clockOptions[openedAt.getMinutes()]
+                      }
                       required
                     >
                       {clockOptions.map((value) => (

@@ -126,8 +126,7 @@ export const dateLabel = (d: string) =>
     month: "short",
     year: "numeric",
   }).format(new Date(d));
-export const today = () => {
-  const d = new Date();
+export const today = (d = new Date()) => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 export const monthStart = () => today().slice(0, 7) + "-01";

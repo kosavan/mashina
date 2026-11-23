@@ -15,6 +15,10 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Release 1.13.0
+
+Use `v1.13.0` as `TARGET_TAG`. The schema remains 007. Synchronize pending browser/PWA entries and keep the full pre-update backup and previous image or standalone release. Use [the registry instructions](container-image.md#update-and-rollback) when switching an existing Docker installation to the published image, or follow [the standalone guide](standalone.md) for a Docker-free installation. Source builds can continue with the procedure below. Verify `/api/v1/health` reports version `1.13.0` and schema `007`, reopen the browser/PWA online, and check the local date and time on a new fill-up and the saved time on an existing fill-up. For rollback, use the previous runtime and its matching pre-update data archive.
+
 ## Release 1.12.1
 
 Use `v1.12.1` as `TARGET_TAG` below. Schema remains 007; there is no new migration, dependency or configuration. Synchronize pending entries on every device and retain a verified complete backup and the previous image before updating. After rebuilding and restarting, verify version `1.12.1` and schema `007` in `/api/v1/health`. Reopen the browser/PWA online, check multiple same-time fill-ups in fuel analytics and save a fuel unit price such as `1.759`. Existing history is recalculated automatically; do not import it again. The full-tank baseline and missing-entry rules still apply. Keep pending browser data; use the matching pre-update data copy and previous image for rollback as described below.

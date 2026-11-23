@@ -11,6 +11,7 @@ import {
 import { useApp } from "./context";
 import { Sheet } from "./components/ui/dialog";
 import { Button } from "./components/ui/button";
+import { apiResponse } from "./api";
 
 export default function SaleReport({ vehicleId }: { vehicleId: string }) {
   const { session, state } = useApp();
@@ -92,21 +93,17 @@ export default function SaleReport({ vehicleId }: { vehicleId: string }) {
               const dates = Object.fromEntries(
                 new FormData(event.currentTarget),
               );
-              const response = await fetch(
-                `/api/v1/vehicles/${vehicleId}/sale-report`,
+              const response = await apiResponse(
+                `/vehicles/${vehicleId}/sale-report`,
                 {
                   method: "POST",
-                  credentials: "same-origin",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRF-Token": session.csrf,
-                  },
                   body: JSON.stringify({
                     start: dates.start || "",
                     end: dates.end || "",
                     ...options,
                   }),
                 },
+                session.csrf,
               );
               if (!response.ok) {
                 const result = await response.json().catch(() => ({}));

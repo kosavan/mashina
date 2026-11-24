@@ -26,6 +26,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: mashina-mobile-${{ inputs.tag || github.event.pull_request.number || github.ref }}
   cancel-in-progress: false
@@ -100,6 +104,7 @@ jobs:
           name: mashina-android
           path: dist/mobile/*.apk
           if-no-files-found: error
+          overwrite: true
 
   ios:
     needs: source
@@ -119,10 +124,11 @@ jobs:
           name: mashina-ios-unsigned
           path: dist/mobile/*.ipa
           if-no-files-found: error
+          overwrite: true
 
   attach:
     if: github.event_name == 'workflow_dispatch'
-    needs: [android, ios]
+    needs: [source, android, ios]
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -136,17 +142,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ inputs.tag }}
+          COMMIT: ${{ needs.source.outputs.commit }}
         working-directory: mobile-assets
         run: |
           apk="mashina-${TAG#v}-android.apk"
           ipa="mashina-${TAG#v}-ios-unsigned.ipa"
           checksums="mashina-${TAG#v}-mobile-sha256.txt"
           sha256sum "$apk" "$ipa" > "$checksums"
-          assets=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)" = "$COMMIT"
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG")
+          jq -e '(.draft == false) and (.prerelease == false)' <<< "$release" > /dev/null
+          assets=$(jq -r '.assets[].name' <<< "$release")
           for asset in "$apk" "$ipa" "$checksums"; do
             if grep -Fxq "$asset" <<< "$assets"; then
-              digest=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets \
-                --jq ".assets[] | select(.name == \"$asset\") | .digest")
+              digest=$(jq -r --arg name "$asset" '.assets[] | select(.name == $name) | .digest' <<< "$release")
               local_digest=$(sha256sum "$asset" | cut -d ' ' -f 1)
               if [[ "$digest" != "sha256:$local_digest" ]]; then
                 echo "Refusing to replace existing asset $asset." >&2

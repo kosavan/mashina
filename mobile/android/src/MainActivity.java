@@ -44,7 +44,7 @@ public final class MainActivity extends Activity {
     private static final int LIME = Color.rgb(209, 247, 110);
     private static final int PICK_FILE = 1;
     private static final int SAVE_FILE = 2;
-    private final ExecutorService serverChecks = Executors.newSingleThreadExecutor();
+    private final ExecutorService networkTasks = Executors.newFixedThreadPool(2);
     private WebView web;
     private FrameLayout content;
     private LinearLayout messagePanel;
@@ -93,8 +93,7 @@ public final class MainActivity extends Activity {
         if (state != null) {
             String url = state.getString("downloadUrl");
             if (url != null) {
-                pendingDownload = new Download(url, state.getString("downloadAgent"),
-                        state.getString("downloadType"));
+                pendingDownload = new Download(url, state.getString("downloadAgent"));
             }
         }
     }
@@ -186,7 +185,7 @@ public final class MainActivity extends Activity {
             confirm.setEnabled(false);
             confirm.setText(R.string.connecting);
             address.setEnabled(false);
-            serverChecks.submit(() -> {
+            networkTasks.submit(() -> {
                 boolean valid = isMashina(candidate);
                 runOnUiThread(() -> {
                     if (isDestroyed() || !dialog.isShowing()) return;
@@ -326,12 +325,9 @@ public final class MainActivity extends Activity {
     private static final class Download {
         final String url;
         final String userAgent;
-        final String mimeType;
-
-        Download(String url, String userAgent, String mimeType) {
+        Download(String url, String userAgent) {
             this.url = url;
             this.userAgent = userAgent;
-            this.mimeType = mimeType;
         }
     }
 
@@ -341,7 +337,7 @@ public final class MainActivity extends Activity {
             return;
         }
         if (pendingDownload != null) return;
-        pendingDownload = new Download(url, agent, mime);
+        pendingDownload = new Download(url, agent);
         Intent save = new Intent(Intent.ACTION_CREATE_DOCUMENT)
                 .addCategory(Intent.CATEGORY_OPENABLE)
                 .setType(mime == null ? "application/octet-stream" : mime)
@@ -393,7 +389,6 @@ public final class MainActivity extends Activity {
         if (pendingDownload == null) return;
         state.putString("downloadUrl", pendingDownload.url);
         state.putString("downloadAgent", pendingDownload.userAgent);
-        state.putString("downloadType", pendingDownload.mimeType);
     }
 
     @Override
@@ -405,7 +400,7 @@ public final class MainActivity extends Activity {
             Uri destination = data == null ? null : data.getData();
             if (result == RESULT_OK && download != null && destination != null
                     && server != null && server.equals(origin(download.url))) {
-                serverChecks.submit(() -> saveDownload(download, destination));
+                networkTasks.submit(() -> saveDownload(download, destination));
             }
             return;
         }
@@ -434,7 +429,7 @@ public final class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         closeWebView();
-        serverChecks.shutdownNow();
+        networkTasks.shutdownNow();
         super.onDestroy();
     }
 }

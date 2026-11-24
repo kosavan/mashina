@@ -66,6 +66,9 @@ docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
 
 Open **http://localhost:8000**. Your data live in **./data**. Use HTTPS for remote access and iPhone PWA installation.
 
+See the [mobile client guide](docs/mobile-clients.md) for PWA installation,
+Android APKs and iOS IPA self-signing.
+
 **[Full deployment & backup guide](docs/self-hosting.md)** · **[macOS Terminal / Windows PowerShell](docs/testing-release.md)**
 
 ## Questions from car owners

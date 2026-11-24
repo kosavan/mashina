@@ -15,6 +15,19 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Mobile packages
+
+Before switching from the PWA or updating an installed client, synchronize
+pending entries and keep a verified full server backup and the current server
+image or standalone package. For mobile updates, retain the previous package
+and use the same application identifier and signing identity. Update over the
+installed app to preserve its storage. Open it online and check the saved
+server, garage, a recent entry and pending changes. If an OS prevents an
+in-place downgrade, use the browser for synced data and keep the installed app
+until its pending entries have synced. If you also roll back the server, use
+the matching data archive and previous image or standalone package described
+below. [Mobile installation and signing](mobile-clients.md)
+
 ## Release 1.13.0
 
 Use `v1.13.0` as `TARGET_TAG`. The schema remains 007. Synchronize pending browser/PWA entries and keep the full pre-update backup and previous image or standalone release. Use [the registry instructions](container-image.md#update-and-rollback) when switching an existing Docker installation to the published image, or follow [the standalone guide](standalone.md) for a Docker-free installation. Source builds can continue with the procedure below. Verify `/api/v1/health` reports version `1.13.0` and schema `007`, reopen the browser/PWA online, and check the local date and time on a new fill-up and the saved time on an existing fill-up. For rollback, use the previous runtime and its matching pre-update data archive.

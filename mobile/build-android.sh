@@ -55,12 +55,20 @@ javac --release 11 -encoding UTF-8 -classpath "$platform" -d "$work/classes" \
     mobile/android/src/MainActivity.java "$work/ru/mashina/mobile/R.java"
 jar --create --file "$work/classes.jar" -C "$work/classes" .
 "$tools/d8" --lib "$platform" --release --min-api 26 --output "$work/dex" "$work/classes.jar"
-(cd "$work/dex" && zip -q "$work/base.apk" classes.dex)
+python3 - "$work" <<'PY'
+from pathlib import Path
+import sys
+import zipfile
+
+work = Path(sys.argv[1])
+with zipfile.ZipFile(work / "base.apk", "a", compression=zipfile.ZIP_DEFLATED) as apk:
+    apk.write(work / "dex/classes.dex", "classes.dex")
+PY
 "$tools/zipalign" -f -P 16 4 "$work/base.apk" "$work/aligned.apk"
 "$tools/apksigner" sign --ks "$MASHINA_ANDROID_KEYSTORE" --ks-key-alias "$MASHINA_ANDROID_KEY_ALIAS" \
     --ks-pass env:MASHINA_ANDROID_STORE_PASSWORD --key-pass env:MASHINA_ANDROID_KEY_PASSWORD \
     --v4-signing-enabled false --out "$work/signed.apk" "$work/aligned.apk"
-"$tools/apksigner" verify --verbose --print-certs "$work/signed.apk"
+"$tools/apksigner" verify --verbose "$work/signed.apk"
 "$tools/aapt2" dump badging "$work/signed.apk" | tee "$work/badging"
 grep -Fq "package: name='$package' versionCode='$build_number' versionName='$version'" "$work/badging"
 grep -Fq "launchable-activity: name='ru.mashina.mobile.MainActivity'" "$work/badging"

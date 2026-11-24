@@ -180,7 +180,9 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
                 "Введите HTTPS-адрес без пути и учётных данных."))
             return
         }
-        var request = URLRequest(url: candidate.appendingPathComponent("api/v1/health"))
+        let endpoint = candidate.appendingPathComponent("api").appendingPathComponent("v1")
+            .appendingPathComponent("health")
+        var request = URLRequest(url: endpoint)
         request.timeoutInterval = 8
         health.dataTask(with: request) { [weak self] data, response, error in
             let object = data.flatMap { try? JSONSerialization.jsonObject(with: $0) } as? [String: Any]
@@ -290,7 +292,11 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
 
     func webView(_ webView: WKWebView, decidePolicyFor response: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        if let http = response.response as? HTTPURLResponse, http.statusCode >= 400,
+        if response.isForMainFrame, let url = response.response.url, !isCurrentOrigin(url),
+           url.scheme != "blob" {
+            decisionHandler(.cancel)
+            pageFailed(webView)
+        } else if let http = response.response as? HTTPURLResponse, http.statusCode >= 400,
            response.isForMainFrame {
             decisionHandler(.cancel)
             pageFailed(webView)

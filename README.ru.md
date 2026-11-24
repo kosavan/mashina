@@ -87,6 +87,9 @@ docker compose exec mashina /app/.venv/bin/python -m backend.cli create-admin
 
 Откройте **http://localhost:8000**. Данные находятся в **./data**. Для удалённого доступа и установки на iPhone нужен HTTPS.
 
+Установка PWA и Android APK, а также самостоятельная подпись IPA описаны в
+[руководстве по мобильным приложениям](docs/mobile-clients.ru.md).
+
 **[Mac: Terminal / Windows: PowerShell — пошагово](docs/testing-release.ru.md)** · **[Подробная инструкция](docs/handbook.ru.md)** · **[Развёртывание и бэкапы, EN](docs/self-hosting.md)**
 
 ## Подробнее

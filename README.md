@@ -18,6 +18,8 @@
 
 ![MASHINA: capture, understand and maintain your vehicles. Actual product with isolated synthetic demo data.](docs/assets/en/mashina-overview.png)
 
+[Watch the mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) · [Work out your running costs](https://kosavan.github.io/mashina/car-cost.html) · [Star MASHINA on GitHub](https://github.com/kosavan/mashina)
+
 ## A garage worth keeping up to date
 
 MASHINA is a modern, open-source, self-hosted vehicle maintenance tracker and car

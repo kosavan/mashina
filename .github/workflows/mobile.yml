@@ -82,7 +82,22 @@ jobs:
         with:
           distribution: temurin
           java-version: 17
-      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.1'
+      - name: Install the pinned Android platform and build tools
+        run: |
+          sdk="$RUNNER_TEMP/mashina-android-sdk"
+          mkdir -p "$sdk/platforms" "$sdk/build-tools"
+          cd "$sdk"
+          base=https://dl.google.com/android/repository
+          curl -fsS --retry 3 -O "$base/platform-35_r02.zip"
+          curl -fsS --retry 3 -O "$base/build-tools_r35.0.1_linux.zip"
+          sha256sum --check <<'CHECKSUMS'
+          0988cacad01b38a18a47bac14a0695f246bc76c1b06c0ee8eb0dc825ab0c8e0  platform-35_r02.zip
+          5993499f3229a021b89f87088c57242aeefaa62316bf3d69da7de40bfd5350f1  build-tools_r35.0.1_linux.zip
+          CHECKSUMS
+          unzip -q platform-35_r02.zip -d "$sdk/platforms"
+          unzip -q build-tools_r35.0.1_linux.zip -d "$sdk/build-tools"
+          mv "$sdk/build-tools/android-15" "$sdk/build-tools/35.0.1"
+          printf 'ANDROID_SDK_ROOT=%s\n' "$sdk" >> "$GITHUB_ENV"
       - if: github.event_name != 'workflow_dispatch'
         run: bash mobile/build-android.sh preview
       - if: github.event_name == 'workflow_dispatch'

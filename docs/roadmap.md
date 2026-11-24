@@ -5,6 +5,11 @@ English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 Last reviewed: **2026-11-18**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
+## Project discovery
+
+- The project website includes a [vehicle logbook guide](https://kosavan.github.io/mashina/#vehicle-logbook-guide) in English and Russian.
+- Planned outreach includes a release announcement for self-hosting communities and a ZimaOS App Store submission. Listings depend on review by each publisher.
+
 ## 1.13.0 distribution and fill-up time
 
 - In 1.13.0, new fill-ups use the device's local date and time when opened. Existing records retain their saved time when opened for editing. [Issue #38](https://github.com/kosavan/mashina/issues/38)

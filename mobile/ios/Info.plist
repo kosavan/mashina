@@ -14,6 +14,19 @@
     <key>LSRequiresIPhoneOS</key><true/>
     <key>NSLocalNetworkUsageDescription</key>
     <string>MASHINA connects to the server you choose on your local network.</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsLocalNetworking</key><true/>
+        <key>NSExceptionDomains</key>
+        <dict>
+            <key>10.0.0.0/8</key>
+            <dict><key>NSExceptionAllowsInsecureHTTPLoads</key><true/></dict>
+            <key>172.16.0.0/12</key>
+            <dict><key>NSExceptionAllowsInsecureHTTPLoads</key><true/></dict>
+            <key>192.168.0.0/16</key>
+            <dict><key>NSExceptionAllowsInsecureHTTPLoads</key><true/></dict>
+        </dict>
+    </dict>
     <key>NSCameraUsageDescription</key><string>Attach a photo to a MASHINA record.</string>
     <key>NSPhotoLibraryUsageDescription</key><string>Attach a photo to a MASHINA record.</string>
     <key>UILaunchScreen</key><dict/>

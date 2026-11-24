@@ -44,6 +44,9 @@ else
 fi
 
 mkdir -p "$work/res/drawable" "$work/classes" "$work/dex" dist/mobile
+javac --release 11 -d "$work/address-tests" mobile/android/src/ServerAddress.java \
+    mobile/tests/ServerAddressTest.java
+java -cp "$work/address-tests" ru.mashina.mobile.ServerAddressTest mobile/tests/server-address.tsv
 cp -R mobile/android/res/. "$work/res/"
 cp frontend/public/icon-192.png "$work/res/drawable/app_icon.png"
 "$tools/aapt2" compile --dir "$work/res" -o "$work/res.zip"
@@ -52,7 +55,7 @@ cp frontend/public/icon-192.png "$work/res/drawable/app_icon.png"
     --version-code "$build_number" --version-name "$version" --java "$work" \
     -o "$work/base.apk" "$work/res.zip"
 javac --release 11 -encoding UTF-8 -classpath "$platform" -d "$work/classes" \
-    mobile/android/src/MainActivity.java "$work/ru/mashina/mobile/R.java"
+    mobile/android/src/*.java "$work/ru/mashina/mobile/R.java"
 jar --create --file "$work/classes.jar" -C "$work/classes" .
 "$tools/d8" --lib "$platform" --release --min-api 26 --output "$work/dex" "$work/classes.jar"
 python3 - "$work" <<'PY'

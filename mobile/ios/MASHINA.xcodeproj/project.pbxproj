@@ -10,9 +10,11 @@
         A10000000000000000000004 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = MASHINA.app; sourceTree = BUILT_PRODUCTS_DIR; };
         A10000000000000000000005 = {isa = PBXBuildFile; fileRef = A10000000000000000000001; };
         A10000000000000000000006 = {isa = PBXBuildFile; fileRef = A10000000000000000000002; };
+        A10000000000000000000011 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerAddress.swift; sourceTree = "<group>"; };
+        A10000000000000000000012 = {isa = PBXBuildFile; fileRef = A10000000000000000000011; };
         A10000000000000000000007 = {
             isa = PBXGroup;
-            children = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, A10000000000000000000008);
+            children = (A10000000000000000000001, A10000000000000000000011, A10000000000000000000002, A10000000000000000000003, A10000000000000000000008);
             sourceTree = "<group>";
         };
         A10000000000000000000008 = {
@@ -24,7 +26,7 @@
         A10000000000000000000009 = {
             isa = PBXSourcesBuildPhase;
             buildActionMask = 2147483647;
-            files = (A10000000000000000000005);
+            files = (A10000000000000000000005, A10000000000000000000012);
             runOnlyForDeploymentPostprocessing = 0;
         };
         A1000000000000000000000A = {

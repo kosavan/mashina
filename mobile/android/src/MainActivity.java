@@ -33,11 +33,12 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayInputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
-import java.util.Locale;
+import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.net.ssl.HttpsURLConnection;
 
 public final class MainActivity extends Activity {
     private static final int BACKGROUND = Color.rgb(21, 24, 22);
@@ -48,7 +49,7 @@ public final class MainActivity extends Activity {
     private WebView web;
     private FrameLayout content;
     private LinearLayout messagePanel;
-    private String server;
+    private volatile String server;
     private ValueCallback<Uri[]> filePicker;
     private Download pendingDownload;
 
@@ -134,35 +135,11 @@ public final class MainActivity extends Activity {
         content.addView(messagePanel, new FrameLayout.LayoutParams(-1, -1));
     }
 
-    static String origin(String input) {
-        try {
-            URI url = URI.create(input.trim());
-            String host = url.getHost();
-            if (!"https".equalsIgnoreCase(url.getScheme()) || host == null
-                    || url.getRawUserInfo() != null || url.getPort() == 0 || url.getPort() > 65535) {
-                return null;
-            }
-            int port = url.getPort();
-            return "https://" + host.toLowerCase(Locale.ROOT)
-                    + (port == -1 || port == 443 ? "" : ":" + port);
-        } catch (IllegalArgumentException invalid) {
-            return null;
-        }
-    }
-
-    static String serverAddress(String input) {
-        String origin = origin(input);
-        if (origin == null) return null;
-        URI url = URI.create(input.trim());
-        return (url.getRawPath().isEmpty() || url.getRawPath().equals("/"))
-                && url.getRawQuery() == null && url.getRawFragment() == null ? origin : null;
-    }
-
     private void editServer() {
         EditText address = new EditText(this);
         address.setSingleLine(true);
         address.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
-        address.setHint("https://mashina.example.org");
+        address.setHint("192.168.1.20:8000");
         address.setText(server);
         FrameLayout field = new FrameLayout(this);
         field.setPadding(dp(24), 0, dp(24), 0);
@@ -177,7 +154,7 @@ public final class MainActivity extends Activity {
         dialog.show();
         Button confirm = dialog.getButton(AlertDialog.BUTTON_POSITIVE);
         confirm.setOnClickListener(view -> {
-            String candidate = serverAddress(address.getText().toString());
+            String candidate = ServerAddress.parse(address.getText().toString());
             if (candidate == null) {
                 address.setError(getString(R.string.bad_address));
                 return;
@@ -206,9 +183,9 @@ public final class MainActivity extends Activity {
     }
 
     private boolean isMashina(String candidate) {
-        HttpsURLConnection request = null;
+        HttpURLConnection request = null;
         try {
-            request = (HttpsURLConnection) URI.create(candidate + "/api/v1/health")
+            request = (HttpURLConnection) URI.create(candidate + "/api/v1/health")
                     .toURL().openConnection();
             request.setConnectTimeout(8000);
             request.setReadTimeout(8000);
@@ -274,10 +251,10 @@ public final class MainActivity extends Activity {
 
         @Override
         public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-            String target = origin(request.getUrl().toString());
+            String target = ServerAddress.origin(request.getUrl().toString());
             if (!request.isForMainFrame()) return false;
             if (server.equals(target)) return false;
-            if (request.isForMainFrame() && request.hasGesture() && target != null) {
+            if (request.hasGesture() && target != null && target.startsWith("https://")) {
                 try {
                     startActivity(new Intent(Intent.ACTION_VIEW, request.getUrl()));
                 } catch (ActivityNotFoundException missing) {
@@ -290,8 +267,19 @@ public final class MainActivity extends Activity {
         }
 
         @Override
+        public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+            Uri url = request.getUrl();
+            if ("http".equalsIgnoreCase(url.getScheme())
+                    && !server.equals(ServerAddress.origin(url.toString()))) {
+                return new WebResourceResponse("text/plain", "UTF-8", 403, "Forbidden",
+                        Collections.emptyMap(), new ByteArrayInputStream(new byte[0]));
+            }
+            return null;
+        }
+
+        @Override
         public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-            if (!server.equals(origin(url))) {
+            if (!server.equals(ServerAddress.origin(url))) {
                 view.stopLoading();
                 fail(view);
                 return;
@@ -301,7 +289,7 @@ public final class MainActivity extends Activity {
 
         @Override
         public void onPageFinished(WebView view, String url) {
-            if (view == web && !failed && server.equals(origin(url))) clearMessage();
+            if (view == web && !failed && server.equals(ServerAddress.origin(url))) clearMessage();
         }
 
         @Override
@@ -332,7 +320,7 @@ public final class MainActivity extends Activity {
     }
 
     private void offerDownload(String url, String agent, String disposition, String mime) {
-        if (!server.equals(origin(url))) {
+        if (!server.equals(ServerAddress.origin(url))) {
             Toast.makeText(this, R.string.download_unavailable, Toast.LENGTH_LONG).show();
             return;
         }
@@ -351,9 +339,9 @@ public final class MainActivity extends Activity {
     }
 
     private void saveDownload(Download download, Uri destination) {
-        HttpsURLConnection request = null;
+        HttpURLConnection request = null;
         try {
-            request = (HttpsURLConnection) URI.create(download.url).toURL().openConnection();
+            request = (HttpURLConnection) URI.create(download.url).toURL().openConnection();
             request.setInstanceFollowRedirects(false);
             request.setConnectTimeout(15000);
             request.setReadTimeout(30000);
@@ -399,7 +387,7 @@ public final class MainActivity extends Activity {
             pendingDownload = null;
             Uri destination = data == null ? null : data.getData();
             if (result == RESULT_OK && download != null && destination != null
-                    && server != null && server.equals(origin(download.url))) {
+                    && server != null && server.equals(ServerAddress.origin(download.url))) {
                 networkTasks.submit(() -> saveDownload(download, destination));
             }
             return;

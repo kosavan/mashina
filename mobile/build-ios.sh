@@ -6,6 +6,9 @@ version=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", 
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
+xcrun --sdk macosx swiftc mobile/ios/ServerAddress.swift mobile/tests/ServerAddressTest.swift \
+    -o "$work/address-tests"
+"$work/address-tests" mobile/tests/server-address.tsv
 cp -R mobile/ios "$work/project"
 sips -z 1024 1024 frontend/public/maskable-512.png \
     --out "$work/project/Assets.xcassets/AppIcon.appiconset/AppIcon.png" > /dev/null

@@ -15,7 +15,7 @@ validation and future work are separate. Dates are not delivery promises.
 
 ## Next release: mobile packages
 
-- In preparation: a signed Android APK and an unsigned iOS IPA for self-signing. The apps use the existing MASHINA interface on the owner's HTTPS server. Release distribution is pending package and device verification. [Mobile client guide](mobile-clients.md)
+- In preparation: a signed Android APK and an unsigned iOS IPA for self-signing. Each user enters the private LAN IP or HTTPS address of their own MASHINA server. Release distribution is pending device verification. [Mobile client guide](mobile-clients.md)
 
 ## 1.13.0 distribution and fill-up time
 

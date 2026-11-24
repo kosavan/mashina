@@ -5,8 +5,9 @@ English · [Russian](mobile-clients.ru.md)
 ## Android APK and iOS IPA
 
 The mobile packages open MASHINA's existing interface in an app on your phone.
-They connect to the HTTPS address you enter and use your existing MASHINA
-account. Android 8.0 and iOS/iPadOS 16 are the minimum versions.
+Each installation begins with an empty server setting. Enter your own server
+address and use your existing MASHINA account. Android 8.0 and iOS/iPadOS 16
+are the minimum versions.
 
 1. Look for the mobile files and SHA-256 checksums in the
    [GitHub release](https://github.com/kosavan/mashina/releases). During
@@ -19,10 +20,28 @@ account. Android 8.0 and iOS/iPadOS 16 are the minimum versions.
    provisioning profile that permits installation on your device. Use the same
    signing identity and bundle identifier for updates when supported by your
    signing tool. The package is for self-signing and sideloading.
-4. Open MASHINA, select **Server**, and enter the server origin, for example
-   `https://mashina.example.org`. Use a certificate trusted by the device. If
-   your server is private, connect to its LAN or VPN. Sign in with your existing
-   account after the connection check succeeds.
+4. Open MASHINA, select **Server**, and enter a local address such as
+   `192.168.1.20:8000` or an HTTPS link such as
+   `https://mashina.example.org`. An IP without a port uses port 8000.
+   Use **Server** again to change the saved address. Sign in after the
+   connection check succeeds.
+
+### Reach the server from your phone
+
+For a local HTTP connection, join the same Wi-Fi or a VPN with a route to the
+server. The app accepts HTTP on private IPv4 addresses. Use HTTP only on a
+trusted network because the connection is unencrypted. Use a certificate
+trusted by your phone for HTTPS. On iPhone and iPad, allow access to the local
+network if prompted.
+
+For a Docker installation, set `MASHINA_BIND` to the computer's LAN IP and
+`MASHINA_ORIGIN` to the exact address entered on the phone, including its
+port. For example, use `MASHINA_BIND=192.168.1.20` and
+`MASHINA_ORIGIN=http://192.168.1.20:8000` with the default port.
+Allow the port from your LAN in the host firewall. The standalone package
+listens on loopback and can be reached from a phone through a reverse proxy
+on that computer. See [standalone setup](standalone.md) and the
+[update guide](updating.md).
 
 If you use the PWA today, synchronize its pending changes before switching.
 The installed app has its own web storage and sign-in session. Your synced

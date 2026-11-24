@@ -4,10 +4,10 @@
     <string name="server">Server</string>
     <string name="connect">Connect</string>
     <string name="connect_title">Connect to MASHINA</string>
-    <string name="connect_help">Enter the HTTPS address of your MASHINA server.</string>
+    <string name="connect_help">Enter a local IP address or the HTTPS link to your MASHINA server. Local HTTP connections are unencrypted.</string>
     <string name="connecting">Checking server…</string>
-    <string name="bad_address">Enter an HTTPS server address without a path or credentials.</string>
-    <string name="server_failed">Could not verify MASHINA at that address. Check the address and certificate.</string>
+    <string name="bad_address">Enter a private IPv4 address or an HTTPS link without a path or credentials.</string>
+    <string name="server_failed">Could not verify MASHINA. Check the address, port and network connection.</string>
     <string name="page_failed">Could not open MASHINA. Check the connection and try again.</string>
     <string name="retry">Try again</string>
     <string name="loading">Opening MASHINA…</string>

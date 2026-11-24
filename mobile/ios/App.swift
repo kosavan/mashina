@@ -40,11 +40,14 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
     private let health = URLSession(configuration: .ephemeral, delegate: HealthRedirectPolicy(),
                                     delegateQueue: nil)
     private var web: WKWebView?
-    private var server = UserDefaults.standard.string(forKey: "server").flatMap { MashinaController.address($0) }
+    private var server = UserDefaults.standard.string(forKey: "server").flatMap(ServerAddress.parse)
     private var checking = false
     private var pageWasVisible = false
     private var statusAction: (() -> Void)?
     private var downloads: [ObjectIdentifier: URL] = [:]
+    private let serverPrompt = message(
+        "Enter a local IP address or the HTTPS link to your MASHINA server. Local HTTP connections are unencrypted.",
+        "Введите локальный IP или HTTPS-ссылку вашего сервера MASHINA. Локальное подключение по HTTP не шифруется.")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -94,8 +97,7 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
         attach(status, to: content.layoutMarginsGuide)
 
         if server == nil {
-            showStatus(message("Enter the HTTPS address of your MASHINA server.",
-                               "Введите HTTPS-адрес вашего сервера MASHINA."),
+            showStatus(serverPrompt,
                        button: message("Connect", "Подключиться")) { [weak self] in self?.editServer() }
         } else {
             openServer()
@@ -113,26 +115,8 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
         ])
     }
 
-    static func origin(_ raw: String) -> URLComponents? {
-        guard var parts = URLComponents(string: raw.trimmingCharacters(in: .whitespacesAndNewlines)),
-              parts.scheme?.lowercased() == "https",
-              let host = parts.host, !host.isEmpty, parts.user == nil, parts.password == nil,
-              (1...65535).contains(parts.port ?? 443) else { return nil }
-        parts.scheme = "https"
-        parts.host = host.lowercased()
-        if parts.port == 443 { parts.port = nil }
-        return parts
-    }
-
-    static func address(_ raw: String) -> URL? {
-        guard var parts = origin(raw), ["", "/"].contains(parts.percentEncodedPath),
-              parts.query == nil, parts.fragment == nil else { return nil }
-        parts.path = ""
-        return parts.url
-    }
-
     private func isCurrentOrigin(_ url: URL) -> Bool {
-        guard var parts = Self.origin(url.absoluteString) else { return false }
+        guard var parts = ServerAddress.origin(url.absoluteString) else { return false }
         parts.path = ""
         parts.query = nil
         parts.fragment = nil
@@ -152,11 +136,10 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
     private func editServer(prefill: String? = nil, error: String? = nil) {
         guard !checking, presentedViewController == nil else { return }
         let alert = UIAlertController(title: message("Connect to MASHINA", "Подключение к MASHINA"),
-            message: error ?? message("Enter the HTTPS address of your MASHINA server.",
-                                      "Введите HTTPS-адрес вашего сервера MASHINA."), preferredStyle: .alert)
+                                      message: error ?? serverPrompt, preferredStyle: .alert)
         alert.addTextField { field in
             field.text = prefill ?? self.server?.absoluteString
-            field.placeholder = "https://mashina.example.org"
+            field.placeholder = "192.168.1.20:8000"
             field.keyboardType = .URL
             field.autocapitalizationType = .none
             field.autocorrectionType = .no
@@ -174,10 +157,10 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
         checking = true
         pageWasVisible = !status.isHidden
         showStatus(message("Checking server…", "Проверяем сервер…"))
-        guard let candidate = Self.address(input) else {
+        guard let candidate = ServerAddress.parse(input) else {
             finishCheck(input, candidate: nil, error: message(
-                "Enter an HTTPS server address without a path or credentials.",
-                "Введите HTTPS-адрес без пути и учётных данных."))
+                "Enter a private IPv4 address or an HTTPS link without a path or credentials.",
+                "Введите локальный IPv4-адрес или HTTPS-ссылку без пути и учётных данных."))
             return
         }
         let endpoint = candidate.appendingPathComponent("api").appendingPathComponent("v1")
@@ -192,8 +175,8 @@ final class MashinaController: UIViewController, WKNavigationDelegate, WKUIDeleg
                 && !(object?["schema"] as? String ?? "").isEmpty
             DispatchQueue.main.async {
                 self?.finishCheck(input, candidate: valid ? candidate : nil, error: message(
-                    "Could not verify MASHINA. Check the address and certificate.",
-                    "Не удалось проверить MASHINA. Проверьте адрес и сертификат сервера."))
+                    "Could not verify MASHINA. Check the address, port and network connection.",
+                    "Не удалось проверить MASHINA. Проверьте адрес, порт и подключение к сети."))
             }
         }.resume()
     }

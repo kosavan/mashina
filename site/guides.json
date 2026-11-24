@@ -1,0 +1,1186 @@
+{
+  "en": {
+    "ui": {
+      "name": "English",
+      "articles": "Articles",
+      "languages": "Choose a language",
+      "skip": "Skip to content",
+      "install": "Install MASHINA",
+      "related": "Related articles",
+      "calculate": "Calculate",
+      "distance": "Distance",
+      "fuel": "Fuel added",
+      "litres": "Litres",
+      "km": "Kilometres",
+      "miles": "Miles",
+      "invalid": "Enter positive numbers for distance and fuel.",
+      "download": "Download the logbook CSV",
+      "sources": "Sources",
+      "vehicle": "Vehicle",
+      "date": "Date",
+      "odometer": "Odometer",
+      "entry": "Entry type",
+      "amount": "Amount",
+      "currency": "Currency",
+      "notes": "Notes",
+      "fillup": "Fuel",
+      "service": "Service",
+      "example": "Fictional example"
+    },
+    "articles": {
+      "fuel": {
+        "title": "Fuel consumption calculator",
+        "description": "Calculate actual fuel economy from fill-ups in L/100 km, MPG (US and UK) and km/L.",
+        "sections": [
+          {
+            "heading": "Measure from full tank to full tank",
+            "paragraphs": [
+              "Fill the tank and record the odometer. At the next full fill, subtract the earlier odometer reading and add every litre bought after the first fill, including any partial fills. Exclude the litres from the first fill.",
+              "For example, 39 L over 520 km is 7.5 L/100 km. Divide litres by kilometres and multiply by 100. The calculator also accepts miles and distinguishes US from imperial gallons."
+            ]
+          },
+          {
+            "heading": "Use a longer sample",
+            "paragraphs": [
+              "For several complete cycles, divide the total fuel by the total distance. Check for missed fill-ups and inconsistent odometer readings before comparing vehicles or months. MASHINA calculates completed cycles from logged fill-ups."
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "Car maintenance schedule by mileage and time",
+        "description": "Build a service checklist from your owner's manual and track the next job by date or odometer reading.",
+        "sections": [
+          {
+            "heading": "Start with the schedule for your car",
+            "paragraphs": [
+              "Look up the schedule for the exact model, engine and year. For each job, write down the last service date and confirmed odometer. If the manual gives both a distance and a time limit, use the one that comes first.",
+              "Use separate rows for engine oil and filter, brake fluid, coolant, the cabin filter and tyre rotation where applicable. Check the manual for a severe-use schedule if your driving qualifies."
+            ]
+          },
+          {
+            "heading": "Set and close reminders",
+            "paragraphs": [
+              "If a fictional car has an oil interval of 10,000 km or 12 months and had service at 40,000 km in March, set 50,000 km and the following March. After the work, record the actual date, reading, parts and receipt before setting the next reminder."
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "Free car maintenance log template",
+        "description": "Download a CSV vehicle logbook for servicing, fill-ups, receipts and running costs.",
+        "sections": [
+          {
+            "heading": "What to record",
+            "paragraphs": [
+              "Use one row per event. Enter the vehicle, date, odometer, event type, amount, currency and notes. Add the fuel volume for fill-ups and the job or part name for maintenance. Keep the receipt or a reference to the receipt alongside the entry.",
+              "The sample CSV contains fictional rows. Open it in a spreadsheet with UTF-8 encoding and a comma separator, then replace the example rows. Keep currency and distance units consistent within each vehicle."
+            ]
+          },
+          {
+            "heading": "If you are buying a used car",
+            "paragraphs": [
+              "Compare service invoices with the dates and odometer readings. Record gaps as unknown, then start your own log with the handover reading. Keep the original documents. The CSV is a spreadsheet template. Check import mappings on a small copy before moving your history into any app."
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "How to calculate the real cost of owning a car",
+        "description": "Calculate monthly vehicle expenses and cost per kilometre with a worked example.",
+        "sections": [
+          {
+            "heading": "Separate paid costs from the budget",
+            "paragraphs": [
+              "A fictional car travelled 900 km. Fuel cost 120, service 80 and parking 30 in the same currency. The owner paid 230, or 0.26 per km. Track fuel, repairs, maintenance, parking and tolls in categories."
+            ]
+          },
+          {
+            "heading": "Budget for occasional bills",
+            "paragraphs": [
+              "An annual insurance bill of 600 adds 50 a month to the budget. The budget is 280 or 0.31 per km at the same distance. Record the actual payment only when paid. Add depreciation separately if comparing total ownership costs. Use the same period and confirmed odometer readings for every comparison."
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "LubeLogger alternatives and self-hosted vehicle logbooks",
+        "description": "Compare MASHINA, LubeLogger, MyGarage, Fuelio and Drivvo for fuel economy, service history and data ownership.",
+        "sections": [
+          {
+            "heading": "If you want your own server",
+            "paragraphs": [
+              "LubeLogger is an open-source self-hosted service and fuel tracker. MyGarage also runs on your infrastructure and documents OBD2 telemetry. MASHINA combines multivehicle service history, fuel cycles, tyre records and damage photos in a mobile-friendly web app, with a prebuilt Docker image and an isolated demo."
+            ]
+          },
+          {
+            "heading": "If you want a phone app",
+            "paragraphs": [
+              "Fuelio stores logs on your device and documents CSV export and optional backup. Drivvo describes vehicle expense, refuelling and maintenance tracking for drivers and fleets. Compare the setup and export you need before choosing."
+            ]
+          },
+          {
+            "heading": "Moving your records",
+            "paragraphs": [
+              "Export and keep the originals. Test a few fuel and service entries and check dates, distance units, currencies, attachments and totals before switching. Self-hosting means you manage updates and backups."
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "How to check tyre pressure and log tyre changes",
+        "description": "Find the correct cold tyre pressure for your car and keep a useful record of wheel swaps and tread.",
+        "sections": [
+          {
+            "heading": "Find the pressure for your car",
+            "paragraphs": [
+              "Use the vehicle placard or owner’s manual. The figure on the tyre sidewall is a maximum marking. Specifications can differ by axle, tyre size and load. Check when the tyres are cold and record which units you used, such as psi, bar or kPa."
+            ]
+          },
+          {
+            "heading": "Keep a record of each set",
+            "paragraphs": [
+              "Note the date, odometer, tyre size, position and tread depth when swapping sets. Photograph labels or uneven wear where useful. Compare measurements at the same positions over time. MASHINA stores each set's mounting history and dated tread readings."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "ru": {
+    "ui": {
+      "name": "Русский",
+      "articles": "Статьи",
+      "languages": "Выбрать язык",
+      "skip": "Перейти к содержанию",
+      "install": "Установить MASHINA",
+      "related": "Другие статьи",
+      "calculate": "Рассчитать",
+      "distance": "Расстояние",
+      "fuel": "Заправлено топлива",
+      "litres": "Литры",
+      "km": "Километры",
+      "miles": "Мили",
+      "invalid": "Введите положительные числа для расстояния и топлива.",
+      "download": "Скачать бортжурнал CSV",
+      "sources": "Источники",
+      "vehicle": "Автомобиль",
+      "date": "Дата",
+      "odometer": "Пробег",
+      "entry": "Тип записи",
+      "amount": "Сумма",
+      "currency": "Валюта",
+      "notes": "Заметки",
+      "fillup": "Заправка",
+      "service": "Обслуживание",
+      "example": "Вымышленный пример"
+    },
+    "articles": {
+      "fuel": {
+        "title": "Калькулятор расхода топлива на 100 км",
+        "description": "Рассчитайте фактический расход от полного бака до полного в л/100 км, км/л и MPG.",
+        "sections": [
+          {
+            "heading": "От полного бака до полного",
+            "paragraphs": [
+              "Заправьте полный бак и запишите пробег. На следующей полной заправке вычтите начальный пробег из конечного и сложите литры всех заправок после первой, включая промежуточные неполные. Литры первой заправки в расчёт не входят.",
+              "Например, 39 л на 520 км дают 7,5 л/100 км. Разделите литры на километры и умножьте на 100. Калькулятор также принимает мили и различает американский и британский галлоны."
+            ]
+          },
+          {
+            "heading": "Сравнивайте несколько циклов",
+            "paragraphs": [
+              "Сложите топливо и пробег по завершённым циклам и разделите один итог на другой. Перед сравнением проверьте пропущенные заправки и показания одометра. MASHINA считает завершённые циклы по журналу заправок."
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "График ТО автомобиля по пробегу и времени",
+        "description": "Составьте регламент обслуживания по руководству автомобиля и настройте напоминания по дате и пробегу.",
+        "sections": [
+          {
+            "heading": "Найдите регламент для своей машины",
+            "paragraphs": [
+              "Проверьте модель, двигатель и год выпуска. Для каждой работы запишите дату и подтверждённый пробег последнего обслуживания. Если производитель задаёт интервал и по времени, и по пробегу, ориентируйтесь на то, что наступит раньше.",
+              "Заведите отдельные строки для масла и фильтра, тормозной жидкости, охлаждающей жидкости и салонного фильтра. Проверьте, есть ли в руководстве сокращённые интервалы для тяжёлых условий эксплуатации."
+            ]
+          },
+          {
+            "heading": "Поставьте напоминание",
+            "paragraphs": [
+              "Если в вымышленном примере масло меняли в марте на 40 000 км, а интервал составляет 10 000 км или год, поставьте напоминание на 50 000 км и следующий март. После ТО запишите фактическую дату, пробег, детали и чек."
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "Шаблон бортжурнала автомобиля в CSV",
+        "description": "Скачайте таблицу для заправок, ТО, ремонтов, пробега, расходов и чеков.",
+        "sections": [
+          {
+            "heading": "Записывайте события по отдельности",
+            "paragraphs": [
+              "Одна строка — одно событие. Запишите машину, дату, показания одометра, операцию, сумму и валюту. Для заправки укажите литры, для ТО — выполненную работу и запчасти. Привяжите чек по имени файла или ссылке.",
+              "В CSV есть вымышленные примеры. Откройте его в Excel или LibreOffice в кодировке UTF-8 с запятой как разделителем и замените строки своими. Сохраняйте единицы пробега и валюту для каждой машины."
+            ]
+          },
+          {
+            "heading": "Если покупаете автомобиль с пробегом",
+            "paragraphs": [
+              "Сверьте даты и пробег в заказ-нарядах. Пропуски оставьте неизвестными и начните свой журнал с показания при передаче машины. Сохраните оригиналы документов. Перед переносом в приложение проверьте сопоставление столбцов на небольшой копии."
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "Как посчитать реальную стоимость владения автомобилем",
+        "description": "Посчитайте расходы за месяц и стоимость километра на практическом примере.",
+        "sections": [
+          {
+            "heading": "Разделите расходы и бюджет",
+            "paragraphs": [
+              "Машина проехала 900 км. На топливо ушло 7 200 ₽, на ТО — 4 800 ₽, на парковку — 1 600 ₽. Итого 13 600 ₽, или 15,11 ₽ на километр."
+            ]
+          },
+          {
+            "heading": "Учтите редкие платежи",
+            "paragraphs": [
+              "Страховка за 14 400 ₽ в год означает резерв 1 200 ₽ в месяц. Бюджет с резервом — 14 800 ₽, или 16,44 ₽ на километр. Сам платёж записывайте только в месяц оплаты. Потерю стоимости автомобиля можно добавить отдельно. Для сравнения берите подтверждённый пробег за одинаковый период."
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "Аналоги LubeLogger и бортжурналы на своём сервере",
+        "description": "Сравните MASHINA, LubeLogger, MyGarage, Fuelio и Drivvo по способу установки и хранению данных.",
+        "sections": [
+          {
+            "heading": "Журнал на своём сервере",
+            "paragraphs": [
+              "LubeLogger — открытый self-hosted журнал ТО и заправок. MyGarage тоже можно развернуть у себя, в документации есть телеметрия OBD2. MASHINA объединяет несколько машин, циклы расхода топлива, историю шин и фотографии повреждений. Есть Docker-образ и изолированный демогараж."
+            ]
+          },
+          {
+            "heading": "Журнал на телефоне",
+            "paragraphs": [
+              "Fuelio хранит записи на устройстве и поддерживает CSV и резервные копии. Drivvo ведёт расходы, заправки и обслуживание для водителей и автопарков. Сравните удобство ввода, экспорт и способ восстановления данных."
+            ]
+          },
+          {
+            "heading": "Переезд со старого журнала",
+            "paragraphs": [
+              "Сделайте экспорт и сохраните оригинал. На нескольких записях проверьте пробег, даты, валюту, сумму и доступность вложений. Установка на своём сервере предполагает, что обновлениями и резервными копиями управляете вы."
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "Как проверить давление в шинах и вести историю комплектов",
+        "description": "Узнайте, где найти давление для своей машины и какие данные записывать при смене колёс.",
+        "sections": [
+          {
+            "heading": "Найдите заводские значения",
+            "paragraphs": [
+              "Сверьтесь с табличкой на автомобиле или руководством. Максимальная маркировка на боковине шины не заменяет значение производителя. Для передней и задней оси, разных размеров или нагрузки значения могут отличаться. Проверяйте давление на холодных шинах."
+            ]
+          },
+          {
+            "heading": "Запишите историю комплекта",
+            "paragraphs": [
+              "При смене запишите дату, пробег, размер, позицию колеса и глубину протектора. При необходимости сфотографируйте маркировку и износ. Сравнивайте замеры в одинаковых местах. В MASHINA можно сохранить историю установки и датированные замеры протектора."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "de": {
+    "ui": {
+      "name": "Deutsch",
+      "articles": "Ratgeber",
+      "languages": "Sprache wählen",
+      "skip": "Zum Inhalt",
+      "install": "MASHINA installieren",
+      "related": "Weitere Ratgeber",
+      "calculate": "Berechnen",
+      "distance": "Strecke",
+      "fuel": "Getankter Kraftstoff",
+      "litres": "Liter",
+      "km": "Kilometer",
+      "miles": "Meilen",
+      "invalid": "Gib positive Werte für Strecke und Kraftstoff ein.",
+      "download": "Fahrten- und Wartungsbuch als CSV herunterladen",
+      "sources": "Quellen",
+      "vehicle": "Fahrzeug",
+      "date": "Datum",
+      "odometer": "Kilometerstand",
+      "entry": "Eintrag",
+      "amount": "Betrag",
+      "currency": "Währung",
+      "notes": "Notizen",
+      "fillup": "Tanken",
+      "service": "Wartung",
+      "example": "Erfundene Beispieldaten"
+    },
+    "articles": {
+      "fuel": {
+        "title": "Spritverbrauch berechnen – Rechner für Liter pro 100 km",
+        "description": "Berechne den tatsächlichen Kraftstoffverbrauch nach der Volltankmethode in l/100 km, km/l und MPG.",
+        "sections": [
+          {
+            "heading": "Von Volltank zu Volltank",
+            "paragraphs": [
+              "Tanke voll und notiere den Kilometerstand. Ziehe beim nächsten Volltanken den alten Stand vom neuen ab. Addiere alle Liter nach der ersten Volltankung, einschließlich der Teilfüllungen. Die erste Tankmenge bleibt außen vor.",
+              "39 Liter auf 520 km ergeben 7,5 l/100 km. Teile die Liter durch die Kilometer und multipliziere mit 100. Der Rechner unterstützt auch Meilen sowie US- und Imperial-MPG."
+            ]
+          },
+          {
+            "heading": "Mehrere Abschnitte vergleichen",
+            "paragraphs": [
+              "Addiere Strecke und Liter aus vollständigen Tankzyklen und rechne dann mit den Summen. Prüfe fehlende Tankbelege und Tippfehler im Kilometerstand. MASHINA berechnet die abgeschlossenen Zyklen aus dem Tankbuch."
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "Wartungsplan fürs Auto nach Zeit und Kilometerstand",
+        "description": "Erstelle eine Wartungsliste nach Herstellerangaben und plane die nächste Inspektion.",
+        "sections": [
+          {
+            "heading": "Das passende Intervall finden",
+            "paragraphs": [
+              "Nutze die Angaben für Modell, Motor und Baujahr. Notiere für jeden Posten den letzten Termin und Kilometerstand. Gibt der Hersteller zwei Grenzen vor, gilt die zuerst erreichte. Prüfe, ob dein Nutzungsprofil kürzere Intervalle erfordert.",
+              "Lege getrennte Einträge für Öl und Filter, Bremsflüssigkeit, Kühlmittel und Innenraumfilter an. Bewahre Rechnung und Teileangaben auf."
+            ]
+          },
+          {
+            "heading": "Die nächste Wartung planen",
+            "paragraphs": [
+              "Beispiel: Ölwechsel im März bei 40.000 km, Intervall 10.000 km oder zwölf Monate. Trage 50.000 km und März des Folgejahres ein. Nach dem Termin speicherst du den tatsächlichen Kilometerstand und setzt die Erinnerung neu."
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "Kfz-Wartungsbuch als CSV-Vorlage",
+        "description": "Lade ein Wartungsbuch für Inspektionen, Tankvorgänge, Kosten und Belege herunter.",
+        "sections": [
+          {
+            "heading": "Ein Ereignis pro Zeile",
+            "paragraphs": [
+              "Notiere Fahrzeug, Datum, Kilometerstand, Kosten und Währung. Ergänze beim Tanken die Liter und bei der Wartung die Arbeit oder das Bauteil. Hinterlege den Dateinamen der Rechnung in den Notizen.",
+              "Öffne die CSV im Tabellenprogramm als UTF-8 mit Komma als Trennzeichen. Ersetze die fiktiven Zeilen durch eigene Daten. Halte Einheit und Währung pro Fahrzeug konsistent."
+            ]
+          },
+          {
+            "heading": "Beim Gebrauchtwagenkauf",
+            "paragraphs": [
+              "Vergleiche die Kilometerstände auf Rechnungen und halte Lücken als unbekannt fest. Beginne das eigene Buch mit dem Übergabestand. Bewahre die Originale und prüfe vor einer Datenübernahme zuerst wenige Zeilen."
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "Autokosten pro Kilometer berechnen",
+        "description": "Berechne die laufenden Autokosten und eine Rücklage für jährliche Ausgaben.",
+        "sections": [
+          {
+            "heading": "Tatsächliche Ausgaben erfassen",
+            "paragraphs": [
+              "Ein Beispielauto fährt 900 km. 120 € für Kraftstoff, 80 € für Wartung und 30 € fürs Parken ergeben 230 € oder 0,26 € je Kilometer."
+            ]
+          },
+          {
+            "heading": "Jahreskosten getrennt planen",
+            "paragraphs": [
+              "Eine Versicherung von 600 € im Jahr entspricht 50 € Rücklage im Monat. Das Budget liegt damit bei 280 € oder 0,31 € je Kilometer. Buche die Prämie im Zahlungsmonat. Für die gesamten Besitzkosten kannst du den Wertverlust separat ergänzen."
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "LubeLogger-Alternativen für ein selbst gehostetes Autotagebuch",
+        "description": "Vergleiche MASHINA, LubeLogger, MyGarage, Fuelio und Drivvo nach Installation und Datensicherung.",
+        "sections": [
+          {
+            "heading": "Auf dem eigenen Server",
+            "paragraphs": [
+              "LubeLogger ist ein quelloffenes Tank- und Wartungsbuch. MyGarage ist ebenfalls selbst hostbar und dokumentiert OBD2-Telemetrie. MASHINA kombiniert Servicehistorie, Tankzyklen, Reifen und Schadensfotos in einer mobilen Weboberfläche mit Docker-Image und isolierter Demo."
+            ]
+          },
+          {
+            "heading": "Auf dem Smartphone",
+            "paragraphs": [
+              "Fuelio speichert Daten auf dem Gerät und bietet CSV-Export und Sicherungen. Drivvo verwaltet Tankvorgänge, Kosten und Wartung für Fahrer und Fuhrparks."
+            ]
+          },
+          {
+            "heading": "Beim Wechsel",
+            "paragraphs": [
+              "Sichere die Originaldateien. Prüfe an wenigen Einträgen Datum, Kilometerstand, Währung, Summe und Anhänge. Beim Selbsthosting bist du für Updates und Sicherungen verantwortlich."
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "Reifendruck beim Auto prüfen und Reifenwechsel dokumentieren",
+        "description": "Finde den Sollwert für kalte Reifen und dokumentiere Montage und Profiltiefe.",
+        "sections": [
+          {
+            "heading": "Der Sollwert steht am Auto",
+            "paragraphs": [
+              "Sieh am Fahrzeugaufkleber oder im Handbuch nach. Der Maximalwert auf der Reifenflanke ersetzt die Fahrzeugangabe nicht. Reifengröße, Achse und Beladung können den Sollwert ändern. Miss bei kalten Reifen."
+            ]
+          },
+          {
+            "heading": "Jeden Satz getrennt führen",
+            "paragraphs": [
+              "Notiere Datum, Kilometerstand, Reifengröße, Position und Profiltiefe beim Wechsel. Miss später an denselben Stellen. In MASHINA kannst du Montagehistorie und Profiltiefen mit Datum speichern."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "fr": {
+    "ui": {
+      "name": "Français",
+      "articles": "Guides",
+      "languages": "Choisir la langue",
+      "skip": "Aller au contenu",
+      "install": "Installer MASHINA",
+      "related": "Autres guides",
+      "calculate": "Calculer",
+      "distance": "Distance",
+      "fuel": "Carburant ajouté",
+      "litres": "Litres",
+      "km": "Kilomètres",
+      "miles": "Miles",
+      "invalid": "Saisissez des valeurs positives pour la distance et le carburant.",
+      "download": "Télécharger le carnet CSV",
+      "sources": "Sources",
+      "vehicle": "Véhicule",
+      "date": "Date",
+      "odometer": "Kilométrage",
+      "entry": "Type",
+      "amount": "Montant",
+      "currency": "Devise",
+      "notes": "Notes",
+      "fillup": "Carburant",
+      "service": "Entretien",
+      "example": "Exemple fictif"
+    },
+    "articles": {
+      "fuel": {
+        "title": "Calcul de consommation de carburant aux 100 km",
+        "description": "Calculez la consommation réelle entre deux pleins en L/100 km, km/L et MPG.",
+        "sections": [
+          {
+            "heading": "Mesurer de plein à plein",
+            "paragraphs": [
+              "Faites le plein et notez le compteur. Au plein suivant, calculez la distance parcourue et additionnez les litres achetés après le premier plein, y compris les appoints. Écartez la quantité du plein initial.",
+              "Avec 39 L sur 520 km, vous obtenez 7,5 L/100 km. Divisez les litres par la distance en kilomètres et multipliez par 100. Le calculateur accepte aussi les miles et distingue les gallons américains et impériaux."
+            ]
+          },
+          {
+            "heading": "Comparer plusieurs cycles",
+            "paragraphs": [
+              "Additionnez les litres et les distances des cycles complets avant de calculer la moyenne. Vérifiez les reçus manquants et le kilométrage. MASHINA utilise les cycles complets de votre journal."
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "Calendrier d’entretien voiture par date et kilométrage",
+        "description": "Préparez votre carnet d’entretien selon le manuel de votre véhicule et programmez les prochaines révisions.",
+        "sections": [
+          {
+            "heading": "Partir du manuel",
+            "paragraphs": [
+              "Repérez la version exacte du véhicule, son moteur et son année. Notez la date et le kilométrage du dernier entretien pour chaque opération. Si deux échéances sont prévues, retenez celle qui arrive en premier.",
+              "Distinguez la vidange et le filtre, le liquide de frein, le liquide de refroidissement et les filtres habitacle et moteur. Consultez les consignes du constructeur pour les usages sévères."
+            ]
+          },
+          {
+            "heading": "Programmer la prochaine révision",
+            "paragraphs": [
+              "Exemple fictif : vidange en mars à 40 000 km, intervalle de 10 000 km ou douze mois. Planifiez 50 000 km et le mois de mars suivant. Après l’intervention, saisissez le kilométrage réel et conservez la facture."
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "Modèle gratuit de carnet d’entretien voiture en CSV",
+        "description": "Téléchargez un fichier pour suivre les révisions, le carburant, le kilométrage et les coûts.",
+        "sections": [
+          {
+            "heading": "Une ligne par événement",
+            "paragraphs": [
+              "Inscrivez le véhicule, la date, le kilométrage, la catégorie, le montant et la devise. Ajoutez les litres pour un plein et les pièces pour une réparation. Gardez le reçu ou sa référence.",
+              "Importez le CSV dans votre tableur avec l’encodage UTF-8 et la virgule comme séparateur. Remplacez les lignes fictives. Gardez des unités cohérentes pour chaque véhicule."
+            ]
+          },
+          {
+            "heading": "Reprendre l’historique d’une occasion",
+            "paragraphs": [
+              "Comparez les dates et les compteurs sur les factures. Laissez les périodes inconnues sans inventer d’entretien. Conservez les originaux et testez quelques lignes avant de transférer l’historique vers une application."
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "Calculer le coût réel d’une voiture au kilomètre",
+        "description": "Distinguez les dépenses payées et le budget avec un exemple au kilomètre.",
+        "sections": [
+          {
+            "heading": "Faire le total des dépenses",
+            "paragraphs": [
+              "Sur 900 km, 120 € de carburant, 80 € d’entretien et 30 € de stationnement font 230 €. Le coût payé est de 0,26 € par kilomètre."
+            ]
+          },
+          {
+            "heading": "Prévoir les coûts annuels",
+            "paragraphs": [
+              "Une assurance de 600 € par an représente une réserve de 50 € par mois. Le budget devient 280 € ou 0,31 € par km. Inscrivez la prime le mois où vous la payez. Pour un coût de possession complet, ajoutez la décote séparément."
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "Alternatives à LubeLogger et carnets auto auto-hébergés",
+        "description": "Comparez MASHINA, LubeLogger, MyGarage, Fuelio et Drivvo selon l’hébergement et l’export.",
+        "sections": [
+          {
+            "heading": "Sur votre serveur",
+            "paragraphs": [
+              "LubeLogger est un carnet de suivi du carburant et de l’entretien à code ouvert. MyGarage est également auto-hébergé et documente la télémétrie OBD2. MASHINA réunit plusieurs véhicules, les cycles de carburant, les pneus et les photos de dommages dans une interface web mobile."
+            ]
+          },
+          {
+            "heading": "Sur votre téléphone",
+            "paragraphs": [
+              "Fuelio conserve les données sur l’appareil et propose l’export CSV et des sauvegardes. Drivvo suit le carburant, l’entretien et les coûts pour les conducteurs et les flottes."
+            ]
+          },
+          {
+            "heading": "Avant de changer",
+            "paragraphs": [
+              "Gardez les exports d’origine. Vérifiez dates, unités, devises et pièces jointes sur quelques entrées. Avec un serveur personnel, vous gérez aussi les mises à jour et les sauvegardes."
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "Vérifier la pression des pneus et suivre leur usure",
+        "description": "Trouvez la pression à froid de votre voiture et tenez l’historique de vos trains de pneus.",
+        "sections": [
+          {
+            "heading": "Lire la valeur du constructeur",
+            "paragraphs": [
+              "Consultez l’étiquette du véhicule ou son manuel. Le maximum imprimé sur le flanc du pneu ne remplace pas la consigne du constructeur. Vérifiez à froid et tenez compte de l’essieu, de la dimension et de la charge."
+            ]
+          },
+          {
+            "heading": "Suivre chaque train",
+            "paragraphs": [
+              "À chaque montage, notez la date, le kilométrage, la dimension, la position et la profondeur des sculptures. Comparez des mesures prises aux mêmes endroits. MASHINA enregistre les montages et les mesures datées."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "es": {
+    "ui": {
+      "name": "Español",
+      "articles": "Guías",
+      "languages": "Elegir idioma",
+      "skip": "Ir al contenido",
+      "install": "Instalar MASHINA",
+      "related": "Otras guías",
+      "calculate": "Calcular",
+      "distance": "Distancia",
+      "fuel": "Combustible repostado",
+      "litres": "Litros",
+      "km": "Kilómetros",
+      "miles": "Millas",
+      "invalid": "Introduce valores positivos para la distancia y el combustible.",
+      "download": "Descargar registro CSV",
+      "sources": "Fuentes",
+      "vehicle": "Vehículo",
+      "date": "Fecha",
+      "odometer": "Kilometraje",
+      "entry": "Tipo",
+      "amount": "Importe",
+      "currency": "Moneda",
+      "notes": "Notas",
+      "fillup": "Combustible",
+      "service": "Mantenimiento",
+      "example": "Ejemplo ficticio"
+    },
+    "articles": {
+      "fuel": {
+        "title": "Calculadora de consumo de combustible y rendimiento de gasolina",
+        "description": "Calcula el consumo real en L/100 km, km/L y MPG con el método de tanque lleno.",
+        "sections": [
+          {
+            "heading": "De tanque lleno a tanque lleno",
+            "paragraphs": [
+              "Llena el depósito y anota el kilometraje. Al llenarlo de nuevo, resta las dos lecturas. Suma el combustible comprado después del primer llenado, incluidas las cargas parciales. Excluye la cantidad del primer tanque.",
+              "Si cargaste 39 litros en 520 km, el consumo es de 7,5 L/100 km y el rendimiento es de 13,33 km/L. El cálculo sirve para gasolina, nafta o diésel y distingue MPG de EE. UU. e imperial."
+            ]
+          },
+          {
+            "heading": "Compara ciclos completos",
+            "paragraphs": [
+              "Suma los litros y las distancias de varios ciclos completos. Revisa si falta alguna carga o si hay un error en el odómetro. MASHINA calcula los ciclos completos a partir de tus registros."
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "Plan de mantenimiento del auto por kilometraje y tiempo",
+        "description": "Organiza el mantenimiento del coche según el manual y programa recordatorios de servicio.",
+        "sections": [
+          {
+            "heading": "Consulta el programa del fabricante",
+            "paragraphs": [
+              "Comprueba el modelo, motor y año. Anota la última fecha y lectura para cada trabajo. Cuando el manual indique tiempo y distancia, usa el límite que llegue primero.",
+              "Separa aceite y filtro, líquido de frenos, refrigerante y filtro de cabina. Revisa si la conducción en condiciones exigentes cambia el intervalo."
+            ]
+          },
+          {
+            "heading": "Programa el siguiente servicio",
+            "paragraphs": [
+              "Ejemplo ficticio: cambio de aceite en marzo a los 40 000 km, con intervalo de 10 000 km o doce meses. Programa el recordatorio para los 50 000 km y el siguiente marzo. Después, registra el kilometraje real y guarda la factura."
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "Plantilla CSV para el historial de mantenimiento del auto",
+        "description": "Descarga un registro para servicios, repostajes, kilometraje, gastos y comprobantes.",
+        "sections": [
+          {
+            "heading": "Una fila por evento",
+            "paragraphs": [
+              "Anota vehículo, fecha, odómetro, categoría, importe y moneda. Añade litros en los repostajes y los trabajos y repuestos en los servicios. Guarda el comprobante o su referencia.",
+              "Abre el CSV como UTF-8 con comas y sustituye los ejemplos ficticios. Usa unidades y monedas coherentes para cada vehículo."
+            ]
+          },
+          {
+            "heading": "Si compras un vehículo usado",
+            "paragraphs": [
+              "Compara fechas y kilometrajes de las facturas. Marca los periodos sin historial como desconocidos y empieza con el odómetro del día de entrega. Prueba unas pocas filas antes de trasladar el historial a otra herramienta."
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "Cómo calcular el coste de un coche por kilómetro",
+        "description": "Calcula los gastos del vehículo por kilómetro y separa los pagos anuales del gasto mensual.",
+        "sections": [
+          {
+            "heading": "Suma los gastos pagados",
+            "paragraphs": [
+              "Un auto recorre 900 km. Gasta 120 en combustible, 80 en mantenimiento y 30 en estacionamiento, en una misma moneda. El total es 230, o 0,26 por km."
+            ]
+          },
+          {
+            "heading": "Reserva para pagos anuales",
+            "paragraphs": [
+              "Un seguro de 600 al año requiere reservar 50 al mes. El presupuesto sería de 280, o 0,31 por km. Registra el pago cuando se produzca. Añade la depreciación por separado si quieres calcular todo el coste de propiedad."
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "Alternativas a LubeLogger y registros de autos autohospedados",
+        "description": "Compara MASHINA, LubeLogger, MyGarage, Fuelio y Drivvo por alojamiento y control de datos.",
+        "sections": [
+          {
+            "heading": "En tu propio servidor",
+            "paragraphs": [
+              "LubeLogger es un registro de código abierto para combustible y mantenimiento. MyGarage también se puede alojar en un servidor propio y documenta telemetría OBD2. MASHINA reúne varios vehículos, ciclos de consumo, neumáticos y fotos de daños en una interfaz web móvil."
+            ]
+          },
+          {
+            "heading": "En el teléfono",
+            "paragraphs": [
+              "Fuelio guarda los datos en el dispositivo y ofrece exportación CSV y copias de seguridad. Drivvo registra gastos, combustible y mantenimiento para conductores y flotas."
+            ]
+          },
+          {
+            "heading": "Antes de migrar",
+            "paragraphs": [
+              "Guarda los archivos originales. Comprueba fechas, unidades, monedas y adjuntos con unas pocas entradas. Si instalas el servicio en tu servidor, las actualizaciones y las copias quedan a tu cargo."
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "Cómo revisar la presión de los neumáticos y registrar los cambios",
+        "description": "Consulta la presión en frío y lleva un historial de tus llantas o neumáticos.",
+        "sections": [
+          {
+            "heading": "Busca el valor indicado para tu auto",
+            "paragraphs": [
+              "Consulta la etiqueta del vehículo o el manual. El máximo del flanco no sustituye la presión recomendada para el auto. Comprueba el valor para cada eje, tamaño y carga. Mide con los neumáticos fríos."
+            ]
+          },
+          {
+            "heading": "Identifica cada juego",
+            "paragraphs": [
+              "Registra fecha, kilometraje, medidas, posición y profundidad del dibujo cuando hagas un cambio. Compara mediciones tomadas en los mismos puntos. MASHINA guarda el montaje y la profundidad con fecha."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "hi": {
+    "ui": {
+      "name": "हिन्दी",
+      "articles": "गाइड",
+      "languages": "भाषा चुनें",
+      "skip": "सामग्री पर जाएँ",
+      "install": "MASHINA इंस्टॉल करें",
+      "related": "अन्य गाइड",
+      "calculate": "गणना करें",
+      "distance": "दूरी",
+      "fuel": "भरा गया ईंधन",
+      "litres": "लीटर",
+      "km": "किलोमीटर",
+      "miles": "मील",
+      "invalid": "दूरी और ईंधन के लिए शून्य से बड़ी संख्याएँ डालें।",
+      "download": "सर्विस लॉग की CSV डाउनलोड करें",
+      "sources": "स्रोत",
+      "vehicle": "वाहन",
+      "date": "तारीख",
+      "odometer": "ओडोमीटर",
+      "entry": "रिकॉर्ड का प्रकार",
+      "amount": "रकम",
+      "currency": "मुद्रा",
+      "notes": "नोट",
+      "fillup": "ईंधन",
+      "service": "सर्विस",
+      "example": "काल्पनिक उदाहरण"
+    },
+    "articles": {
+      "fuel": {
+        "title": "कार का माइलेज कैसे निकालें – माइलेज कैलकुलेटर",
+        "description": "टैंक फुल करने की विधि से कार का माइलेज km/L, L/100 km और MPG में निकालें।",
+        "sections": [
+          {
+            "heading": "दो बार टैंक फुल करके मापें",
+            "paragraphs": [
+              "पहली बार टैंक फुल करें और ओडोमीटर नोट करें। अगली बार टैंक फुल करने पर दोनों रीडिंग का अंतर निकालें। पहली भराई के बाद डाला गया सारा ईंधन जोड़ें, जिसमें बीच की छोटी भराइयाँ भी हैं।",
+              "520 किमी में 39 लीटर लगे तो माइलेज 13.33 किमी/लीटर है। यही खपत 7.5 लीटर प्रति 100 किमी है। कैलकुलेटर मील और अमेरिकी व ब्रिटिश MPG भी दिखाता है।"
+            ]
+          },
+          {
+            "heading": "कई चक्रों से बेहतर अंदाज़ा",
+            "paragraphs": [
+              "कई पूरे चक्रों की कुल दूरी और कुल ईंधन जोड़कर हिसाब लगाएँ। कोई भराई छूटी हो तो तुलना से पहले उसे जाँचें। MASHINA दर्ज की गई भराइयों से पूरे चक्रों का हिसाब लगाती है।"
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "कार की सर्विस कब कराएँ – किलोमीटर और समय का शेड्यूल",
+        "description": "कार के मैनुअल से सर्विस सूची बनाएं और अगली तारीख या किलोमीटर तय करें।",
+        "sections": [
+          {
+            "heading": "पहले सही सर्विस शेड्यूल देखें",
+            "paragraphs": [
+              "मॉडल, इंजन और वर्ष के लिए निर्माता की सूची देखें। हर काम की पिछली तारीख और ओडोमीटर लिखें। अगर समय और दूरी दोनों की सीमा दी गई है तो जो पहले आए उसे मानें।",
+              "इंजन ऑयल और फ़िल्टर, ब्रेक फ़्लूइड, कूलेंट और केबिन फ़िल्टर अलग दर्ज करें। कठिन परिस्थितियों में चलाने पर निर्माता की विशेष सूची देखें।"
+            ]
+          },
+          {
+            "heading": "अगली सर्विस तय करें",
+            "paragraphs": [
+              "काल्पनिक उदाहरण में मार्च में 40,000 किमी पर ऑयल बदला गया। यदि अंतराल 10,000 किमी या बारह महीने है, तो 50,000 किमी और अगले मार्च का रिमाइंडर रखें। काम होने पर वास्तविक तारीख और रसीद जोड़ें।"
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "कार सर्विस रिकॉर्ड का मुफ्त CSV टेम्पलेट",
+        "description": "सर्विस, पेट्रोल, खर्च, किलोमीटर और रसीदें दर्ज करने के लिए CSV डाउनलोड करें।",
+        "sections": [
+          {
+            "heading": "हर काम के लिए एक पंक्ति",
+            "paragraphs": [
+              "वाहन, तारीख, ओडोमीटर, खर्च का प्रकार, राशि और मुद्रा लिखें। पेट्रोल के लिए लीटर और सर्विस के लिए काम या पार्ट का नाम जोड़ें। रसीद की फ़ाइल का नाम भी लिख सकते हैं।",
+              "स्प्रेडशीट में UTF-8 और कॉमा चुनकर CSV खोलें। काल्पनिक पंक्तियों की जगह अपना डेटा लिखें। एक वाहन के लिए इकाइयाँ एक जैसी रखें।"
+            ]
+          },
+          {
+            "heading": "पुरानी कार खरीदते समय",
+            "paragraphs": [
+              "बिलों की तारीख और किलोमीटर मिलाएँ। जहाँ इतिहास उपलब्ध न हो वहाँ उसे अनजान रखें और डिलीवरी के दिन की रीडिंग से शुरू करें। डेटा किसी ऐप में ले जाने से पहले कुछ पंक्तियाँ जाँचें।"
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "कार चलाने का खर्च प्रति किलोमीटर कैसे निकालें",
+        "description": "मासिक खर्च और बीमा के लिए अलग बजट का एक उदाहरण देखें।",
+        "sections": [
+          {
+            "heading": "चुकाया गया खर्च जोड़ें",
+            "paragraphs": [
+              "900 किमी चलने वाली कार पर पेट्रोल के ₹7,200, सर्विस के ₹4,800 और पार्किंग के ₹1,600 लगे। कुल ₹13,600 यानी ₹15.11 प्रति किमी।"
+            ]
+          },
+          {
+            "heading": "सालाना बिल के लिए राशि अलग रखें",
+            "paragraphs": [
+              "सालाना बीमा ₹14,400 है तो हर महीने ₹1,200 का बजट रखें। नया बजट ₹14,800 या ₹16.44 प्रति किमी है। बीमा भुगतान सिर्फ़ भुगतान वाले महीने में दर्ज करें। पूरी मालिकाना लागत में कार के मूल्य में कमी अलग जोड़ सकते हैं।"
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "LubeLogger के विकल्प और अपने सर्वर पर कार सर्विस लॉग",
+        "description": "होस्टिंग, डेटा और बैकअप के आधार पर MASHINA, LubeLogger, MyGarage, Fuelio और Drivvo देखें।",
+        "sections": [
+          {
+            "heading": "अपने सर्वर पर",
+            "paragraphs": [
+              "LubeLogger एक ओपन-सोर्स सर्विस और ईंधन रिकॉर्ड है। MyGarage भी अपने सर्वर पर चलता है और OBD2 टेलीमेट्री का दस्तावेज़ देता है। MASHINA में कई गाड़ियों का इतिहास, ईंधन चक्र, टायर और क्षति की तस्वीरें मोबाइल वेब इंटरफ़ेस में मिलती हैं।"
+            ]
+          },
+          {
+            "heading": "फ़ोन पर",
+            "paragraphs": [
+              "Fuelio रिकॉर्ड डिवाइस पर रखता है और CSV एक्सपोर्ट व बैकअप देता है। Drivvo ड्राइवर और फ़्लीट के लिए ईंधन, खर्च और सर्विस दर्ज करता है।"
+            ]
+          },
+          {
+            "heading": "रिकॉर्ड बदलने से पहले",
+            "paragraphs": [
+              "मूल एक्सपोर्ट संभालें। पहले कुछ रिकॉर्ड में तारीख, दूरी, मुद्रा, रकम और फ़ाइलें जाँचें। अपने सर्वर पर अपडेट और बैकअप की ज़िम्मेदारी आपकी होती है।"
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "कार के टायर का प्रेशर कैसे जाँचें",
+        "description": "कार निर्माता का ठंडे टायर वाला प्रेशर देखें और टायर बदलने का रिकॉर्ड रखें।",
+        "sections": [
+          {
+            "heading": "कार पर दिया प्रेशर देखें",
+            "paragraphs": [
+              "निर्माता का लेबल या मैनुअल देखें। टायर की साइड पर लिखा अधिकतम दबाव कार के लिए सुझाया दबाव नहीं बताता। आगे और पीछे के पहियों, लोड या टायर आकार के हिसाब से मान बदल सकता है। ठंडे टायर पर मापें।"
+            ]
+          },
+          {
+            "heading": "हर सेट का रिकॉर्ड अलग रखें",
+            "paragraphs": [
+              "तारीख, ओडोमीटर, टायर का आकार, पहिए की जगह और ट्रेड की गहराई लिखें। अगली बार उसी जगह मापें। MASHINA में टायर लगाने और ट्रेड मापने की तारीख दर्ज कर सकते हैं।"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "ar": {
+    "ui": {
+      "name": "العربية",
+      "articles": "الأدلة",
+      "languages": "اختيار اللغة",
+      "skip": "انتقل إلى المحتوى",
+      "install": "تثبيت MASHINA",
+      "related": "أدلة أخرى",
+      "calculate": "احسب",
+      "distance": "المسافة",
+      "fuel": "الوقود المضاف",
+      "litres": "لتر",
+      "km": "كيلومتر",
+      "miles": "ميل",
+      "invalid": "أدخل قيمًا موجبة للمسافة والوقود.",
+      "download": "نزّل سجل السيارة بصيغة CSV",
+      "sources": "المصادر",
+      "vehicle": "السيارة",
+      "date": "التاريخ",
+      "odometer": "عداد المسافة",
+      "entry": "نوع السجل",
+      "amount": "المبلغ",
+      "currency": "العملة",
+      "notes": "ملاحظات",
+      "fillup": "وقود",
+      "service": "صيانة",
+      "example": "مثال افتراضي"
+    },
+    "articles": {
+      "fuel": {
+        "title": "حاسبة استهلاك الوقود وحساب البنزين لكل 100 كم",
+        "description": "احسب استهلاك سيارتك الفعلي باللتر لكل 100 كم أو بالكيلومتر لكل لتر أو بوحدة MPG.",
+        "sections": [
+          {
+            "heading": "احسب بين تعبئتين كاملتين",
+            "paragraphs": [
+              "املأ الخزان وسجّل قراءة العداد. عند التعبئة الكاملة التالية احسب فرق المسافة واجمع كل الوقود المضاف بعد التعبئة الأولى، بما في ذلك التعبئات الجزئية. استبعد كمية التعبئة الأولى.",
+              "إذا قطعت 520 كم واستهلكت 39 لترًا، فالنتيجة 7.5 لتر لكل 100 كم. تقبل الحاسبة الأميال أيضًا وتفرّق بين الغالون الأمريكي والإمبراطوري."
+            ]
+          },
+          {
+            "heading": "قارن عدة دورات كاملة",
+            "paragraphs": [
+              "اجمع الوقود والمسافات في الدورات المكتملة قبل الحساب. تحقق من التعبئات المفقودة ومن قراءة العداد. يحسب MASHINA الدورات المكتملة من سجل التعبئات."
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "جدول صيانة السيارة حسب الكيلومترات والوقت",
+        "description": "أعد جدول الصيانة حسب دليل سيارتك واضبط تذكيرًا بالتاريخ أو المسافة.",
+        "sections": [
+          {
+            "heading": "ابدأ بدليل السيارة",
+            "paragraphs": [
+              "راجع جدول الطراز والمحرك وسنة الصنع. سجّل آخر تاريخ وقراءة للعداد لكل عملية. إذا حدد الدليل مدة ومسافة فاعتمد الموعد الذي يحين أولًا.",
+              "دوّن كلًا من الزيت والمرشح وسائل الفرامل وسائل التبريد ومرشح المقصورة في بند منفصل. تحقق من شروط الاستخدام الشاق في دليل الصانع."
+            ]
+          },
+          {
+            "heading": "حدد الموعد التالي",
+            "paragraphs": [
+              "مثال افتراضي: تغيير الزيت في مارس عند 40 ألف كم كل 10 آلاف كم أو 12 شهرًا. اضبط التذكير عند 50 ألف كم وفي مارس التالي. بعد الصيانة سجّل القراءة الفعلية واحتفظ بالفاتورة."
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "نموذج سجل صيانة السيارة بصيغة CSV",
+        "description": "نزّل جدولًا لسجل الصيانة والوقود والعداد والمصروفات والفواتير.",
+        "sections": [
+          {
+            "heading": "صف لكل عملية",
+            "paragraphs": [
+              "أدخل السيارة والتاريخ وقراءة العداد والنوع والمبلغ والعملة. أضف عدد اللترات للتعبئة واسم العمل أو القطعة للصيانة. احتفظ بالفاتورة أو مرجعها.",
+              "افتح الملف بترميز UTF-8 والفاصلة كفاصل للحقول. استبدل الصفوف الافتراضية ببياناتك واستخدم وحدات متسقة لكل سيارة."
+            ]
+          },
+          {
+            "heading": "إذا اشتريت سيارة مستعملة",
+            "paragraphs": [
+              "قارن التواريخ وقراءات العداد على الفواتير. اترك الفترات المجهولة كما هي وابدأ سجلّك بقراءة الاستلام. اختبر بضعة صفوف قبل نقل البيانات إلى تطبيق آخر."
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "حساب تكلفة تشغيل السيارة لكل كيلومتر",
+        "description": "احسب المصروف الشهري وتكلفة الكيلومتر وأضف احتياطًا للتأمين.",
+        "sections": [
+          {
+            "heading": "اجمع المدفوعات الفعلية",
+            "paragraphs": [
+              "في مثال افتراضي قطعت السيارة 900 كم. بلغ الوقود 120 والصيانة 80 والمواقف 30 بالعملة نفسها. الإجمالي 230، أي 0.26 لكل كيلومتر."
+            ]
+          },
+          {
+            "heading": "خصص ميزانية للفواتير السنوية",
+            "paragraphs": [
+              "إذا كان التأمين 600 سنويًا، خصص 50 شهريًا. تصبح الميزانية 280، أي 0.31 لكل كم. سجّل الفاتورة في شهر دفعها. أضف انخفاض قيمة السيارة بندًا مستقلًا لحساب تكلفة الملكية الكاملة."
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "بدائل LubeLogger وسجلات السيارات على خادمك",
+        "description": "قارن MASHINA وLubeLogger وMyGarage وFuelio وDrivvo بحسب الاستضافة وتصدير البيانات.",
+        "sections": [
+          {
+            "heading": "على خادمك الخاص",
+            "paragraphs": [
+              "LubeLogger سجل مفتوح المصدر للصيانة والوقود. يعمل MyGarage أيضًا على خادمك ويوثّق استخدام OBD2. يجمع MASHINA سجلات عدة سيارات مع دورات الوقود والإطارات وصور الأضرار في واجهة ويب مناسبة للهاتف."
+            ]
+          },
+          {
+            "heading": "على الهاتف",
+            "paragraphs": [
+              "يحتفظ Fuelio بالسجل على الجهاز ويدعم تصدير CSV والنسخ الاحتياطي. يتتبع Drivvo الوقود والتكاليف والصيانة للسائقين والأساطيل."
+            ]
+          },
+          {
+            "heading": "قبل النقل",
+            "paragraphs": [
+              "احتفظ بالملفات الأصلية. اختبر بضعة قيود وتحقق من التواريخ والوحدات والعملات والمرفقات. عند تشغيل التطبيق على خادمك تتولى التحديث والنسخ الاحتياطي."
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "طريقة فحص ضغط الإطارات وتسجيل تبديلها",
+        "description": "اعرف ضغط الإطارات الصحيح لسيارتك وسجّل تاريخ التبديل وعمق المداس.",
+        "sections": [
+          {
+            "heading": "راجع ملصق السيارة",
+            "paragraphs": [
+              "استخدم دليل السيارة أو ملصقها. الحد الأقصى على جانب الإطار لا يحدد ضغط التشغيل الموصى به. قد تختلف القيمة حسب المحور أو المقاس أو الحمولة. افحص الضغط والإطارات باردة."
+            ]
+          },
+          {
+            "heading": "سجّل كل طقم",
+            "paragraphs": [
+              "عند التبديل سجّل التاريخ وقراءة العداد والمقاس وموقع الإطار وعمق المداس. قارن القياسات في المواضع نفسها. في MASHINA يمكن حفظ تاريخ التركيب والقياسات."
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "zh-Hans": {
+    "ui": {
+      "name": "简体中文",
+      "articles": "用车指南",
+      "languages": "选择语言",
+      "skip": "跳到正文",
+      "install": "安装 MASHINA",
+      "related": "相关阅读",
+      "calculate": "计算",
+      "distance": "行驶距离",
+      "fuel": "加油量",
+      "litres": "升",
+      "km": "公里",
+      "miles": "英里",
+      "invalid": "请输入大于零的里程和油量。",
+      "download": "下载养车记录 CSV",
+      "sources": "资料来源",
+      "vehicle": "车辆",
+      "date": "日期",
+      "odometer": "里程表",
+      "entry": "记录类型",
+      "amount": "金额",
+      "currency": "币种",
+      "notes": "备注",
+      "fillup": "加油",
+      "service": "保养",
+      "example": "虚构示例"
+    },
+    "articles": {
+      "fuel": {
+        "title": "油耗计算器：百公里油耗怎么算",
+        "description": "用加满到加满的方法计算百公里油耗、每升行驶距离和美制或英制 MPG。",
+        "sections": [
+          {
+            "heading": "从一次加满到下一次加满",
+            "paragraphs": [
+              "先将油箱加满并记下里程表。下次加满时计算两次读数的差，并把第一次加满之后的加油量相加，包含中途没有加满的记录。第一次加满的升数不计入。",
+              "行驶 520 公里消耗 39 升，结果是 7.5 升/百公里。油量除以公里数再乘 100。也可以输入英里，查看两种 MPG。"
+            ]
+          },
+          {
+            "heading": "用多个完整周期核对",
+            "paragraphs": [
+              "把完整周期的里程和升数分别求和再计算。比较前检查有没有漏记加油或抄错里程。MASHINA 根据加油记录计算完整周期。"
+            ]
+          }
+        ]
+      },
+      "service": {
+        "title": "汽车保养周期表：按公里数和时间安排保养",
+        "description": "按车辆手册列出保养项目，并设置日期或公里数提醒。",
+        "sections": [
+          {
+            "heading": "先查对应车型的手册",
+            "paragraphs": [
+              "按车型、发动机和年份找到手册。逐项记下上次保养日期和里程。如果厂家同时规定时间和公里数，以先到者为准。",
+              "把机油及滤芯、制动液、冷却液和空调滤芯分开记录。常在短途或多尘环境行驶时，检查厂家是否有严苛工况说明。"
+            ]
+          },
+          {
+            "heading": "设定下一次提醒",
+            "paragraphs": [
+              "虚构示例：三月在 4 万公里更换机油，手册要求每 1 万公里或 12 个月更换。可分别设置 5 万公里和次年三月。完成后记录实际里程、配件和凭证。"
+            ]
+          }
+        ]
+      },
+      "log": {
+        "title": "汽车保养记录表 CSV 模板免费下载",
+        "description": "用一张表记录保养、加油、里程、费用和收据。",
+        "sections": [
+          {
+            "heading": "一项记录占一行",
+            "paragraphs": [
+              "填写车辆、日期、里程表、类型、金额和币种。加油时写升数，保养时写作业或零件。备注可以写收据的文件名。",
+              "用表格软件以 UTF-8 编码和逗号分隔打开 CSV，替换示例数据。每辆车应使用一致的里程单位和币种。"
+            ]
+          },
+          {
+            "heading": "接手二手车时",
+            "paragraphs": [
+              "核对单据日期与里程。没有证据的保养记录留空，从交车当天的读数开始。保留原始单据，导入新工具前用几行数据测试格式。"
+            ]
+          }
+        ]
+      },
+      "cost": {
+        "title": "养车成本怎么算：每公里花多少钱",
+        "description": "用一个例子区分月度实付、每公里成本与年度费用预算。",
+        "sections": [
+          {
+            "heading": "先统计当月实付",
+            "paragraphs": [
+              "一辆车行驶 900 公里，油费 720 元，保养 480 元，停车 160 元。合计 1,360 元，每公里约 1.51 元。"
+            ]
+          },
+          {
+            "heading": "把年度账单单独预算",
+            "paragraphs": [
+              "年保费 1,440 元，可每月预留 120 元。此时预算为 1,480 元，同样里程下约每公里 1.64 元。保费实付只记在缴费月份；比较车辆总持有成本时可另外计入折旧。"
+            ]
+          }
+        ]
+      },
+      "compare": {
+        "title": "LubeLogger 替代方案：自托管汽车保养和油耗记录",
+        "description": "对比 MASHINA、LubeLogger、MyGarage、Fuelio 和 Drivvo 的部署方式和数据保存。",
+        "sections": [
+          {
+            "heading": "部署到自己的服务器",
+            "paragraphs": [
+              "LubeLogger 是开源的自托管保养与加油记录工具。MyGarage 也能自托管，并提供 OBD2 遥测说明。MASHINA 在手机网页中记录多辆车的保养、完整加油周期、轮胎和损伤照片，提供 Docker 镜像和隔离的演示车库。"
+            ]
+          },
+          {
+            "heading": "直接在手机上使用",
+            "paragraphs": [
+              "Fuelio 将数据保存在设备上，提供 CSV 导出和备份。Drivvo 面向个人驾驶者和车队记录加油、费用和保养。"
+            ]
+          },
+          {
+            "heading": "迁移前核对",
+            "paragraphs": [
+              "保留原始导出文件。先选几条校验日期、里程单位、币种和附件。自托管时需要自行更新和管理备份。"
+            ]
+          }
+        ]
+      },
+      "tires": {
+        "title": "胎压多少正常？如何检查冷胎胎压和记录换胎",
+        "description": "了解从哪里查到适用胎压，并记录轮胎安装和胎纹深度。",
+        "sections": [
+          {
+            "heading": "从车辆标牌或手册查数值",
+            "paragraphs": [
+              "轮胎侧壁上的最大值不是车辆的推荐胎压。前后轴、轮胎尺寸和车辆载荷可能对应不同数值。冷胎时测量，并记下使用的单位。"
+            ]
+          },
+          {
+            "heading": "每套轮胎单独记录",
+            "paragraphs": [
+              "安装时记下日期、里程、尺寸、位置与胎纹深度。之后尽量在同一位置复测。MASHINA 可以保存轮胎安装历史与带日期的胎纹测量值。"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -34,11 +34,11 @@ python tools/check_migrations.py
 python tools/check_secrets.py
 ```
 
-After deployment verify HTTP 200 at `https://kosavan.github.io/mashina/`, its
-screenshot and `https://kosavan.github.io/mashina/sitemap.xml`. Inspect canonical
-and JSON-LD in page source and use Google's Rich Results Test. Structured data
-does not guarantee a rich result. There are no remote fonts, tracking or runtime
-scripts. A separate Russian landing page with reciprocal hreflang is future work.
+After deployment verify HTTP 200 for the home page, guide URLs and sitemap.
+Inspect canonical and reciprocal language links on the guides and JSON-LD on
+the home page. The build generates the sitemap from the published URLs.
+There are no remote fonts or tracking. The fuel calculator runs locally in the
+browser and sends no input to a server.
 
 ## Root robots rules
 

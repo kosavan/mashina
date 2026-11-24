@@ -7,6 +7,8 @@
 
 ## Публикации о проекте
 
+- На сайте собраны [статьи на восьми языках](https://kosavan.github.io/mashina/guides/ru/index.html) про расход топлива, график ТО, бортжурнал, стоимость владения, давление в шинах и аналоги для своего сервера.
+
 - На сайте проекта есть [гайд по ведению бортжурнала](https://kosavan.github.io/mashina/#vehicle-logbook-guide-ru) на русском и английском.
 - На сайте есть [пример расчёта расходов](https://kosavan.github.io/mashina/stoimost-vladeniya.html) и [демонстрация записи заправки с телефона](https://kosavan.github.io/mashina/#fill-up-demo) на вымышленных данных.
 - Релиз MASHINA 1.13.0 подан в Self-Host Weekly и [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Публикация зависит от решения площадок. Изучается пакет для каталога сообщества Runtipi.

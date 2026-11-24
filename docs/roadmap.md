@@ -7,6 +7,8 @@ validation and future work are separate. Dates are not delivery promises.
 
 ## Project discovery
 
+- The website provides [vehicle guides in eight languages](https://kosavan.github.io/mashina/guides/en/index.html) for fuel consumption, service schedules, logbook templates, ownership costs, tire pressure and self-hosted alternatives.
+
 - The project website includes a [vehicle logbook guide](https://kosavan.github.io/mashina/#vehicle-logbook-guide) in English and Russian.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.

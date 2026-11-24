@@ -1,0 +1,95 @@
+// !$*UTF8*$!
+{
+    archiveVersion = 1;
+    classes = {};
+    objectVersion = 56;
+    objects = {
+        A10000000000000000000001 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
+        A10000000000000000000002 = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+        A10000000000000000000003 = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+        A10000000000000000000004 = {isa = PBXFileReference; explicitFileType = wrapper.application; path = MASHINA.app; sourceTree = BUILT_PRODUCTS_DIR; };
+        A10000000000000000000005 = {isa = PBXBuildFile; fileRef = A10000000000000000000001; };
+        A10000000000000000000006 = {isa = PBXBuildFile; fileRef = A10000000000000000000002; };
+        A10000000000000000000007 = {
+            isa = PBXGroup;
+            children = (A10000000000000000000001, A10000000000000000000002, A10000000000000000000003, A10000000000000000000008);
+            sourceTree = "<group>";
+        };
+        A10000000000000000000008 = {
+            isa = PBXGroup;
+            children = (A10000000000000000000004);
+            name = Products;
+            sourceTree = "<group>";
+        };
+        A10000000000000000000009 = {
+            isa = PBXSourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (A10000000000000000000005);
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        A1000000000000000000000A = {
+            isa = PBXResourcesBuildPhase;
+            buildActionMask = 2147483647;
+            files = (A10000000000000000000006);
+            runOnlyForDeploymentPostprocessing = 0;
+        };
+        A1000000000000000000000B = {
+            isa = PBXNativeTarget;
+            buildConfigurationList = A1000000000000000000000F;
+            buildPhases = (A10000000000000000000009, A1000000000000000000000A);
+            buildRules = ();
+            dependencies = ();
+            name = MASHINA;
+            productName = MASHINA;
+            productReference = A10000000000000000000004;
+            productType = "com.apple.product-type.application";
+        };
+        A1000000000000000000000C = {
+            isa = PBXProject;
+            buildConfigurationList = A10000000000000000000010;
+            compatibilityVersion = "Xcode 14.0";
+            developmentRegion = en;
+            knownRegions = (en, Base);
+            mainGroup = A10000000000000000000007;
+            productRefGroup = A10000000000000000000008;
+            projectDirPath = "";
+            projectRoot = "";
+            targets = (A1000000000000000000000B);
+        };
+        A1000000000000000000000D = {
+            isa = XCBuildConfiguration;
+            name = Release;
+            buildSettings = {
+                ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+                GENERATE_INFOPLIST_FILE = NO;
+                INFOPLIST_FILE = Info.plist;
+                PRODUCT_BUNDLE_IDENTIFIER = ru.mashina.mobile;
+                PRODUCT_NAME = MASHINA;
+                TARGETED_DEVICE_FAMILY = "1,2";
+            };
+        };
+        A1000000000000000000000E = {
+            isa = XCBuildConfiguration;
+            name = Release;
+            buildSettings = {
+                IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+                SDKROOT = iphoneos;
+                SWIFT_VERSION = 5.0;
+                SWIFT_OPTIMIZATION_LEVEL = "-O";
+            };
+        };
+        A1000000000000000000000F = {
+            isa = XCConfigurationList;
+            buildConfigurations = (A1000000000000000000000D);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+        A10000000000000000000010 = {
+            isa = XCConfigurationList;
+            buildConfigurations = (A1000000000000000000000E);
+            defaultConfigurationIsVisible = 0;
+            defaultConfigurationName = Release;
+        };
+    };
+    rootObject = A1000000000000000000000C;
+}

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">MASHINA</string>
+    <string name="server">Server</string>
+    <string name="connect">Connect</string>
+    <string name="connect_title">Connect to MASHINA</string>
+    <string name="connect_help">Enter the HTTPS address of your MASHINA server.</string>
+    <string name="connecting">Checking server…</string>
+    <string name="bad_address">Enter an HTTPS server address without a path or credentials.</string>
+    <string name="server_failed">Could not verify MASHINA at that address. Check the address and certificate.</string>
+    <string name="page_failed">Could not open MASHINA. Check the connection and try again.</string>
+    <string name="retry">Try again</string>
+    <string name="loading">Opening MASHINA…</string>
+    <string name="download_unavailable">Open your server in a browser to download this file.</string>
+    <string name="download_saved">File saved.</string>
+    <string name="download_failed">Could not save the file. Check the connection and try again.</string>
+    <string name="no_picker">No file picker is available.</string>
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:colorAccent">#D1F76E</item>
+        <item name="android:windowBackground">#151816</item>
+        <item name="android:statusBarColor">#151816</item>
+        <item name="android:navigationBarColor">#151816</item>
+    </style>
+</resources>

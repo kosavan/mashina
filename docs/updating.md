@@ -28,6 +28,9 @@ until its pending entries have synced. If you also roll back the server, use
 the matching data archive and previous image or standalone package described
 below. [Mobile installation and signing](mobile-clients.md)
 
+For Android servers using a private CA, check that the owner's CA appears in
+the phone's trusted user certificates and verify HTTPS after updating.
+
 ## Release 1.13.0
 
 Use `v1.13.0` as `TARGET_TAG`. The schema remains 007. Synchronize pending browser/PWA entries and keep the full pre-update backup and previous image or standalone release. Use [the registry instructions](container-image.md#update-and-rollback) when switching an existing Docker installation to the published image, or follow [the standalone guide](standalone.md) for a Docker-free installation. Source builds can continue with the procedure below. Verify `/api/v1/health` reports version `1.13.0` and schema `007`, reopen the browser/PWA online, and check the local date and time on a new fill-up and the saved time on an existing fill-up. For rollback, use the previous runtime and its matching pre-update data archive.

@@ -31,8 +31,11 @@ are the minimum versions.
 For a local HTTP connection, join the same Wi-Fi or a VPN with a route to the
 server. The app accepts HTTP on private IPv4 addresses. Use HTTP only on a
 trusted network because the connection is unencrypted. Use a certificate
-trusted by your phone for HTTPS. On iPhone and iPad, allow access to the local
-network if prompted.
+trusted by your phone for HTTPS. For a private CA on Android, install the
+owner's CA through **Settings → Security and privacy → Encryption and
+credentials → Install a certificate → CA certificate**. On iPhone and iPad,
+enable full trust for the installed CA and allow local network access if
+prompted.
 
 For a Docker installation, set `MASHINA_BIND` to the computer's LAN IP and
 `MASHINA_ORIGIN` to the exact address entered on the phone, including its

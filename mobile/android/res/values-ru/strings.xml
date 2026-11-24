@@ -7,6 +7,7 @@
     <string name="connecting">Проверяем сервер…</string>
     <string name="bad_address">Введите локальный IPv4-адрес или HTTPS-ссылку без пути и учётных данных.</string>
     <string name="server_failed">Не удалось проверить MASHINA. Проверьте адрес, порт и подключение к сети.</string>
+    <string name="server_tls_failed">Не удалось установить HTTPS-соединение. Проверьте сертификат сервера и доверенный корневой сертификат в настройках Android.</string>
     <string name="page_failed">Не удалось открыть MASHINA. Проверьте подключение и попробуйте снова.</string>
     <string name="retry">Попробовать снова</string>
     <string name="loading">Открываем MASHINA…</string>

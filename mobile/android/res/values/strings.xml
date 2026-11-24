@@ -8,6 +8,7 @@
     <string name="connecting">Checking server…</string>
     <string name="bad_address">Enter a private IPv4 address or an HTTPS link without a path or credentials.</string>
     <string name="server_failed">Could not verify MASHINA. Check the address, port and network connection.</string>
+    <string name="server_tls_failed">Could not establish HTTPS. Check the server certificate and its trusted CA in Android settings.</string>
     <string name="page_failed">Could not open MASHINA. Check the connection and try again.</string>
     <string name="retry">Try again</string>
     <string name="loading">Opening MASHINA…</string>

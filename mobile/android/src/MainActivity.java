@@ -39,6 +39,7 @@ import java.net.URI;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.net.ssl.SSLException;
 
 public final class MainActivity extends Activity {
     private static final int BACKGROUND = Color.rgb(21, 24, 22);
@@ -163,14 +164,14 @@ public final class MainActivity extends Activity {
             confirm.setText(R.string.connecting);
             address.setEnabled(false);
             networkTasks.submit(() -> {
-                boolean valid = isMashina(candidate);
+                int error = checkServer(candidate);
                 runOnUiThread(() -> {
                     if (isDestroyed() || !dialog.isShowing()) return;
                     confirm.setEnabled(true);
                     confirm.setText(R.string.connect);
                     address.setEnabled(true);
-                    if (!valid) {
-                        address.setError(getString(R.string.server_failed));
+                    if (error != 0) {
+                        address.setError(getString(error));
                         return;
                     }
                     dialog.dismiss();
@@ -182,7 +183,7 @@ public final class MainActivity extends Activity {
         });
     }
 
-    private boolean isMashina(String candidate) {
+    private int checkServer(String candidate) {
         HttpURLConnection request = null;
         try {
             request = (HttpURLConnection) URI.create(candidate + "/api/v1/health")
@@ -190,7 +191,7 @@ public final class MainActivity extends Activity {
             request.setConnectTimeout(8000);
             request.setReadTimeout(8000);
             request.setInstanceFollowRedirects(false);
-            if (request.getResponseCode() != 200) return false;
+            if (request.getResponseCode() != 200) return R.string.server_failed;
             try (var stream = request.getInputStream()) {
                 byte[] body = new byte[4097];
                 int size = 0;
@@ -199,13 +200,18 @@ public final class MainActivity extends Activity {
                     if (count == -1) break;
                     size += count;
                 }
-                if (size == body.length) return false;
+                if (size == body.length) return R.string.server_failed;
                 JSONObject health = new JSONObject(new String(body, 0, size, java.nio.charset.StandardCharsets.UTF_8));
-                return "ok".equals(health.optString("status"))
-                        && !health.optString("version").isEmpty() && !health.optString("schema").isEmpty();
+                if ("ok".equals(health.optString("status"))
+                        && !health.optString("version").isEmpty() && !health.optString("schema").isEmpty()) {
+                    return 0;
+                }
+                return R.string.server_failed;
             }
+        } catch (SSLException failed) {
+            return R.string.server_tls_failed;
         } catch (Exception failed) {
-            return false;
+            return R.string.server_failed;
         } finally {
             if (request != null) request.disconnect();
         }

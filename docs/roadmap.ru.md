@@ -8,7 +8,8 @@
 ## Публикации о проекте
 
 - На сайте проекта есть [гайд по ведению бортжурнала](https://kosavan.github.io/mashina/#vehicle-logbook-guide-ru) на русском и английском.
-- В планах анонс релиза в сообществах self-hosting и заявка в ZimaOS App Store. Появление материалов зависит от решения площадок.
+- На сайте есть [пример расчёта расходов](https://kosavan.github.io/mashina/stoimost-vladeniya.html) и [демонстрация записи заправки с телефона](https://kosavan.github.io/mashina/#fill-up-demo) на вымышленных данных.
+- Релиз MASHINA 1.13.0 подан в Self-Host Weekly и [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Публикация зависит от решения площадок. Изучается пакет для каталога сообщества Runtipi.
 
 ## Установка и время заправки в 1.13.0
 

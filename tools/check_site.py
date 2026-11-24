@@ -3,11 +3,24 @@
 from html.parser import HTMLParser
 import json
 from pathlib import Path
+from urllib.parse import urlsplit
 import xml.etree.ElementTree as ET
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 BASE = "https://kosavan.github.io/mashina/"
+PAGES = {
+    "index.html": "",
+    "car-cost.html": "car-cost.html",
+    "stoimost-vladeniya.html": "stoimost-vladeniya.html",
+}
+PUBLIC_ASSETS = {
+    "assets/mashina-overview.png": "en/mashina-overview.png",
+    "assets/car-cost-analytics.png": "en/analytics.png",
+    "assets/car-cost-analytics-ru.png": "ru/analytics.png",
+    "assets/fill-up-demo.mp4": "en/fill-up-demo.mp4",
+    "assets/fill-up-demo.webp": "en/fill-up-demo.webp",
+}
 
 
 class Page(HTMLParser):
@@ -25,8 +38,10 @@ class Page(HTMLParser):
         attrs = dict(attrs)
         if "id" in attrs:
             self.ids.add(attrs["id"])
-        if tag in ("a", "link", "img"):
+        if tag in ("a", "link", "img", "video", "source"):
             self.links.append(attrs.get("href", attrs.get("src", "")))
+        if tag == "video" and "poster" in attrs:
+            self.links.append(attrs["poster"])
         if tag == "link" and attrs.get("rel") == "canonical":
             self.canonical = attrs.get("href")
         if tag == "meta" and attrs.get("name") == "description":
@@ -46,26 +61,32 @@ class Page(HTMLParser):
             self.schema += data
 
 
-page = Page()
-page.feed((SITE / "index.html").read_text(encoding="utf-8"))
-assert page.canonical == BASE and page.description and page.robots
-schema = json.loads(page.schema)
+pages = {}
+for filename, location in PAGES.items():
+    page = Page()
+    page.feed((SITE / filename).read_text(encoding="utf-8"))
+    assert page.canonical == BASE + location and page.description and page.robots, filename
+    pages[filename] = page
+schema = json.loads(pages["index.html"].schema)
 assert schema["@type"] == "SoftwareApplication" and schema["url"] == BASE
 assert schema["license"].endswith("/LICENSE")
 assert "aggregateRating" not in schema and "review" not in schema
-for link in page.links:
-    if link.startswith("https://"):
-        continue
-    if link.startswith("#"):
-        assert link[1:] in page.ids, link
-    elif link == "assets/mashina-overview.png":
-        assert (ROOT / "docs/assets/en/mashina-overview.png").is_file()
-    else:
-        assert (SITE / link).exists(), link
+for filename, page in pages.items():
+    for link in page.links:
+        if link.startswith("https://"):
+            continue
+        url = urlsplit(link)
+        target = "index.html" if url.path == "./" else url.path or filename
+        if target in PUBLIC_ASSETS:
+            assert (ROOT / "docs/assets" / PUBLIC_ASSETS[target]).is_file(), link
+        elif target in pages:
+            assert not url.fragment or url.fragment in pages[target].ids, link
+        else:
+            assert target == "style.css" and (SITE / target).is_file(), link
 tree = ET.parse(SITE / "sitemap.xml")
-assert [node.text for node in tree.findall(".//{*}loc")] == [BASE]
+assert [node.text for node in tree.findall(".//{*}loc")] == [BASE + path for path in PAGES.values()]
 output = ROOT / "dist-site"
 if output.exists():
     actual = {p.relative_to(output).as_posix() for p in output.rglob("*") if p.is_file()}
-    assert actual == {"index.html", "style.css", "sitemap.xml", ".nojekyll", "assets/mashina-overview.png"}
+    assert actual == {*PAGES, "style.css", "sitemap.xml", ".nojekyll", *PUBLIC_ASSETS}
 print("Site metadata, structured data, local links, sitemap and public file boundary passed.")

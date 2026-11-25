@@ -13,10 +13,10 @@ validation and future work are separate. Dates are not delivery promises.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.
 
-## In development
+## 1.15.0 vehicle ownership
 
-- Add a vehicle's registration and insurance history with payment and expiration dates, inspection results and private attachments. Show upcoming and expired renewals alongside the history. Renewal payments contribute to the existing spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)
-- Make fuel CSV imports easier to review when the source uses different column names. Preserve explicit currencies and supported fuel details, and keep the import preview and duplicate protection. [Issue #31](https://github.com/kosavan/mashina/issues/31)
+- Registration and insurance history shows payments, expiration dates and inspection results by vehicle. It supports private attachments and prefilled renewal reminders. Payments appear in spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)
+- History CSV imports support column mapping, date formats and default currencies, with a preview and duplicate detection. Supported fuel details and custom categories are preserved. [Issue #31](https://github.com/kosavan/mashina/issues/31)
 
 ## 1.14.0 mobile packages
 
@@ -114,7 +114,6 @@ ownership confirmation and sitemap submission remain owner actions.
 |---|---|---|
 | Ongoing | Safe upgrades | Every release tests supported schemas, restoration and offline-client compatibility |
 | Ongoing | Device/accessibility/performance | Physical iPhone, arm64, actual notifications and low-power benchmarks |
-| Next | CSV fuel-table column mapping ([#31](https://github.com/kosavan/mashina/issues/31)) | Interactive column mapping for arbitrary fuel spreadsheets with preview, odometer chronology checks and duplicate protection |
 | Later | Natural-language search | Local processing, permissions, measured resource budget |
 | Later | Expense bot and OBD-II | Optional owner-configured components, confirmed writes |
 | Later | Passkeys and more languages | Preserve existing login/data |

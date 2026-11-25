@@ -1,3 +1,12 @@
+# MASHINA 1.15.0
+
+- **Flexible history CSV import.** Map spreadsheet columns, choose the date format and default currency, and review rows before importing. Fuel records preserve supported details and custom categories. The preview flags duplicates. [#31](https://github.com/kosavan/mashina/issues/31)
+- **Registration and insurance.** See payments, expiration dates and renewal history for each car. Record inspection results, attach reports or policies, and prefill a renewal reminder. Payments also appear in spending analytics. [#45](https://github.com/kosavan/mashina/issues/45)
+
+Schema remains 007. Synchronize pending entries and keep a complete backup paired with the previous runtime. [Update and rollback](docs/updating.md) · [Обновление и откат](docs/updating.ru.md)
+
+---
+
 # MASHINA 1.14.0
 
 - Install the signed Android APK on Android 8.0 or later, or self-sign the unsigned IPA for iOS and iPadOS 16 or later.

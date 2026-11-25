@@ -1,0 +1,183 @@
+name: MASHINA mobile packages
+
+on:
+  pull_request:
+    paths:
+      - mobile/**
+      - .github/workflows/mobile.yml
+      - pyproject.toml
+      - frontend/public/icon-192.png
+      - frontend/public/maskable-512.png
+  push:
+    branches: [main, 'codex/**']
+    paths:
+      - mobile/**
+      - .github/workflows/mobile.yml
+      - pyproject.toml
+      - frontend/public/icon-192.png
+      - frontend/public/maskable-512.png
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable release tag, with successful CI and mobile checks on main
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: mashina-mobile-${{ inputs.tag || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    if: github.event_name != 'workflow_dispatch' || (github.repository == 'kosavan/mashina' && github.ref == 'refs/heads/main')
+    permissions:
+      contents: read
+      actions: read
+    outputs:
+      commit: ${{ steps.source.outputs.commit }}
+    steps:
+      - id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != workflow_dispatch ]]; then
+            printf 'commit=%s\n' "$GITHUB_SHA" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          test "$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG" --jq '(.draft == false) and (.prerelease == false)')" = true
+          commit=$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)
+          [[ "$commit" =~ ^[0-9a-f]{40}$ ]]
+          for workflow in ci.yml mobile.yml; do
+            run=$(gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/$workflow/runs" \
+              -f branch=main -f event=push -f status=success -f head_sha="$commit" \
+              --jq '.workflow_runs[0].html_url // empty')
+            if [[ -z "$run" ]]; then
+              echo "$workflow must pass on main at $commit." >&2
+              exit 1
+            fi
+            printf '[Exact-source %s](%s)\n\n' "$workflow" "$run" >> "$GITHUB_STEP_SUMMARY"
+          done
+          printf 'commit=%s\n' "$commit" >> "$GITHUB_OUTPUT"
+
+  android:
+    needs: source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: Install the pinned Android platform and build tools
+        run: |
+          sdk="$RUNNER_TEMP/mashina-android-sdk"
+          mkdir -p "$sdk/platforms" "$sdk/build-tools"
+          cd "$sdk"
+          base=https://dl.google.com/android/repository
+          curl -fsS --retry 3 -O "$base/platform-35_r02.zip"
+          curl -fsS --retry 3 -O "$base/build-tools_r35.0.1_linux.zip"
+          sha256sum --check <<'CHECKSUMS'
+          0988cacad01b38a18a47bac14a0695f246bc76c1b06c0ee8eb0dc825ab0c8e0  platform-35_r02.zip
+          5993499f3229a021b89f87088c57242aeefaa62316bf3d69da7de40bfd5350f1  build-tools_r35.0.1_linux.zip
+          CHECKSUMS
+          unzip -q platform-35_r02.zip -d "$sdk/platforms"
+          unzip -q build-tools_r35.0.1_linux.zip -d "$sdk/build-tools"
+          mv "$sdk/build-tools/android-15" "$sdk/build-tools/35.0.1"
+          printf 'ANDROID_SDK_ROOT=%s\n' "$sdk" >> "$GITHUB_ENV"
+      - if: github.event_name != 'workflow_dispatch'
+        run: bash mobile/build-android.sh preview
+      - if: github.event_name == 'workflow_dispatch'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.MASHINA_ANDROID_KEYSTORE_BASE64 }}
+          MASHINA_ANDROID_STORE_PASSWORD: ${{ secrets.MASHINA_ANDROID_STORE_PASSWORD }}
+          MASHINA_ANDROID_KEY_ALIAS: ${{ secrets.MASHINA_ANDROID_KEY_ALIAS }}
+          MASHINA_ANDROID_KEY_PASSWORD: ${{ secrets.MASHINA_ANDROID_KEY_PASSWORD }}
+        run: |
+          : "${KEYSTORE_BASE64:?Configure the Android release signing secrets first}"
+          umask 077
+          export MASHINA_ANDROID_KEYSTORE="$(mktemp)"
+          trap 'rm -f "$MASHINA_ANDROID_KEYSTORE"' EXIT
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode > "$MASHINA_ANDROID_KEYSTORE"
+          unset KEYSTORE_BASE64
+          bash mobile/build-android.sh release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mashina-android
+          path: dist/mobile/*.apk
+          if-no-files-found: error
+          overwrite: true
+
+  ios:
+    needs: source
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.source.outputs.commit }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: bash mobile/build-ios.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mashina-ios-unsigned
+          path: dist/mobile/*.ipa
+          if-no-files-found: error
+          overwrite: true
+
+  attach:
+    if: github.event_name == 'workflow_dispatch'
+    needs: [source, android, ios]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: mashina-*
+          merge-multiple: true
+          path: mobile-assets
+      - name: Add verified packages to the existing release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ inputs.tag }}
+          COMMIT: ${{ needs.source.outputs.commit }}
+        working-directory: mobile-assets
+        run: |
+          apk="mashina-${TAG#v}-android.apk"
+          ipa="mashina-${TAG#v}-ios-unsigned.ipa"
+          checksums="mashina-${TAG#v}-mobile-sha256.txt"
+          sha256sum "$apk" "$ipa" > "$checksums"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$TAG" --jq .sha)" = "$COMMIT"
+          release=$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$TAG")
+          jq -e '(.draft == false) and (.prerelease == false)' <<< "$release" > /dev/null
+          assets=$(jq -r '.assets[].name' <<< "$release")
+          for asset in "$apk" "$ipa" "$checksums"; do
+            if grep -Fxq "$asset" <<< "$assets"; then
+              digest=$(jq -r --arg name "$asset" '.assets[] | select(.name == $name) | .digest' <<< "$release")
+              local_digest=$(sha256sum "$asset" | cut -d ' ' -f 1)
+              if [[ "$digest" != "sha256:$local_digest" ]]; then
+                echo "Refusing to replace existing asset $asset." >&2
+                exit 1
+              fi
+            fi
+          done
+          for asset in "$apk" "$ipa" "$checksums"; do
+            grep -Fxq "$asset" <<< "$assets" || gh release upload "$TAG" "$asset" --repo "$GITHUB_REPOSITORY"
+          done

@@ -2,7 +2,7 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-18**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-25**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
 ## Project discovery
@@ -13,11 +13,14 @@ validation and future work are separate. Dates are not delivery promises.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.
 
+## 1.14.0 mobile packages
+
+- The release includes a signed Android APK and an unsigned iOS IPA for self-signing. Enter the private LAN IP or HTTPS address of your own MASHINA server. The owner verified the mobile previews on an iPhone and an Android tablet, including HTTPS with a private CA. [Mobile client guide](mobile-clients.md)
+
 ## 1.13.0 distribution and fill-up time
 
 - In 1.13.0, new fill-ups use the device's local date and time when opened. Existing records retain their saved time when opened for editing. [Issue #38](https://github.com/kosavan/mashina/issues/38)
 - Release delivery includes [registry-based installation](container-image.md) and [standalone background installation](standalone.md) for Linux, macOS and Windows. Verify published artifacts from the release before installing. [Issue #39](https://github.com/kosavan/mashina/issues/39)
-- Planned native iOS and Android clients will start with the identity and synchronization slice in the [mobile client notes](mobile-clients.md). The mobile PWA remains available.
 
 ## Release 1.12.1: fuel analytics and fractional prices
 

@@ -1,3 +1,13 @@
+# MASHINA 1.14.0
+
+- Install the signed Android APK on Android 8.0 or later, or self-sign the unsigned IPA for iOS and iPadOS 16 or later.
+- Connect to your own MASHINA server using its HTTPS address or a private LAN IPv4 address. Android supports a private CA explicitly installed through device settings.
+- Use your existing account and garage. Each installation keeps its own browser storage and pending operations.
+
+Schema remains 007. Synchronize pending changes before switching clients and keep a complete server backup paired with the previous runtime. [Mobile installation](docs/mobile-clients.md) · [Update and rollback](docs/updating.md) · [Русская инструкция](docs/mobile-clients.ru.md)
+
+---
+
 # MASHINA 1.13.0
 
 - New fill-ups open with the device’s local date and 24-hour time. Existing fill-ups open with their saved timestamp. [Issue #38](https://github.com/kosavan/mashina/issues/38)

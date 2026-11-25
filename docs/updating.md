@@ -15,6 +15,31 @@ account setup or replace `.env` with its example during an update. Use an existi
 verified release tag. Check every command and stop on errors. Never run two app
 versions or an optional notification dispatcher against the same database.
 
+## Mobile packages
+
+Before switching from the PWA or updating an installed client, synchronize
+pending entries and keep a verified full server backup and the current server
+image or standalone package. For mobile updates, retain the previous package
+and use the same application identifier and signing identity. Update over the
+installed app to preserve its storage. Open it online and check the saved
+server, garage, a recent entry and pending changes. If an OS prevents an
+in-place downgrade, use the browser for synced data and keep the installed app
+until its pending entries have synced. If you also roll back the server, use
+the matching data archive and previous image or standalone package described
+below. [Mobile installation and signing](mobile-clients.md)
+
+For Android servers using a private CA, check that the owner's CA appears in
+the phone's trusted user certificates and verify HTTPS after updating.
+
+## Release 1.14.0
+
+Use `v1.14.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
+and keep a verified full backup and the previous image or standalone package.
+After upgrading, check version `1.14.0` at `/api/v1/health` and verify access
+to the existing garage and attachments. The mobile packages can also connect
+to an existing compatible MASHINA server. For server rollback, use the previous
+runtime with its matching pre-update data archive.
+
 ## Release 1.13.0
 
 Use `v1.13.0` as `TARGET_TAG`. The schema remains 007. Synchronize pending browser/PWA entries and keep the full pre-update backup and previous image or standalone release. Use [the registry instructions](container-image.md#update-and-rollback) when switching an existing Docker installation to the published image, or follow [the standalone guide](standalone.md) for a Docker-free installation. Source builds can continue with the procedure below. Verify `/api/v1/health` reports version `1.13.0` and schema `007`, reopen the browser/PWA online, and check the local date and time on a new fill-up and the saved time on an existing fill-up. For rollback, use the previous runtime and its matching pre-update data archive.

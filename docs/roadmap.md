@@ -2,7 +2,7 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-24**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-25**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
 ## Project discovery
@@ -13,9 +13,9 @@ validation and future work are separate. Dates are not delivery promises.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.
 
-## Next release: mobile packages
+## 1.14.0 mobile packages
 
-- In preparation: a signed Android APK and an unsigned iOS IPA for self-signing. Each user enters the private LAN IP or HTTPS address of their own MASHINA server. An Android preview has reached the sign-in screen using a private CA installed on the tablet. Release distribution is pending device verification. [Mobile client guide](mobile-clients.md)
+- The release includes a signed Android APK and an unsigned iOS IPA for self-signing. Enter the private LAN IP or HTTPS address of your own MASHINA server. The owner verified the mobile previews on an iPhone and an Android tablet, including HTTPS with a private CA. [Mobile client guide](mobile-clients.md)
 
 ## 1.13.0 distribution and fill-up time
 

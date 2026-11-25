@@ -527,8 +527,44 @@ function ToolForm({
   );
 }
 
+const historyFields = {
+  occurred_at: "Дата и время",
+  kind: "Тип записи",
+  amount: "Сумма",
+  currency: "Валюта",
+  liters: "Объём топлива",
+  price: "Цена за литр",
+  odometer: "Пробег",
+  full: "Полный бак",
+  gap: "Пропущена заправка",
+  fuel: "Топливо",
+  station: "АЗС",
+  category: "Категория",
+  description: "Описание",
+  vendor: "Поставщик",
+  tags: "Теги",
+  external_id: "Внешний ID",
+};
+const historyKinds = {
+  fuel: "Заправка",
+  expense: "Расход",
+  maintenance: "Обслуживание",
+  odometer: "Пробег",
+  note: "Заметка",
+};
+type HistoryMapping = {
+  columns: Record<string, string>;
+  default_kind: string | null;
+  date_format: "iso" | "dmy";
+  default_currency: string;
+};
+
 function CSVImport() {
   const { selected, session, refresh, notify } = useApp();
+  const [file, setFile] = useState<File>();
+  const [headers, setHeaders] = useState<string[]>([]);
+  const [mapping, setMapping] = useState<HistoryMapping>();
+  const [reviewedCurrency, setReviewedCurrency] = useState("");
   const [rows, setRows] = useState<ImportRow[]>([]);
   const [checked, setChecked] = useState<Set<string>>(new Set());
   const [confirmed, setConfirmed] = useState(false);
@@ -541,6 +577,45 @@ function CSVImport() {
   const needsOdometer = selectedRows.some(
     (row) => row.data?.odometer !== null && row.data?.odometer !== undefined,
   );
+  function clearReview() {
+    setRows([]);
+    setChecked(new Set());
+    setConfirmed(false);
+    setReviewedCurrency("");
+  }
+  function uploadData(source: File) {
+    const body = new FormData();
+    body.set("file", source);
+    body.set("vehicle_id", selected);
+    return body;
+  }
+  async function preview(source: File, options: HistoryMapping) {
+    const body = uploadData(source);
+    const currency = options.default_currency.trim().toUpperCase();
+    body.set(
+      "mapping",
+      JSON.stringify({ ...options, default_currency: currency }),
+    );
+    const result = await api<{ rows: ImportRow[] }>(
+      "/import/csv/preview",
+      { method: "POST", body },
+      session.csrf,
+    );
+    setRows(result.rows);
+    setReviewedCurrency(currency);
+    setChecked(
+      new Set(
+        result.rows.flatMap((row) =>
+          row.id && !row.error && !row.duplicate ? [row.id] : [],
+        ),
+      ),
+    );
+  }
+  function updateMapping(next: HistoryMapping) {
+    clearReview();
+    setError("");
+    setMapping(next);
+  }
   return (
     <>
       <PageHeading
@@ -554,7 +629,7 @@ function CSVImport() {
         <h3>{tr("Документированный формат")}</h3>
         <p className="muted">
           {tr(
-            "UTF-8, разделитель запятая или точка с запятой. Обязательны occurred_at и kind. Для расходов нужна amount; для топлива — любые два из amount, liters, price. Максимум 1 000 строк и 2 МБ.",
+            "Сохраните таблицу в UTF-8. Для заправки нужны любые два значения: сумма, объём в литрах и цена за литр. Для заправки нужен пробег в километрах. Максимум 1 000 строк и 2 МБ.",
           )}
         </p>
         <code className="csv-example">
@@ -579,27 +654,39 @@ function CSVImport() {
               if (!file) return;
               setBusy(true);
               setError("");
-              setRows([]);
-              setConfirmed(false);
+              clearReview();
+              setFile(undefined);
+              setHeaders([]);
+              setMapping(undefined);
               try {
                 if (file.size > 2 * 1024 * 1024)
                   throw new Error(tr("CSV превышает 2 МБ"));
-                const body = new FormData();
-                body.append("file", file);
-                body.append("vehicle_id", selected);
-                const result = await api<{ rows: ImportRow[] }>(
-                  "/import/csv/preview",
-                  { method: "POST", body },
+                const { headers, row_count, ...options } = await api<
+                  HistoryMapping & {
+                    headers: string[];
+                    row_count: number;
+                  }
+                >(
+                  "/import/csv/inspect",
+                  { method: "POST", body: uploadData(file) },
                   session.csrf,
                 );
-                setRows(result.rows);
-                setChecked(
-                  new Set(
-                    result.rows
-                      .filter((row) => !row.error && !row.duplicate && row.id)
-                      .map((row) => row.id!),
-                  ),
-                );
+                if (!row_count)
+                  throw new Error(
+                    tr("В файле нет операций. Выберите другой CSV."),
+                  );
+                setFile(file);
+                setHeaders(headers);
+                setMapping(options);
+                if (
+                  options.columns.occurred_at &&
+                  options.columns.kind &&
+                  headers.every((header) =>
+                    Object.hasOwn(historyFields, header),
+                  )
+                ) {
+                  await preview(file, options);
+                }
               } catch (err) {
                 setError((err as Error).message);
               } finally {
@@ -609,6 +696,116 @@ function CSVImport() {
             }}
           />
         </label>
+        {file && mapping && (
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              clearReview();
+              setError("");
+              setBusy(true);
+              try {
+                await preview(file, mapping);
+              } catch (err) {
+                setError((err as Error).message);
+              } finally {
+                setBusy(false);
+              }
+            }}
+          >
+            <h3>{tr("Сопоставление колонок")}</h3>
+            <p className="muted">{file.name}</p>
+            <fieldset className="field-grid csv-mapping" disabled={busy}>
+              {Object.entries(historyFields).map(([key, label]) => (
+                <label className="field" key={key}>
+                  <span>{tr(label)}</span>
+                  <select
+                    aria-label={tr(label)}
+                    value={mapping.columns[key] || ""}
+                    onChange={(event) => {
+                      const columns = { ...mapping.columns };
+                      if (event.target.value) columns[key] = event.target.value;
+                      else delete columns[key];
+                      updateMapping({ ...mapping, columns });
+                    }}
+                  >
+                    <option value="">{tr("Без колонки")}</option>
+                    {headers.map((header) => (
+                      <option
+                        key={header}
+                        value={header}
+                        disabled={Object.entries(mapping.columns).some(
+                          ([field, column]) =>
+                            field !== key && column === header,
+                        )}
+                      >
+                        {header}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              ))}
+              <label className="field">
+                <span>{tr("Тип записи по умолчанию")}</span>
+                <select
+                  value={mapping.default_kind || ""}
+                  onChange={(event) =>
+                    updateMapping({
+                      ...mapping,
+                      default_kind: event.target.value || null,
+                    })
+                  }
+                >
+                  <option value="">{tr("Из колонки")}</option>
+                  {Object.entries(historyKinds).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {tr(label)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>{tr("Формат даты в файле")}</span>
+                <select
+                  value={mapping.date_format}
+                  onChange={(event) =>
+                    updateMapping({
+                      ...mapping,
+                      date_format: event.target.value === "dmy" ? "dmy" : "iso",
+                    })
+                  }
+                >
+                  <option value="iso">YYYY-MM-DD</option>
+                  <option value="dmy">DD/MM/YYYY · DD.MM.YYYY</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>{tr("Валюта по умолчанию")}</span>
+                <input
+                  required
+                  pattern="[A-Za-z]{3}"
+                  maxLength={3}
+                  value={mapping.default_currency}
+                  onChange={(event) =>
+                    updateMapping({
+                      ...mapping,
+                      default_currency: event.target.value.toUpperCase(),
+                    })
+                  }
+                />
+              </label>
+            </fieldset>
+            <Button
+              type="submit"
+              disabled={
+                busy ||
+                !mapping.columns.occurred_at ||
+                (!mapping.columns.kind && !mapping.default_kind)
+              }
+            >
+              {tr("Проверить строки")}
+            </Button>
+          </form>
+        )}
         {!navigator.onLine && (
           <p className="field-help">
             {tr("Импорт требует подключения к серверу.")}
@@ -696,6 +893,7 @@ function CSVImport() {
                       vehicle_id: selected,
                       rows: selectedRows.map((row) => row.source),
                       confirm_odometer: confirmed,
+                      default_currency: reviewedCurrency,
                     }),
                   },
                   session.csrf,

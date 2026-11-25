@@ -76,6 +76,7 @@ import {
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { ServiceLocation } from "./ServiceLocation";
+import { inspectionLabels, renewalLabels } from "./renewals";
 
 export function PageHeading({
   eyebrow,
@@ -155,7 +156,7 @@ export function Metric({
     </div>
   );
 }
-function VehicleSelect({
+export function VehicleSelect({
   all = false,
   value,
   onChange,
@@ -727,6 +728,11 @@ export function EventRow({ entry }: { entry: Entry }) {
       : entry.kind;
   const vehicle = state.vehicles.find((v) => v.id === entry.vehicle_id);
   const attachments = state.attachments.filter((a) => a.event_id === entry.id);
+  const title =
+    entry.description ||
+    (entry.renewal
+      ? tr(renewalLabels[entry.renewal.type])
+      : kindNames[entry.kind]);
   const [preview, setPreview] = useState<Attachment | null>(null);
   async function remove() {
     if (!confirm(tr("Удалить запись? После удаления её можно отменить.")))
@@ -751,7 +757,7 @@ export function EventRow({ entry }: { entry: Entry }) {
             <Icon size={19} />
           </span>
           <div className="event-text">
-            <strong>{entry.description || kindNames[entry.kind]}</strong>
+            <strong>{title}</strong>
             <span>
               {vehicle?.name} <i>·</i> {dateLabel(entry.occurred_at)}
               {entry.odometer != null && (
@@ -786,20 +792,14 @@ export function EventRow({ entry }: { entry: Entry }) {
         {entry.can_edit !== false && (
           <button
             className="icon-button row-edit"
-            aria-label={tr("Редактировать {0}", [
-              entry.description || kindNames[entry.kind],
-            ])}
+            aria-label={tr("Редактировать {0}", [title])}
             onClick={() => open(entry.kind, entry)}
           >
             <Pencil size={15} />
           </button>
         )}
       </div>
-      <Sheet
-        open={view}
-        onClose={() => setView(false)}
-        title={entry.description || kindNames[entry.kind]}
-      >
+      <Sheet open={view} onClose={() => setView(false)} title={title}>
         <div className="record-detail">
           <div className={`detail-symbol event-icon ${entry.kind}`}>
             <Icon size={28} />
@@ -823,6 +823,20 @@ export function EventRow({ entry }: { entry: Entry }) {
                   : tr("Не указан"),
               ],
               [tr("Категория"), entry.category],
+              [
+                tr("Действует до"),
+                entry.renewal?.expires_on &&
+                  dateLabel(entry.renewal.expires_on + "T12:00:00"),
+              ],
+              [
+                tr("Техосмотр"),
+                entry.renewal?.type === "registration" &&
+                  tr(
+                    inspectionLabels[
+                      entry.renewal.inspection_status ?? "pending"
+                    ],
+                  ),
+              ],
               [tr("Сервис / продавец"), entry.vendor],
               [tr("АЗС"), entry.station],
               [tr("Топливо"), entry.fuel],

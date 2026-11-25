@@ -262,7 +262,7 @@ CSV_COLUMNS = {
 }
 
 
-def import_row(source, owner, vehicle_id):
+def import_row(source, owner, vehicle_id, default_currency=None):
     if not isinstance(source, dict) or set(source) - CSV_COLUMNS:
         raise ValueError("Неподдерживаемые колонки CSV")
     source = {k: text(v, maximum=4000) for k, v in source.items()}
@@ -276,11 +276,39 @@ def import_row(source, owner, vehicle_id):
                 raise ValueError("Признак бака/пропуска: 1 или 0")
             data[key] = data[key].lower() in {"1", "true", "да"}
     data["vehicle_id"] = vehicle_id
+    if default_currency is None and data.get("kind") == "fuel":
+        # The legacy importer sent this category in its operation receipt.
+        data["category"] = "Топливо"
+    if default_currency is not None and not data.get("currency"):
+        data["currency"] = default_currency
     if data.get("kind") in {"expense", "maintenance"} and not data.get("amount"):
         raise ValueError("Для расхода нужна сумма")
     normalized = normalize_event(data)
     normalized["import_fingerprint"] = hashlib.sha256(canonical.encode()).hexdigest()
     return {"id": record_id, "operation_id": record_id, "source": source, "data": normalized}
+
+
+def reviewed_rows(sources, owner, vehicle_id, default_currency=None):
+    result, seen = [], set()
+    for index, source in enumerate(sources, 1):
+        if index > 1000:
+            raise ValueError("Не более 1000 строк")
+        try:
+            row = import_row(source, owner, vehicle_id, default_currency)
+            if row["id"] in seen:
+                row["duplicate"] = True
+            seen.add(row["id"])
+            result.append({**row, "line": index + 1})
+        except (ValueError, TypeError) as exc:
+            result.append(
+                {
+                    "line": index + 1,
+                    "source": source,
+                    "error": str(exc) if default_currency is not None else
+                    "Проверьте дату, тип, сумму, пробег и поля заправки",
+                }
+            )
+    return result
 
 
 def csv_rows(blob, owner, vehicle_id):
@@ -299,25 +327,7 @@ def csv_rows(blob, owner, vehicle_id):
         or set(headers) - CSV_COLUMNS
     ):
         raise ValueError("Нужны колонки occurred_at, kind; неизвестные/повторные колонки запрещены")
-    result, seen = [], set()
     try:
-        for index, source in enumerate(reader, 1):
-            if index > 1000:
-                raise ValueError("Не более 1000 строк")
-            try:
-                row = import_row(source, owner, vehicle_id)
-                if row["id"] in seen:
-                    row["duplicate"] = True
-                seen.add(row["id"])
-                result.append({**row, "line": index + 1})
-            except (ValueError, TypeError):
-                result.append(
-                    {
-                        "line": index + 1,
-                        "source": source,
-                        "error": "Проверьте дату, тип, сумму, пробег и поля заправки",
-                    }
-                )
+        return reviewed_rows(reader, owner, vehicle_id)
     except csv.Error:
         raise ValueError("Некорректная структура CSV") from None
-    return result

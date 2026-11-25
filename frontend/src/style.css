@@ -1911,6 +1911,62 @@ dd {
     font-size: 19px;
   }
 }
+.renewals-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px;
+  margin: 20px 0 32px;
+}
+.renewal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+}
+.renewal-header,
+.renewal-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.renewal-header h2 {
+  font-size: 16px;
+}
+.renewal-header .status-pill {
+  margin-inline-start: auto;
+}
+.renewal-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin: 0;
+}
+.renewal-facts dt,
+.renewal-facts small {
+  color: var(--muted);
+  font-size: 12px;
+}
+.renewal-facts dd {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+.renewal-facts small {
+  display: block;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.renewal-actions {
+  margin-block-start: auto;
+}
+.renewal-empty {
+  font-size: 14px;
+}
+@media (max-width: 700px) {
+  .renewals-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 .reminder-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -4545,6 +4601,12 @@ input[type="checkbox"] {
 }
 .ownership-import .file-picker {
   margin-top: 20px;
+}
+.csv-mapping {
+  min-inline-size: 0;
+  margin: 0 0 14px;
+  padding: 0;
+  border: 0;
 }
 .csv-rows {
   max-height: 500px;

@@ -22,12 +22,19 @@ import {
   Check,
   AlertTriangle,
 } from "lucide-react";
-import { useApp } from "./context";
-import type { Item, Kind, RecordBase } from "./types";
+import { useApp, type RecordFormOptions } from "./context";
+import type {
+  InspectionStatus,
+  Item,
+  Kind,
+  RecordBase,
+  RenewalData,
+} from "./types";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { OcrReview, type OcrFields } from "./OcrReview";
 import { FuelDetailsFields } from "./FuelDetailsFields";
+import { inspectionLabels, renewalLabels } from "./renewals";
 
 const maintenanceTemplates = [
   "Замена моторного масла",
@@ -87,12 +94,19 @@ export function RecordForm({
   type,
   record,
   onClose,
+  renewalType,
+  reminderDraft,
 }: {
   type: Kind | "vehicle" | "reminder" | "document" | "category";
   record?: RecordBase;
   onClose: () => void;
-}) {
+} & RecordFormOptions) {
   const { state, selected, save, upload, notify, refresh } = useApp();
+  const renewal =
+    type === "expense"
+      ? (record?.renewal as RenewalData | undefined)
+      : undefined;
+  const renewalKind = renewal?.type ?? renewalType;
   const allowedVehicles = state.vehicles.filter(
     (v) => !["reminder", "document"].includes(type) || v.can_edit !== false,
   );
@@ -116,8 +130,9 @@ export function RecordForm({
     amount: record?.amount || "",
   });
   const form = useRef<HTMLFormElement>(null);
-  const title =
-    type === "vehicle"
+  const title = renewalKind
+    ? tr(renewalLabels[renewalKind])
+    : type === "vehicle"
       ? record
         ? tr("Профиль автомобиля")
         : tr("Новый автомобиль")
@@ -179,6 +194,22 @@ export function RecordForm({
         ) {
           data.kind = type;
           data.items = items;
+          if (type === "expense" && renewalKind) {
+            if (data.renewal_expires_on < data.occurred_at.slice(0, 10))
+              throw new Error(
+                tr("Срок действия не может закончиться до даты оплаты."),
+              );
+            const nextRenewal: RenewalData = {
+              type: renewalKind,
+              expires_on: data.renewal_expires_on,
+            };
+            if (renewalKind === "registration")
+              nextRenewal.inspection_status =
+                data.renewal_inspection as InspectionStatus;
+            data.renewal = nextRenewal;
+            delete data.renewal_expires_on;
+            delete data.renewal_inspection;
+          }
           if (type === "fuel") {
             const { occurred_hour, occurred_minute } = data;
             data.occurred_at += `T${occurred_hour}:${occurred_minute}`;
@@ -221,8 +252,9 @@ export function RecordForm({
               vehicle_id: type === "vehicle" ? result.id : vehicleId,
               event_id: entity === "event" ? result.id : "",
               title: file.name,
-              document_type:
-                type === "maintenance"
+              document_type: renewalKind
+                ? "Прочее"
+                : type === "maintenance"
                   ? "Заказ-наряд"
                   : type === "fuel"
                     ? "Чек"
@@ -582,7 +614,7 @@ export function RecordForm({
             <Field
               label={tr("Что нужно сделать")}
               name="title"
-              value={record?.title}
+              value={record?.title ?? reminderDraft?.title}
               required
               placeholder={tr("Замена моторного масла")}
             />
@@ -591,7 +623,7 @@ export function RecordForm({
                 label={tr("К дате")}
                 name="due_date"
                 type="date"
-                value={record?.due_date}
+                value={record?.due_date ?? reminderDraft?.due_date}
               />
               <Field
                 label={
@@ -692,32 +724,64 @@ export function RecordForm({
             )}
             <div className="field-grid">
               <Field
-                label={type === "fuel" ? "Дата" : "Дата и время"}
+                label={
+                  renewalKind
+                    ? "Дата оплаты"
+                    : type === "fuel"
+                      ? "Дата"
+                      : "Дата и время"
+                }
                 name="occurred_at"
                 type={type === "fuel" ? "date" : "datetime-local"}
                 value={
                   type === "fuel"
                     ? record?.occurred_at?.slice(0, 10) || today(openedAt)
-                    : record?.occurred_at?.slice(0, 16) || today() + "T12:00"
+                    : renewalKind && record?.occurred_at?.length === 10
+                      ? record.occurred_at + "T12:00"
+                      : record?.occurred_at?.slice(0, 16) || today() + "T12:00"
                 }
                 required
               />
-              <Field
-                key={type === "fuel" ? vehicleId : undefined}
-                label={dUnit === "mi" ? tr("Пробег, ми") : tr("Пробег, км")}
-                name="odometer"
-                type="number"
-                step="1"
-                value={
-                  (type !== "fuel" || record?.vehicle_id === vehicleId
-                    ? record?.odometer
-                    : undefined) ??
-                  vehicle?.current_odometer ??
-                  ""
-                }
-                required={type === "fuel" || type === "odometer"}
-              />
+              {renewalKind ? (
+                <Field
+                  label="Действует до"
+                  name="renewal_expires_on"
+                  type="date"
+                  value={renewal?.expires_on}
+                  required
+                />
+              ) : (
+                <Field
+                  key={type === "fuel" ? vehicleId : undefined}
+                  label={dUnit === "mi" ? tr("Пробег, ми") : tr("Пробег, км")}
+                  name="odometer"
+                  type="number"
+                  step="1"
+                  value={
+                    (type !== "fuel" || record?.vehicle_id === vehicleId
+                      ? record?.odometer
+                      : undefined) ??
+                    vehicle?.current_odometer ??
+                    ""
+                  }
+                  required={type === "fuel" || type === "odometer"}
+                />
+              )}
             </div>
+            {renewalKind === "registration" && (
+              <Field label="Техосмотр" name="renewal_inspection">
+                <select
+                  name="renewal_inspection"
+                  defaultValue={renewal?.inspection_status ?? "pending"}
+                >
+                  {Object.entries(inspectionLabels).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {tr(label)}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
             {type === "fuel" ? (
               <>
                 <div className="field-grid">
@@ -862,7 +926,7 @@ export function RecordForm({
                     name="amount"
                     type="number"
                     step="0.01"
-                    value={record?.amount || ""}
+                    value={record?.amount ?? ""}
                     required={!items.length}
                   />
                   <Field label={tr("Категория")} name="category">
@@ -870,7 +934,13 @@ export function RecordForm({
                       name="category"
                       defaultValue={
                         record?.category ||
-                        (type === "maintenance" ? "Плановое ТО" : "Прочее")
+                        (renewalKind === "insurance"
+                          ? "Страхование"
+                          : renewalKind === "registration"
+                            ? "Налоги"
+                            : type === "maintenance"
+                              ? "Плановое ТО"
+                              : "Прочее")
                       }
                     >
                       {allCategories.map((c) => (
@@ -1040,6 +1110,13 @@ export function RecordForm({
                   value={record?.payment}
                 />
                 <Field label={tr("Теги")} name="tags" value={record?.tags} />
+                {renewalKind && record?.odometer != null && (
+                  <input
+                    type="hidden"
+                    name="odometer"
+                    value={record.odometer}
+                  />
+                )}
                 <Field
                   key={`curr-${vehicleId}`}
                   label={tr("Валюта")}
@@ -1093,7 +1170,13 @@ export function RecordForm({
               <span>
                 {files.length
                   ? files.map((f) => f.name).join(", ")
-                  : tr("Прикрепить чек, фото или заказ-наряд")}
+                  : tr(
+                      renewalKind === "registration"
+                        ? "Прикрепить документ или отчёт техосмотра"
+                        : renewalKind === "insurance"
+                          ? "Прикрепить страховой полис"
+                          : "Прикрепить чек, фото или заказ-наряд",
+                    )}
               </span>
               <input name="file" type="file" multiple onChange={chooseFiles} />
             </label>

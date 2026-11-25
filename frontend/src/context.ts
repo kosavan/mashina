@@ -5,9 +5,14 @@ import type {
   Mutation,
   Page,
   RecordBase,
+  RenewalType,
   Session,
   State,
 } from "./types";
+export interface RecordFormOptions {
+  renewalType?: RenewalType;
+  reminderDraft?: { title: string; due_date: string };
+}
 export interface AppModel {
   state: State;
   session: Session;
@@ -18,6 +23,7 @@ export interface AppModel {
   open: (
     type: Kind | "vehicle" | "reminder" | "document" | "category" | "quick",
     record?: RecordBase,
+    options?: RecordFormOptions,
   ) => void;
   save: (
     entity: Mutation["entity"],

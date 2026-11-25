@@ -23,7 +23,7 @@ from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form, Dep
 from fastapi.responses import JSONResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image, ImageOps, UnidentifiedImageError
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, ValidationError
 
 from backend.storage import Store, Conflict, Denied, dumps, uid
 from backend.domain import (
@@ -31,13 +31,15 @@ from backend.domain import (
     DISTANCE_UNITS,
     VOLUME_UNITS,
     analytics,
+    currency,
     garage_statistics,
     iso,
     text,
 )
 from backend.backup import save_backup, restore_backup, MAX_ARCHIVE
 from backend.demo import seed
-from backend.ownership import ownership_report, csv_rows, import_row
+from backend.ownership import ownership_report, csv_rows, import_row, reviewed_rows
+from backend.history_csv import MAX_CSV, HistoryMapping, inspect_history_csv, mapped_sources
 from backend.access import vehicle_access, upload_access, attachment_access
 from backend.accounts import install_accounts, require_admin
 from backend.reports import ReportOptions, report_snapshot, render_report, RENDER_LOCK
@@ -402,14 +404,42 @@ def create_app(data_path=None, bootstrap_token=None):
             vehicle_access(c, uid(vehicle_id), s["user_id"], write=True)
         return ownership_report(active_store.state(s["user_id"]), vehicle_id, month)
 
-    @app.post(PREFIX + "/import/csv/preview")
-    async def preview_csv(
+    @app.post(PREFIX + "/import/csv/inspect")
+    async def inspect_csv(
         file: UploadFile = File(...), vehicle_id: str = Form(...), s=Depends(session)
     ):
+        with s["store"].transaction() as c:
+            car, _ = vehicle_access(c, uid(vehicle_id), s["user_id"], write=True)
+            settings = c.exec_driver_sql(
+                "SELECT settings FROM users WHERE id=?", (s["user_id"],)
+            ).scalar_one()
+        default_currency = currency(
+            json.loads(car["data"]).get("currency") or json.loads(settings or "{}").get("currency")
+        )
+        return {**inspect_history_csv(await file.read(MAX_CSV + 1)), "default_currency": default_currency}
+
+    @app.post(PREFIX + "/import/csv/preview")
+    async def preview_csv(
+        file: UploadFile = File(...),
+        vehicle_id: str = Form(...),
+        mapping: str | None = Form(default=None, max_length=12000),
+        s=Depends(session),
+    ):
         active_store = s["store"]
+        normalized_vehicle_id = uid(vehicle_id)
         with active_store.transaction() as c:
-            vehicle_access(c, uid(vehicle_id), s["user_id"], write=True)
-        rows = csv_rows(await file.read(2 * 1024 * 1024 + 1), s["user_id"], vehicle_id)
+            vehicle_access(c, normalized_vehicle_id, s["user_id"], write=True)
+        blob = await file.read(MAX_CSV + 1)
+        if mapping is None:
+            rows = csv_rows(blob, s["user_id"], vehicle_id)
+        else:
+            try:
+                options = HistoryMapping.model_validate_json(mapping)
+            except ValidationError:
+                raise ValueError("Проверьте сопоставление колонок CSV") from None
+            rows = reviewed_rows(
+                mapped_sources(blob, options), s["user_id"], normalized_vehicle_id, options.default_currency
+            )
         for row in rows:
             if row.get("error"):
                 continue
@@ -430,11 +460,15 @@ def create_app(data_path=None, bootstrap_token=None):
         vehicle_id: uuid.UUID
         rows: list[dict] = Field(min_length=1, max_length=1000)
         confirm_odometer: bool = False
+        default_currency: str | None = Field(default=None, pattern=r"^[A-Za-z]{3}$")
 
     @app.post(PREFIX + "/import/csv/commit")
     def commit_csv(body: ImportCommit, s=Depends(session)):
         vehicle_id, active_store = str(body.vehicle_id), s["store"]
-        rows = [import_row(source, s["user_id"], vehicle_id) for source in body.rows]
+        rows = [
+            import_row(source, s["user_id"], vehicle_id, body.default_currency)
+            for source in body.rows
+        ]
         if (
             any(row["data"].get("odometer") is not None for row in rows)
             and not body.confirm_odometer
@@ -444,6 +478,21 @@ def create_app(data_path=None, bootstrap_token=None):
         with active_store.transaction() as c:
             vehicle_access(c, vehicle_id, s["user_id"], write=True)
             for row in rows:
+                existing = c.exec_driver_sql(
+                    "SELECT data FROM events WHERE id=? AND vehicle_id=?", (row["id"], vehicle_id)
+                ).scalar()
+                if existing:
+                    data = json.loads(existing)
+                    if data.get("import_fingerprint") == row["data"]["import_fingerprint"]:
+                        # Switching between import modes or changing defaults must not replay a cost.
+                        receipt = c.exec_driver_sql(
+                            "SELECT response FROM receipts WHERE owner_id=? AND operation_id=?",
+                            (s["user_id"], row["operation_id"]),
+                        ).scalar()
+                        records.append(
+                            json.loads(receipt)["record"] if receipt else {**data, "can_edit": True}
+                        )
+                        continue
                 row["data"]["odometer_confirmed"] = row["data"].get("odometer") is not None
                 payload = {
                     "operation_id": row["operation_id"],

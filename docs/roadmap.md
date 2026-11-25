@@ -13,6 +13,11 @@ validation and future work are separate. Dates are not delivery promises.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.
 
+## In development
+
+- Add a vehicle's registration and insurance history with payment and expiration dates, inspection results and private attachments. Show upcoming and expired renewals alongside the history. Renewal payments contribute to the existing spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)
+- Make fuel CSV imports easier to review when the source uses different column names. Preserve explicit currencies and supported fuel details, and keep the import preview and duplicate protection. [Issue #31](https://github.com/kosavan/mashina/issues/31)
+
 ## 1.14.0 mobile packages
 
 - The release includes a signed Android APK and an unsigned iOS IPA for self-signing. Enter the private LAN IP or HTTPS address of your own MASHINA server. The owner verified the mobile previews on an iPhone and an Android tablet, including HTTPS with a private CA. [Mobile client guide](mobile-clients.md)

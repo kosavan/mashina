@@ -129,6 +129,34 @@ def normalize_vehicle(data):
     return r
 
 
+def _normalize_renewal(renewal, kind, paid_on):
+    if kind != "expense":
+        raise ValueError("Продление должно быть расходом")
+    if not isinstance(renewal, dict) or set(renewal) - {"type", "expires_on", "inspection_status"}:
+        raise ValueError("Некорректные сведения о продлении")
+    renewal_type = renewal.get("type")
+    if renewal_type not in ("registration", "insurance"):
+        raise ValueError("Укажите тип продления: регистрация или страховка")
+    expires_on = renewal.get("expires_on")
+    try:
+        expires = date.fromisoformat(expires_on).isoformat()
+    except (TypeError, ValueError):
+        raise ValueError("Укажите корректный срок действия продления") from None
+    if expires != expires_on or expires < paid_on:
+        raise ValueError("Срок действия должен быть датой не раньше даты оплаты")
+    result = {"type": renewal_type, "expires_on": expires}
+    status = renewal.get("inspection_status")
+    if renewal_type == "registration":
+        if status is None:
+            status = "pending"
+        if status not in ("pending", "passed", "failed"):
+            raise ValueError("Укажите корректный статус техосмотра")
+        result["inspection_status"] = status
+    elif status is not None:
+        raise ValueError("Статус техосмотра указывается в записи о регистрации")
+    return result
+
+
 def normalize_event(data):
     r = dict(data)
     if r.get("kind") not in KINDS:
@@ -139,6 +167,11 @@ def normalize_event(data):
     r["currency"] = currency(r.get("currency"))
     for key in ("description", "vendor", "payment", "tags", "station", "fuel", "category"):
         r[key] = text(r.get(key), maximum=4000 if key == "description" else 300)
+    renewal = r.pop("renewal", None)
+    if renewal is not None:
+        r["renewal"] = _normalize_renewal(renewal, r["kind"], r["occurred_at"][:10])
+        if not r["category"]:
+            r["category"] = "Налоги" if r["renewal"]["type"] == "registration" else "Страхование"
     r["service_address"] = text(r.get("service_address"), maximum=500)
     lat, lon = r.get("service_latitude"), r.get("service_longitude")
     if (lat not in (None, "")) != (lon not in (None, "")):
@@ -203,7 +236,7 @@ def normalize_event(data):
             amount_minor=minor(amount if amount is not None else liters * price),
             full=bool(r.get("full")),
             gap=bool(r.get("gap")),
-            category="Топливо",
+            category=r["category"] or "Топливо",
         )
     elif r["kind"] in {"expense", "maintenance"}:
         adjustment = minor(r.get("adjustment", "0") or "0")

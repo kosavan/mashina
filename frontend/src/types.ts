@@ -25,6 +25,14 @@ export interface Entry extends RecordBase {
   description: string;
   odometer: number | null;
   items: Item[];
+  renewal?: RenewalData;
+}
+export type RenewalType = "registration" | "insurance";
+export type InspectionStatus = "pending" | "passed" | "failed";
+export interface RenewalData {
+  type: RenewalType;
+  expires_on: string;
+  inspection_status?: InspectionStatus;
 }
 export interface Item {
   name: string;
@@ -187,5 +195,6 @@ export type Page =
   | "maintenance"
   | "analytics"
   | "documents"
+  | "renewals"
   | "reminders"
   | "settings";

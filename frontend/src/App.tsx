@@ -56,7 +56,7 @@ import {
   clearLocal,
   resolveOperation,
 } from "./offline";
-import { AppContext } from "./context";
+import { AppContext, type RecordFormOptions } from "./context";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import {
@@ -74,6 +74,7 @@ import { permissionError, scopeKey } from "./permissions";
 import { BrandMark } from "./BrandMark";
 const Analytics = lazy(() => import("./Analytics"));
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
+const Renewals = lazy(() => import("./VehicleRenewals"));
 const navigation = [
   ["garage", "Мой гараж", LayoutGrid],
   ["timeline", "История", Clock3],
@@ -82,6 +83,7 @@ const navigation = [
   ["tires", "Шины", CircleDot],
   ["analytics", "Аналитика", ChartNoAxesCombined],
   ["documents", "Документы", Files],
+  ["renewals", "Регистрация и страховка", ShieldCheck],
   ["reminders", "Напоминания", Bell],
 ] as const;
 
@@ -267,6 +269,7 @@ export default function App() {
   const [modal, setModal] = useState<{
     type: Kind | "vehicle" | "reminder" | "document" | "category" | "quick";
     record?: RecordBase;
+    options?: RecordFormOptions;
   } | null>(null);
   const [toast, setToast] = useState<{
     message: string;
@@ -579,7 +582,8 @@ export default function App() {
     open: (
       type: Kind | "vehicle" | "reminder" | "document" | "category" | "quick",
       record?: RecordBase,
-    ) => setModal({ type, record }),
+      options?: RecordFormOptions,
+    ) => setModal({ type, record, options }),
     save,
     refresh,
     notify,
@@ -870,6 +874,10 @@ export default function App() {
               </Suspense>
             ) : page === "documents" ? (
               <Documents />
+            ) : page === "renewals" ? (
+              <Suspense fallback={<p role="status">{tr("Загрузка…")}</p>}>
+                <Renewals />
+              </Suspense>
             ) : page === "reminders" ? (
               <Reminders />
             ) : (
@@ -981,6 +989,7 @@ export default function App() {
               type={modal.type}
               record={modal.record}
               onClose={() => setModal(null)}
+              {...modal.options}
             />
           )
         )}

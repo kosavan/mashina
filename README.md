@@ -85,6 +85,29 @@ Save the oil change as a service entry and search your vehicle history for it.
 The recorded date, mileage and parts stay together. Set the next reminder using
 your vehicle's service schedule; estimated mileage is not a measured reading.
 
+### Can I use miles, GBP and litres per 100 km together?
+
+Yes. In **Settings**, choose **GBP** as the default currency, **Miles (mi)**
+for distance, **Liters (L)** for fuel volume and **L / 100 km** for fuel
+consumption. You can set a different currency for each vehicle. Changes to
+the default currency leave the currencies on saved records intact.
+
+### Where do I find upcoming registration and insurance renewals?
+
+Open **Registration and insurance** and select a vehicle. The section shows
+the current expiration dates and previous payments. Registration records can
+also include the inspection result and its report. The same payments appear
+in spending analytics.
+
+### How do I import existing fuel records from a spreadsheet?
+
+Save the spreadsheet as UTF-8 CSV and open **Maintenance → Import**. Check the
+suggested column mapping, choose the date format and set the default currency
+for rows without one. For a fuel-only file, choose **Fill-up** as the default
+record type. Include the odometer reading in kilometres and fuel volume in
+litres where applicable. Review the amounts and dates before confirming the
+import.
+
 ### Is this a self-hosted alternative to vehicle maintenance apps?
 
 Yes. MASHINA runs on your own computer or server with Docker. It stores your

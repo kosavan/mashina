@@ -4,7 +4,7 @@
 
 MASHINA is distributed through GitHub Container Registry for `linux/amd64` and `linux/arm64`. Install Docker Engine with Compose on Linux or Docker Desktop with Linux containers on macOS or Windows. Use a specific published release version.
 
-1. Open the [release](https://github.com/kosavan/mashina/releases/tag/v1.15.0) and save `compose.registry.yml` into a dedicated installation directory. Put the release’s [.env.example](https://github.com/kosavan/mashina/blob/v1.15.0/.env.example) there as `.env` if you want to customize settings. Create `.env` if it does not exist, and add `MASHINA_IMAGE=ghcr.io/kosavan/mashina:1.15.0`.
+1. Open the [release](https://github.com/kosavan/mashina/releases/tag/v1.16.0) and save `compose.registry.yml` into a dedicated installation directory. Put the release’s [.env.example](https://github.com/kosavan/mashina/blob/v1.16.0/.env.example) there as `.env` if you want to customize settings. Create `.env` if it does not exist, and add `MASHINA_IMAGE=ghcr.io/kosavan/mashina:1.16.0`.
 2. Create `data` alongside the Compose file. On Docker Desktop, use a directory outside synchronized folders or network drives. The `chown` command below prepares the new data mount for the non-root service.
 3. From that directory, run:
 

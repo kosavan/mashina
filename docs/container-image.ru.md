@@ -4,7 +4,7 @@
 
 MASHINA поставляется через GitHub Container Registry для `linux/amd64` и `linux/arm64`. В Linux установите Docker Engine и Compose. В macOS и Windows используйте Docker Desktop с контейнерами Linux. Указывайте конкретную опубликованную версию.
 
-1. На [странице релиза](https://github.com/kosavan/mashina/releases/tag/v1.15.0) скачайте `compose.registry.yml` в отдельную папку для установки. Для настройки можно сохранить в ту же папку [.env.example](https://github.com/kosavan/mashina/blob/v1.15.0/.env.example) под именем `.env`. Создайте `.env`, если его ещё нет, и добавьте строку `MASHINA_IMAGE=ghcr.io/kosavan/mashina:1.15.0`.
+1. На [странице релиза](https://github.com/kosavan/mashina/releases/tag/v1.16.0) скачайте `compose.registry.yml` в отдельную папку для установки. Для настройки можно сохранить в ту же папку [.env.example](https://github.com/kosavan/mashina/blob/v1.16.0/.env.example) под именем `.env`. Создайте `.env`, если его ещё нет, и добавьте строку `MASHINA_IMAGE=ghcr.io/kosavan/mashina:1.16.0`.
 2. Создайте рядом папку `data`. При использовании Docker Desktop выбирайте локальную папку вне облачной синхронизации и сетевых дисков. Команда `chown` ниже задаёт права новой папки для запуска сервиса без root.
 3. Из этой папки выполните:
 

@@ -2,7 +2,7 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-25**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-26**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
 ## Project discovery
@@ -13,12 +13,7 @@ validation and future work are separate. Dates are not delivery promises.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.
 
-## 1.15.0 vehicle ownership
-
-- Registration and insurance history shows payments, expiration dates and inspection results by vehicle. It supports private attachments and prefilled renewal reminders. Payments appear in spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)
-- History CSV imports support column mapping, date formats and default currencies, with a preview and duplicate detection. Supported fuel details and custom categories are preserved. [Issue #31](https://github.com/kosavan/mashina/issues/31)
-
-## Accepted for the next release
+## 1.16.0 ownership workflows
 
 - Advance renewal reminders and a one-event calendar download.
 - On-device receipt inbox and reusable column mappings for history and bank CSV.
@@ -26,7 +21,12 @@ validation and future work are separate. Dates are not delivery promises.
 - Pinned parts, a service shopping list, stock usage, trip expenses and a map of saved places.
 - Administrator-controlled daily backups and opt-in NHTSA vPIC suggestions from a saved VIN.
 
-These workflows are in development. The compatible-parts catalogue remains under research.
+See the [release notes](../RELEASES.md#mashina-1160) for details. The compatible-parts catalogue remains under research.
+
+## 1.15.0 vehicle ownership
+
+- Registration and insurance history shows payments, expiration dates and inspection results by vehicle. It supports private attachments and prefilled renewal reminders. Payments appear in spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)
+- History CSV imports support column mapping, date formats and default currencies, with a preview and duplicate detection. Supported fuel details and custom categories are preserved. [Issue #31](https://github.com/kosavan/mashina/issues/31)
 
 ## 1.14.0 mobile packages
 
@@ -84,7 +84,7 @@ Accepted [community request #20](https://github.com/kosavan/mashina/issues/20): 
 | Area | Available | Limits / evidence |
 |---|---|---|
 | Body condition 1.6 | Five-view panel/point map, before/after images, repair statuses/history, service links | [Guide](body-damage.md); offline text/markers, online photo upload |
-| Garage | Multiple cars, profiles/photos, ownership, archive/sale, manual VIN | Profile/history tests; automatic VIN lookup is planned |
+| Garage | Multiple cars, profiles/photos, ownership, archive/sale, manual VIN and opt-in suggestions | Profile/history tests; vPIC coverage varies by market |
 | Daily records | Exact expenses, service items/parts, fuel, mileage, notes; global & per-vehicle currencies and units (1.11) | Financial invariants, edit/delete/replay tests |
 | Analytics | Period/category/car filters, full-to-full fuel cycles, configurable distance/volume/consumption units (1.11) | Missing measurements stay unknown; purchase/sale separate |
 | History / files | Search, filters, private images/PDF, JSON/CSV, full archive | Authorization and restore tests |
@@ -127,7 +127,7 @@ ownership confirmation and sitemap submission remain owner actions.
 | Later | Natural-language search | Local processing, permissions, measured resource budget |
 | Later | Expense bot and OBD-II | Optional owner-configured components, confirmed writes |
 | Later | Passkeys and more languages | Preserve existing login/data |
-| Research | VIN / compatible parts | Licensed sources and proven fitment; details below |
+| Research | Compatible parts | Licensed sources and proven fitment; details below |
 
 ## Available in 1.6: interactive body damage map
 
@@ -199,13 +199,11 @@ Optional local-only vision models may be evaluated later against CPU/RAM budgets
 3. Passkeys and additional sign-in methods.
 4. Continue device/accessibility/performance and backup/restore verification alongside every slice.
 
-## Planned: VIN identification and compatible spare parts
+## Research: compatible spare parts
 
-Manual VIN entry already exists in the vehicle profile. Extend it with reviewed VIN
-decoding and a searchable vehicle-specific parts catalogue:
+The vehicle profile supports manual VIN entry and owner-reviewed suggestions from
+NHTSA vPIC. Research a searchable vehicle-specific parts catalogue:
 
-- Propose vehicle specifications from the VIN; show the source and let the owner confirm
-  changes. Preserve manually entered details and support vehicles with non-standard identifiers.
 - Search OEM part numbers, manufacturer articles and documented equivalents; start with
   common service parts such as filters, plugs and brakes. Save confirmed parts to the car
   and reuse them in maintenance records and a personal shopping list.

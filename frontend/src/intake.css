@@ -1,0 +1,61 @@
+.import-profiles {
+  margin-block: 14px 18px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.intake-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.import-profiles .intake-actions {
+  margin-block-start: 10px;
+}
+
+.receipt-inbox .file-picker {
+  margin-bottom: 12px;
+}
+
+.receipt-list {
+  display: grid;
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.receipt-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.receipt-list li > div {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.receipt-fields {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.receipt-photo {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  max-block-size: 320px;
+  margin-inline: auto;
+  object-fit: contain;
+  border-radius: 12px;
+}

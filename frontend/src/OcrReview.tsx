@@ -26,15 +26,17 @@ export function OcrReview({
   kind,
   vehicleId,
   onApply,
+  sourceFile,
 }: {
   kind: string;
   vehicleId: string;
   onApply: (fields: OcrFields, source?: File, items?: Item[]) => void;
+  sourceFile?: File;
 }) {
   const { session } = useApp();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>(
-    kind === "fuel"
+    sourceFile || kind === "fuel"
       ? "receipt"
       : kind === "odometer"
         ? "odometer"
@@ -42,7 +44,7 @@ export function OcrReview({
           ? "service"
           : "screenshot",
   );
-  const [file, setFile] = useState<File>();
+  const [file, setFile] = useState<File | undefined>(sourceFile);
   const [page, setPage] = useState("1");
   const [pages, setPages] = useState("");
   const [rotation, setRotation] = useState(0);
@@ -144,7 +146,7 @@ export function OcrReview({
     setAttach(false);
     setLineItems([]);
     setChosenItems({});
-    if (clearSource) setFile(undefined);
+    if (clearSource) setFile(sourceFile);
   }
   async function recognize() {
     if (!file || !vehicleId) return;
@@ -275,23 +277,25 @@ export function OcrReview({
               </option>
             </select>
           </label>
-          <label>
-            {tr("Фото, скриншот или PDF")}
-            <input
-              type="file"
-              accept="image/jpeg,image/png,image/webp,application/pdf"
-              disabled={busy}
-              onChange={(e) => {
-                reset();
-                setFile(e.target.files?.[0]);
-                setPage("1");
-                setPages("");
-                setRotation(0);
-                setCropEnabled(false);
-                setCrop([0, 0, 100, 100]);
-              }}
-            />
-          </label>
+          {!sourceFile && (
+            <label>
+              {tr("Фото, скриншот или PDF")}
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,application/pdf"
+                disabled={busy}
+                onChange={(e) => {
+                  reset();
+                  setFile(e.target.files?.[0]);
+                  setPage("1");
+                  setPages("");
+                  setRotation(0);
+                  setCropEnabled(false);
+                  setCrop([0, 0, 100, 100]);
+                }}
+              />
+            </label>
+          )}
           {file?.type === "application/pdf" && (
             <label>
               {tr("Страница PDF")}
@@ -582,14 +586,16 @@ export function OcrReview({
                   ))}
                 </section>
               )}
-              <label className="check-field">
-                <input
-                  type="checkbox"
-                  checked={attach}
-                  onChange={(e) => setAttach(e.target.checked)}
-                />
-                {tr("Прикрепить исходный файл при сохранении записи")}
-              </label>
+              {!sourceFile && (
+                <label className="check-field">
+                  <input
+                    type="checkbox"
+                    checked={attach}
+                    onChange={(e) => setAttach(e.target.checked)}
+                  />
+                  {tr("Прикрепить исходный файл при сохранении записи")}
+                </label>
+              )}
               <p className="field-help">
                 {tr(
                   "Полный бак, пропуски заправок и исправление исторического пробега подтверждаются отдельно. Проверьте все выбранные поля и позиции перед сохранением.",

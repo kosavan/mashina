@@ -329,7 +329,7 @@ def reminder_status(reminder, odometer, today=None):
         days is not None and days <= reminder.get("warning_days", 30)
     ):
         status = "soon"
-    if not reminder.get("enabled", True):
+    if not reminder.get("enabled", True) or reminder.get("renewal_active") is False:
         status = "disabled"
     if reminder.get("completed_at"):
         status = "completed"

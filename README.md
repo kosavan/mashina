@@ -108,6 +108,15 @@ record type. Include the odometer reading in kilometres and fuel volume in
 litres where applicable. Review the amounts and dates before confirming the
 import.
 
+### What can I do from the vehicle and maintenance screens?
+
+Use the service checklist to prepare a visit, then save the work and export its
+report. Pin a part from service history, mark it for purchase, or link a used
+quantity to a service record. Group existing expenses into a trip to see the
+totals by currency. On the places map, open the external map only for a place
+you choose. Vehicle owners can also explicitly request VIN suggestions from
+NHTSA vPIC and choose which fields to save.
+
 ### Is this a self-hosted alternative to vehicle maintenance apps?
 
 Yes. MASHINA runs on your own computer or server with Docker. It stores your

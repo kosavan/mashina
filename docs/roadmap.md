@@ -18,6 +18,16 @@ validation and future work are separate. Dates are not delivery promises.
 - Registration and insurance history shows payments, expiration dates and inspection results by vehicle. It supports private attachments and prefilled renewal reminders. Payments appear in spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)
 - History CSV imports support column mapping, date formats and default currencies, with a preview and duplicate detection. Supported fuel details and custom categories are preserved. [Issue #31](https://github.com/kosavan/mashina/issues/31)
 
+## Accepted for the next release
+
+- Advance renewal reminders and a one-event calendar download.
+- On-device receipt inbox and reusable column mappings for history and bank CSV.
+- Service visit checklist and a shareable report from the completed visit.
+- Pinned parts, a service shopping list, stock usage, trip expenses and a map of saved places.
+- Administrator-controlled daily backups and opt-in NHTSA vPIC suggestions from a saved VIN.
+
+These workflows are in development. The compatible-parts catalogue remains under research.
+
 ## 1.14.0 mobile packages
 
 - The release includes a signed Android APK and an unsigned iOS IPA for self-signing. Enter the private LAN IP or HTTPS address of your own MASHINA server. The owner verified the mobile previews on an iPhone and an Android tablet, including HTTPS with a private CA. [Mobile client guide](mobile-clients.md)

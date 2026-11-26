@@ -1,6 +1,7 @@
 import type {
   Entry,
   InspectionStatus,
+  Reminder,
   RenewalData,
   RenewalType,
 } from "./types";
@@ -39,4 +40,24 @@ export function expiresInDays(expires: string, day: string) {
     (Date.parse(expires + "T12:00:00Z") - Date.parse(day + "T12:00:00Z")) /
     86_400_000
   );
+}
+
+export function projectRenewalReminder(reminder: Reminder, entries: Entry[]) {
+  const schedule = reminder.renewal_schedule;
+  if (!schedule) return reminder;
+  const latest = renewalHistory(entries, reminder.vehicle_id).find(
+    (entry) => entry.renewal.type === schedule.type,
+  );
+  const cycle = latest ? `${latest.id}:${latest.renewal.expires_on}` : "";
+  return {
+    ...reminder,
+    warning_days: schedule.lead_days,
+    due_date: latest?.renewal.expires_on ?? "",
+    renewal_cycle: cycle,
+    renewal_active: !!cycle,
+    completed_at:
+      cycle && cycle === reminder.renewal_completed_for
+        ? reminder.renewal_completed_at
+        : "",
+  };
 }

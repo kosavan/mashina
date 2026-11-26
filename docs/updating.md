@@ -48,6 +48,25 @@ to the existing garage and attachments. The mobile packages can also connect
 to an existing compatible MASHINA server. For server rollback, use the previous
 runtime with its matching pre-update data archive.
 
+## Upcoming daily backups
+
+Automatic backups are opt-in under **Settings → Backup**. The administrator
+selects a subdirectory, a UTC hour and the number of daily archives to keep.
+By default the parent is `backups` inside the MASHINA data directory. To use a
+different disk with Docker, mount a private writable directory into the
+container in a Compose override and set `MASHINA_BACKUP_ROOT` to the absolute
+container path. On a standalone installation it is the writable host path.
+The application account must have write access. Use one MASHINA process per
+data directory. The schedule runs while the server is up.
+
+Before enabling it after an update, synchronize pending entries and make a
+verified full backup paired with the previous runtime. Confirm the first
+scheduled archive passes verification in Settings. Keep a copy on a
+separate disk and test restoring it to a separate installation. For rollback,
+use the previous runtime with its matching pre-update archive. The schedule
+and its status live on the server alongside the data and can be configured
+again when moving the installation to a new host.
+
 ## Release 1.13.0
 
 Use `v1.13.0` as `TARGET_TAG`. The schema remains 007. Synchronize pending browser/PWA entries and keep the full pre-update backup and previous image or standalone release. Use [the registry instructions](container-image.md#update-and-rollback) when switching an existing Docker installation to the published image, or follow [the standalone guide](standalone.md) for a Docker-free installation. Source builds can continue with the procedure below. Verify `/api/v1/health` reports version `1.13.0` and schema `007`, reopen the browser/PWA online, and check the local date and time on a new fill-up and the saved time on an existing fill-up. For rollback, use the previous runtime and its matching pre-update data archive.

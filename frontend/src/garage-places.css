@@ -1,0 +1,41 @@
+.garage-places-map {
+  width: 100%;
+  min-height: 13rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background-image:
+    linear-gradient(to right, var(--border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--border) 1px, transparent 1px);
+  background-size: 2rem 2rem;
+}
+
+.garage-places-map button {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--text);
+}
+
+.garage-places-map button[aria-pressed="true"] {
+  border-color: currentColor;
+  z-index: 1;
+}
+
+.garage-places-list {
+  list-style: none;
+  padding: 0;
+}
+
+.garage-places-list li {
+  display: grid;
+  gap: 0.2rem;
+  margin-block: 0.6rem;
+}

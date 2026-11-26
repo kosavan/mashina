@@ -7,6 +7,7 @@ import time
 from backend.domain import reminder_status
 from backend.output_locale import user_locale
 from backend.notifications import digest, telegram_config
+from backend.renewal_schedule import latest_renewal, project_renewal
 from backend.notification_transport import (
     ProviderResult,
     send_push,
@@ -34,10 +35,16 @@ def due_targets(store, now, actor="", reminder_id=""):
             (actor, actor, reminder_id, reminder_id),
         ).mappings()
         destinations = {}
+        renewals = {}
         for row in rows:
             car, reminder = json.loads(row["car_data"]), json.loads(row["data"])
             if car.get("status", "active") != "active":
                 continue
+            if schedule := reminder.get("renewal_schedule"):
+                renewal_key = row["vehicle_id"], schedule["type"]
+                if renewal_key not in renewals:
+                    renewals[renewal_key] = latest_renewal(c, *renewal_key)
+                reminder = project_renewal(reminder, renewals[renewal_key])
             odometer = max(car.get("purchase_odometer", 0), row["maximum"] or 0)
             stage = reminder_status(reminder, odometer, date.fromtimestamp(now).isoformat())[
                 "status"
@@ -62,15 +69,14 @@ def due_targets(store, now, actor="", reminder_id=""):
                     if link:
                         channels.append(("telegram", digest(link[0]), link[0]))
                 destinations[owner] = channels
-            cycle = digest(
-                json.dumps(
-                    [
-                        reminder.get("due_date"),
-                        reminder.get("due_odometer"),
-                        reminder.get("completed_at", ""),
-                    ]
-                )
-            )
+            cycle_fields = [
+                reminder.get("due_date"),
+                reminder.get("due_odometer"),
+                reminder.get("completed_at", ""),
+            ]
+            if "renewal_cycle" in reminder:
+                cycle_fields.append(reminder["renewal_cycle"])
+            cycle = digest(json.dumps(cycle_fields))
             for channel, destination_id, destination in destinations[owner]:
                 key = digest(json.dumps([owner, row["id"], channel, destination_id, cycle, stage]))
                 result.append(

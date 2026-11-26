@@ -27,6 +27,9 @@ import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { Empty, EventRow, PageHeading } from "./Views";
 import { TireHealth } from "./TireHealth";
+import { ImportProfiles, type HistoryMapping } from "./ImportProfiles";
+import ReceiptInbox from "./ReceiptInbox";
+import "./intake.css";
 
 const BankImport = lazy(() => import("./BankImport"));
 
@@ -552,13 +555,6 @@ const historyKinds = {
   odometer: "Пробег",
   note: "Заметка",
 };
-type HistoryMapping = {
-  columns: Record<string, string>;
-  default_kind: string | null;
-  date_format: "iso" | "dmy";
-  default_currency: string;
-};
-
 function CSVImport() {
   const { selected, session, refresh, notify } = useApp();
   const [file, setFile] = useState<File>();
@@ -714,6 +710,26 @@ function CSVImport() {
           >
             <h3>{tr("Сопоставление колонок")}</h3>
             <p className="muted">{file.name}</p>
+            <ImportProfiles
+              kind="history"
+              current={
+                mapping.columns.occurred_at &&
+                (mapping.columns.kind || mapping.default_kind) &&
+                /^[A-Z]{3}$/.test(mapping.default_currency)
+                  ? { kind: "history", mapping }
+                  : undefined
+              }
+              disabled={busy}
+              accepts={(profile) =>
+                profile.kind === "history" &&
+                Object.values(profile.mapping.columns).every((header) =>
+                  headers.includes(header),
+                )
+              }
+              onApply={(profile) => {
+                if (profile.kind === "history") updateMapping(profile.mapping);
+              }}
+            />
             <fieldset className="field-grid csv-mapping" disabled={busy}>
               {Object.entries(historyFields).map(([key, label]) => (
                 <label className="field" key={key}>
@@ -974,7 +990,8 @@ export default function OwnershipTools({
       !!selected &&
       state.vehicles.find((v) => v.id === selected)?.can_edit !== false &&
       visibleTab !== "work" &&
-      visibleTab !== "import",
+      visibleTab !== "import" &&
+      visibleTab !== "receipts",
   });
   const tires = (state.tire_sets || []).filter(
     (row) => row.vehicle_id === selected && !row.deleted,
@@ -1046,6 +1063,7 @@ export default function OwnershipTools({
             ["tires", tr("Шины")],
             ["parts", tr("Запчасти")],
             ["budget", tr("Бюджет")],
+            ["receipts", tr("Чеки")],
             ["import", tr("Импорт")],
           ]
             .filter(
@@ -1067,7 +1085,7 @@ export default function OwnershipTools({
               </button>
             ))}
         </div>
-        {visibleTab !== "work" && (
+        {visibleTab !== "work" && visibleTab !== "receipts" && (
           <label className="filter-select">
             {tr("Автомобиль")}
             <select
@@ -1089,6 +1107,8 @@ export default function OwnershipTools({
       </div>
       {visibleTab === "work" ? (
         children
+      ) : visibleTab === "receipts" ? (
+        <ReceiptInbox key={session.id} />
       ) : !selected ? (
         <Empty
           title={tr("Сначала добавьте автомобиль")}

@@ -31,24 +31,16 @@ below. [Mobile installation and signing](mobile-clients.md)
 For Android servers using a private CA, check that the owner's CA appears in
 the phone's trusted user certificates and verify HTTPS after updating.
 
-## Release 1.15.0
+## Release 1.16.0
 
-Use `v1.15.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
-and retain a verified full backup with the previous image or standalone package.
-Check version `1.15.0` and schema `007` at `/api/v1/health`. Open the existing
-garage and check an attachment, the registration and insurance screen, and a
-CSV preview. For rollback, pair the previous runtime with its pre-update archive.
+Use `v1.16.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
+and retain a verified full backup with the previous Docker image or standalone
+package. Check version `1.16.0` and schema `007` at `/api/v1/health`. Reopen
+the garage online and check an existing attachment, a renewal, and the
+pending queue. For rollback, pair the previous runtime with its matching
+pre-update archive.
 
-## Release 1.14.0
-
-Use `v1.14.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
-and keep a verified full backup and the previous image or standalone package.
-After upgrading, check version `1.14.0` at `/api/v1/health` and verify access
-to the existing garage and attachments. The mobile packages can also connect
-to an existing compatible MASHINA server. For server rollback, use the previous
-runtime with its matching pre-update data archive.
-
-## Upcoming daily backups
+### Daily backups
 
 Automatic backups are opt-in under **Settings → Backup**. The administrator
 selects a subdirectory, a UTC hour and the number of daily archives to keep.
@@ -66,6 +58,23 @@ separate disk and test restoring it to a separate installation. For rollback,
 use the previous runtime with its matching pre-update archive. The schedule
 and its status live on the server alongside the data and can be configured
 again when moving the installation to a new host.
+
+## Release 1.15.0
+
+Use `v1.15.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
+and retain a verified full backup with the previous image or standalone package.
+Check version `1.15.0` and schema `007` at `/api/v1/health`. Open the existing
+garage and check an attachment, the registration and insurance screen, and a
+CSV preview. For rollback, pair the previous runtime with its pre-update archive.
+
+## Release 1.14.0
+
+Use `v1.14.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
+and keep a verified full backup and the previous image or standalone package.
+After upgrading, check version `1.14.0` at `/api/v1/health` and verify access
+to the existing garage and attachments. The mobile packages can also connect
+to an existing compatible MASHINA server. For server rollback, use the previous
+runtime with its matching pre-update data archive.
 
 ## Release 1.13.0
 

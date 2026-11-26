@@ -1,3 +1,16 @@
+# MASHINA 1.16.0
+
+- **Renewals and calendar.** Set reminders for registration and insurance 7, 14 or 30 days ahead. Linked reminders follow the latest renewal. Download a private `.ics` calendar event.
+- **Receipts and CSV templates.** Capture receipt photos offline and confirm them later to save an expense and attachment. Reuse named column mappings for history and bank CSV imports.
+- **Service visits.** Prepare a workshop checklist, close selected tasks by saving the service record, and copy or download the repair report.
+- **Supplies and stock.** Pin parts from service history, keep a shopping list, and track stock receipts and quantities used on a service record.
+- **Trips and saved places.** Group existing expenses into trips with totals by currency. Explore places from your records without automatically loading an external map.
+- **Backups and VIN.** Administrators can schedule verified daily backups with retention. Vehicle owners can explicitly request NHTSA vPIC suggestions and choose which fields to save.
+
+Schema remains 007. Synchronize pending entries and retain a verified full backup paired with the previous Docker image or standalone package. [Update and rollback](docs/updating.md) · [Обновление и откат](docs/updating.ru.md)
+
+---
+
 # MASHINA 1.15.0
 
 - **Flexible history CSV import.** Map spreadsheet columns, choose the date format and default currency, and review rows before importing. Fuel records preserve supported details and custom categories. The preview flags duplicates. [#31](https://github.com/kosavan/mashina/issues/31)

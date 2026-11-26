@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
+import { closeDemoSession } from "./demo-session";
+
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.155" } });
+test.afterEach(async ({ page }) => closeDemoSession(page));
 
 test("vehicle stock and trips use existing service records, and map consent follows each point", async ({
   page,

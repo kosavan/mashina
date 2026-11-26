@@ -1,6 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { closeDemoSession } from "./demo-session";
+
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.131" } });
+test.afterEach(async ({ page }) => closeDemoSession(page));
 
 async function openMaintenance(page: Page, tab: string) {
   await page

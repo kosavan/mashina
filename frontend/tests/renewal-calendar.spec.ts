@@ -1,6 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { closeDemoSession } from "./demo-session";
+
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.91" } });
+test.afterEach(async ({ page }) => closeDemoSession(page));
 
 test("renewal reminder follows the next record and exports the current calendar date", async ({
   page,

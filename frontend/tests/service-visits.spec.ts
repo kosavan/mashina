@@ -1,7 +1,10 @@
 import { readFile } from "node:fs/promises";
 import { expect, test } from "@playwright/test";
 
+import { closeDemoSession } from "./demo-session";
+
 test.use({ extraHTTPHeaders: { "X-Forwarded-For": "192.0.2.125" } });
+test.afterEach(async ({ page }) => closeDemoSession(page));
 
 test("selected service concerns close on save and appear in the downloadable repair report", async ({
   page,

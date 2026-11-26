@@ -40,6 +40,13 @@ export function projectReminder(
       } else result.due_odometer = null;
       result.completed_at = "";
     } else result.completed_at = date;
+    if (result.renewal_schedule) {
+      result.renewal_completed_at = date;
+      result.renewal_completed_for =
+        typeof input.renewal_expected_cycle === "string"
+          ? input.renewal_expected_cycle
+          : undefined;
+    }
   }
   delete result.completion_date;
   delete result.completion_odometer;
@@ -75,7 +82,8 @@ export function reminderStatus(
       remaining_days <= Number(reminder.warning_days ?? 30))
   )
     status = "soon";
-  if (!reminder.enabled) status = "disabled";
+  if (!reminder.enabled || reminder.renewal_active === false)
+    status = "disabled";
   if (reminder.completed_at) status = "completed";
   return { status, remaining_km, remaining_days };
 }

@@ -1,5 +1,6 @@
 """Versioned, same-origin API and private file handlers for the MASHINA monolith."""
 
+import asyncio
 from collections import OrderedDict
 from contextlib import asynccontextmanager
 import csv
@@ -22,10 +23,10 @@ from argon2.exceptions import VerificationError, InvalidHashError
 from fastapi import FastAPI, HTTPException, Request, UploadFile, File, Form, Depends
 from fastapi.responses import JSONResponse, Response, FileResponse
 from fastapi.staticfiles import StaticFiles
-from PIL import Image, ImageOps, UnidentifiedImageError
 from pydantic import BaseModel, Field, ConfigDict, ValidationError
 
 from backend.storage import Store, Conflict, Denied, dumps, uid
+from backend.attachment_media import MAX_FILE, normalize_attachment
 from backend.domain import (
     CONSUMPTION_UNITS,
     DISTANCE_UNITS,
@@ -37,6 +38,8 @@ from backend.domain import (
     text,
 )
 from backend.backup import save_backup, restore_backup, MAX_ARCHIVE
+from backend.scheduled_backup import ScheduledBackups, install_scheduled_backups
+from backend.vin_lookup import install_vin_lookup
 from backend.demo import seed
 from backend.ownership import ownership_report, csv_rows, import_row, reviewed_rows
 from backend.history_csv import MAX_CSV, HistoryMapping, inspect_history_csv, mapped_sources
@@ -45,6 +48,8 @@ from backend.accounts import install_accounts, require_admin
 from backend.reports import ReportOptions, report_snapshot, render_report, RENDER_LOCK
 from backend.notifications import install_notifications
 from backend.bank_api import install_bank
+from backend.import_profiles import install_import_profiles
+from backend.receipt_inbox import PREFIX as RECEIPT_CONFIRM, install_receipt_inbox
 from backend.machine_api import install_machine
 from backend.ocr import recognize, MAX_SOURCE
 from backend.previews import card_preview
@@ -61,7 +66,6 @@ class ArchiveFileResponse(FileResponse):
 
 HASHER = PasswordHasher(time_cost=2, memory_cost=19456, parallelism=1)
 PREFIX = "/api/v1"
-MAX_FILE = 20 * 1024 * 1024
 
 
 class Credentials(BaseModel):
@@ -89,17 +93,24 @@ class Mutation(BaseModel):
 def create_app(data_path=None, bootstrap_token=None):
     data_path = Path(data_path or os.getenv("MASHINA_DATA", "data"))
     store = Store(data_path)
+    scheduled_backups = ScheduledBackups(store)
     demos = {}
     attempts = OrderedDict()
     dummy_hash = HASHER.hash(secrets.token_urlsafe(32))
 
     @asynccontextmanager
     async def lifespan(app):
-        yield
-        for item in demos.values():
-            item["store"].close()
-            item["temp"].cleanup()
-        store.close()
+        stopped = asyncio.Event()
+        backup_worker = asyncio.create_task(scheduled_backups.run(stopped))
+        try:
+            yield
+        finally:
+            stopped.set()
+            await backup_worker
+            for item in demos.values():
+                item["store"].close()
+                item["temp"].cleanup()
+            store.close()
 
     app = FastAPI(
         title="MASHINA", version="1.15.0", lifespan=lifespan, docs_url=None, redoc_url=None
@@ -127,7 +138,7 @@ def create_app(data_path=None, bootstrap_token=None):
                     else 201 * 1024 * 1024
                     if path == PREFIX + "/restore"
                     else 22 * 1024 * 1024
-                    if path in {PREFIX + "/attachments", PREFIX + "/ocr"}
+                    if path in {PREFIX + "/attachments", PREFIX + "/ocr", RECEIPT_CONFIRM}
                     else 4 * 1024 * 1024
                 )
             )
@@ -558,26 +569,7 @@ def create_app(data_path=None, bootstrap_token=None):
         event_id = uid(event_id) if event_id else ""
         with active_store.transaction() as c:
             upload_access(c, vehicle_id, event_id, s["user_id"])
-        content = await file.read(MAX_FILE + 1)
-        if len(content) > MAX_FILE or not content:
-            raise ValueError("Файл должен быть от 1 байта до 20 МБ")
-        media = "application/octet-stream"
-        try:
-            if content.startswith((b"\xff\xd8\xff", b"\x89PNG", b"RIFF")):
-                Image.MAX_IMAGE_PIXELS = 25000000
-                with Image.open(io.BytesIO(content)) as image:
-                    if image.width * image.height > 25000000:
-                        raise ValueError("Изображение превышает 25 мегапикселей")
-                    image.load()
-                    image = ImageOps.exif_transpose(image)
-                    image.thumbnail((2400, 2400))
-                    output = io.BytesIO()
-                    image.convert("RGB").save(output, format="JPEG", quality=90)
-                    content, media = output.getvalue(), "image/jpeg"
-            elif content.startswith(b"%PDF-"):
-                media = "application/pdf"
-        except (UnidentifiedImageError, OSError, Image.DecompressionBombError):
-            raise ValueError("Изображение повреждено или слишком велико") from None
+        content, media = normalize_attachment(await file.read(MAX_FILE + 1))
         attachment_id = str(uuid.uuid4())
         filename = attachment_id + ".bin"
         metadata = {
@@ -843,10 +835,17 @@ def create_app(data_path=None, bootstrap_token=None):
         return {"ok": True, "login_required": True}
 
     install_notifications(app, session, throttle)
+    from backend.renewal_schedule import install_renewal_calendar
+
+    install_renewal_calendar(app, session)
     install_bank(app, session, throttle)
+    install_import_profiles(app, session)
+    install_receipt_inbox(app, session)
     install_machine(app, session)
 
     install_accounts(app, session, HASHER, login_response, throttle)
+    install_scheduled_backups(app, session, scheduled_backups)
+    install_vin_lookup(app, session, throttle)
 
     @app.post(PREFIX + "/vehicles/{vehicle_id}/sale-report")
     def sale_report(vehicle_id: str, body: ReportOptions, request: Request, s=Depends(session)):

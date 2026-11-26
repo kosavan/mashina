@@ -54,6 +54,7 @@ import {
   queueFor,
   synchronize,
   clearLocal,
+  receiptDrafts,
   resolveOperation,
 } from "./offline";
 import { AppContext, type RecordFormOptions } from "./context";
@@ -466,12 +467,17 @@ export default function App() {
     return result;
   }
   async function logout() {
+    const drafts = session ? await receiptDrafts(session.id) : [];
     if (
-      queue.length &&
+      (queue.length || drafts.length) &&
       !confirm(
-        tr(
-          "Есть несинхронизированные записи. При выходе локальные данные будут удалены. Выйти?",
-        ),
+        drafts.length
+          ? tr(
+              "При выходе локальные черновики чеков и несинхронизированные записи будут удалены. Выйти?",
+            )
+          : tr(
+              "Есть несинхронизированные записи. При выходе локальные данные будут удалены. Выйти?",
+            ),
       )
     )
       return;

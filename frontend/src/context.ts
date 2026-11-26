@@ -11,7 +11,8 @@ import type {
 } from "./types";
 export interface RecordFormOptions {
   renewalType?: RenewalType;
-  reminderDraft?: { title: string; due_date: string };
+  reminderDraft?: { title: string; due_date: string; renewalType: RenewalType };
+  serviceVisitDraft?: { vehicleId: string; concernIds: string[] };
 }
 export interface AppModel {
   state: State;

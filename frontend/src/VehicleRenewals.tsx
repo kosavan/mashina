@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Bell,
+  CalendarDays,
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
@@ -17,7 +18,7 @@ import {
   renewalLabels,
 } from "./renewals";
 import type { RenewalType } from "./types";
-import { dateLabel, money, number, today } from "./utils";
+import { dateLabel, download, money, number, today } from "./utils";
 import { Empty, EventRow, PageHeading, VehicleSelect } from "./Views";
 
 const renewalOptions = [
@@ -76,6 +77,12 @@ export default function Renewals() {
           <div className="renewals-grid">
             {renewalOptions.map(({ kind, icon: Icon, add, reminder }) => {
               const latest = rows.find((entry) => entry.renewal.type === kind);
+              const schedule = state.reminders.find(
+                (record) =>
+                  !record.deleted &&
+                  record.vehicle_id === car.id &&
+                  record.renewal_schedule?.type === kind,
+              );
               const remaining = latest
                 ? expiresInDays(latest.renewal.expires_on, currentDay)
                 : null;
@@ -135,6 +142,16 @@ export default function Renewals() {
                           </dd>
                         </div>
                       )}
+                      {schedule?.enabled && (
+                        <div>
+                          <dt>{tr("Напоминания")}</dt>
+                          <dd>
+                            {tr("За {0} дн. до продления", [
+                              schedule.renewal_schedule!.lead_days,
+                            ])}
+                          </dd>
+                        </div>
+                      )}
                     </dl>
                   ) : (
                     <p className="muted renewal-empty">
@@ -148,24 +165,41 @@ export default function Renewals() {
                     </Button>
                     {latest &&
                       remaining != null &&
-                      remaining >= 0 &&
+                      (remaining >= 0 || schedule) &&
                       car.can_edit !== false && (
                         <Button
                           variant="ghost"
                           onClick={() => {
                             setSelected(car.id);
-                            open("reminder", undefined, {
+                            open("reminder", schedule, {
                               reminderDraft: {
                                 title: tr(reminder),
                                 due_date: latest.renewal.expires_on,
+                                renewalType: kind,
                               },
                             });
                           }}
                         >
                           <Bell size={16} />
-                          {tr("Напомнить о продлении")}
+                          {tr(
+                            schedule
+                              ? "Настроить напоминание"
+                              : "Напомнить о продлении",
+                          )}
                         </Button>
                       )}
+                    {latest && (
+                      <Button
+                        variant="ghost"
+                        disabled={latest.pending || !navigator.onLine}
+                        onClick={() =>
+                          download(`/api/v1/renewals/${latest.id}/calendar`)
+                        }
+                      >
+                        <CalendarDays size={16} />
+                        {tr("Добавить в календарь")}
+                      </Button>
+                    )}
                   </div>
                 </article>
               );

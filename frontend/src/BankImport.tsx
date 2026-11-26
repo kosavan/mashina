@@ -24,6 +24,12 @@ import { CURRENCIES, defaultCurrency, money } from "./utils";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import {
+  ImportProfiles,
+  type BankDelimiter,
+  type BankEncoding,
+  type BankMapping,
+} from "./ImportProfiles";
+import {
   reviewSummary,
   selectedDecisions,
   type BankRow,
@@ -32,16 +38,7 @@ import {
 } from "./bankReview";
 
 type Source = { id: string; label: string };
-type Mapping = {
-  date: string;
-  amount: string;
-  description: string;
-  transaction_id: string | null;
-  currency: string | null;
-  date_format: "iso" | "russian";
-  outgoing_sign: "negative" | "positive";
-  default_currency: string;
-};
+type Mapping = BankMapping;
 type Preview = { batch_id: string; expires: number; rows: BankRow[] };
 type Result = {
   created: number;
@@ -60,6 +57,15 @@ const initial: Mapping = {
   outgoing_sign: "negative",
   default_currency: "RUB",
 };
+function mappingHeaders(mapping: Mapping) {
+  return [
+    mapping.date,
+    mapping.amount,
+    mapping.description,
+    mapping.transaction_id,
+    mapping.currency,
+  ].filter((header): header is string => !!header);
+}
 const kindNames: Record<string, string> = {
   fuel: "Заправка",
   maintenance: "ТО / ремонт",
@@ -96,14 +102,15 @@ export default function BankImport() {
   const [sourceId, setSourceId] = useState("");
   const [label, setLabel] = useState("");
   const [file, setFile] = useState<File>();
-  const [encoding, setEncoding] = useState("utf-8");
-  const [delimiter, setDelimiter] = useState("semicolon");
+  const [encoding, setEncoding] = useState<BankEncoding>("utf-8");
+  const [delimiter, setDelimiter] = useState<BankDelimiter>("semicolon");
   const [headers, setHeaders] = useState<string[]>([]);
   const [rowCount, setRowCount] = useState(0);
   const [mapping, setMapping] = useState<Mapping>({
     ...initial,
     default_currency: defaultBankCur,
   });
+  const [preset, setPreset] = useState<Mapping>();
   const [preview, setPreview] = useState<Preview>();
   const [choices, setChoices] = useState<Choices>({});
   const [page, setPage] = useState(0);
@@ -176,6 +183,7 @@ export default function BankImport() {
     setFile(undefined);
     setPreview(undefined);
     setHeaders([]);
+    setPreset(undefined);
     setChoices({});
     setResult(undefined);
     setStep(1);
@@ -375,13 +383,48 @@ export default function BankImport() {
                   )}
                 </p>
               </div>
+              <ImportProfiles
+                kind="bank"
+                current={
+                  headers.length &&
+                  mapping.date &&
+                  mapping.amount &&
+                  mapping.description
+                    ? { kind: "bank", mapping, encoding, delimiter }
+                    : undefined
+                }
+                disabled={busy || !online}
+                accepts={(profile) =>
+                  profile.kind === "bank" &&
+                  (!headers.length ||
+                    profile.encoding !== encoding ||
+                    profile.delimiter !== delimiter ||
+                    mappingHeaders(profile.mapping).every((header) =>
+                      headers.includes(header),
+                    ))
+                }
+                onApply={(profile) => {
+                  if (profile.kind !== "bank") return;
+                  setPreset(profile.mapping);
+                  setMapping(profile.mapping);
+                  if (
+                    encoding !== profile.encoding ||
+                    delimiter !== profile.delimiter
+                  )
+                    setHeaders([]);
+                  setEncoding(profile.encoding);
+                  setDelimiter(profile.delimiter);
+                  setError("");
+                }}
+              />
               <div className="field-grid">
                 <Field label={tr("Кодировка")}>
                   <select
                     value={encoding}
                     disabled={busy}
                     onChange={(e) => {
-                      setEncoding(e.target.value);
+                      setEncoding(e.target.value as BankEncoding);
+                      setPreset(undefined);
                       setHeaders([]);
                     }}
                   >
@@ -394,7 +437,8 @@ export default function BankImport() {
                     value={delimiter}
                     disabled={busy}
                     onChange={(e) => {
-                      setDelimiter(e.target.value);
+                      setDelimiter(e.target.value as BankDelimiter);
+                      setPreset(undefined);
                       setHeaders([]);
                     }}
                   >
@@ -415,10 +459,12 @@ export default function BankImport() {
                   onChange={(e) => {
                     setFile(e.target.files?.[0]);
                     setHeaders([]);
-                    setMapping({
-                      ...initial,
-                      default_currency: defaultBankCur,
-                    });
+                    setMapping(
+                      preset || {
+                        ...initial,
+                        default_currency: defaultBankCur,
+                      },
+                    );
                     setError("");
                   }}
                 />
@@ -444,10 +490,21 @@ export default function BankImport() {
                     );
                     setHeaders(inspected.headers);
                     setRowCount(inspected.row_count);
-                    setMapping({
-                      ...initial,
-                      default_currency: defaultBankCur,
-                    });
+                    if (
+                      preset &&
+                      mappingHeaders(preset).every((header) =>
+                        inspected.headers.includes(header),
+                      )
+                    ) {
+                      setMapping(preset);
+                    } else {
+                      setMapping({
+                        ...initial,
+                        default_currency: defaultBankCur,
+                      });
+                      if (preset)
+                        setError(tr("Столбцы шаблона не совпадают с CSV"));
+                    }
                   })
                 }
               >

@@ -29,6 +29,7 @@ import type {
   Kind,
   RecordBase,
   RenewalData,
+  RenewalSchedule,
 } from "./types";
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
@@ -59,6 +60,7 @@ function Field({
   placeholder = "",
   step,
   list,
+  readOnly = false,
   children,
 }: {
   label: string;
@@ -69,6 +71,7 @@ function Field({
   placeholder?: string;
   step?: string;
   list?: string;
+  readOnly?: boolean;
   children?: React.ReactNode;
 }) {
   return (
@@ -83,6 +86,7 @@ function Field({
           placeholder={placeholder}
           step={step}
           list={list}
+          readOnly={readOnly}
           inputMode={type === "number" ? "decimal" : undefined}
         />
       )}
@@ -94,6 +98,7 @@ export function RecordForm({
   type,
   record,
   onClose,
+  serviceVisitDraft,
   renewalType,
   reminderDraft,
 }: {
@@ -107,11 +112,17 @@ export function RecordForm({
       ? (record?.renewal as RenewalData | undefined)
       : undefined;
   const renewalKind = renewal?.type ?? renewalType;
+  const reminderRenewalType =
+    type === "reminder"
+      ? ((record?.renewal_schedule as RenewalSchedule | undefined)?.type ??
+        reminderDraft?.renewalType)
+      : undefined;
   const allowedVehicles = state.vehicles.filter(
     (v) => !["reminder", "document"].includes(type) || v.can_edit !== false,
   );
   const [vehicleId, setVehicleId] = useState(
     record?.vehicle_id ||
+      serviceVisitDraft?.vehicleId ||
       allowedVehicles.find((v) => v.id === selected)?.id ||
       allowedVehicles[0]?.id ||
       "",
@@ -184,6 +195,12 @@ export function RecordForm({
           ).checked;
       if (type !== "vehicle" && type !== "category")
         data.vehicle_id = vehicleId;
+      if (reminderRenewalType) {
+        data.renewal_schedule = {
+          type: reminderRenewalType,
+          lead_days: Number(data.warning_days),
+        };
+      }
       if (type === "document") {
         if (!files.length)
           throw new Error(tr("Выберите документ для загрузки"));
@@ -194,6 +211,21 @@ export function RecordForm({
         ) {
           data.kind = type;
           data.items = items;
+          if (type === "maintenance") {
+            const concernIds =
+              serviceVisitDraft?.concernIds ??
+              record?.service_visit?.concern_ids ??
+              [];
+            if (concernIds.length || data.service_visit_follow_up.trim()) {
+              data.service_visit = {
+                concern_ids: concernIds,
+                follow_up: data.service_visit_follow_up.trim(),
+              };
+            } else if (record?.service_visit) {
+              data.service_visit = null;
+            }
+            delete data.service_visit_follow_up;
+          }
           if (type === "expense" && renewalKind) {
             if (data.renewal_expires_on < data.occurred_at.slice(0, 10))
               throw new Error(
@@ -385,6 +417,7 @@ export function RecordForm({
             {tr("Автомобиль")}
             <select
               value={vehicleId}
+              disabled={!!serviceVisitDraft || !!reminderRenewalType}
               onChange={(e) => setVehicleId(e.target.value)}
               required
             >
@@ -618,60 +651,98 @@ export function RecordForm({
               required
               placeholder={tr("Замена моторного масла")}
             />
-            <div className="field-grid">
-              <Field
-                label={tr("К дате")}
-                name="due_date"
-                type="date"
-                value={record?.due_date ?? reminderDraft?.due_date}
-              />
-              <Field
-                label={
-                  dUnit === "mi" ? tr("На пробеге, ми") : tr("На пробеге, км")
-                }
-                name="due_odometer"
-                type="number"
-                step="1"
-                value={record?.due_odometer}
-              />
-            </div>
-            <p className="field-help">
-              {tr("Если заданы оба условия, напомним при наступлении любого.")}
-            </p>
-            <div className="field-grid">
-              <Field
-                label={tr("Предупредить за, дней")}
-                name="warning_days"
-                type="number"
-                value={record?.warning_days ?? 30}
-              />
-              <Field
-                label={
-                  dUnit === "mi"
-                    ? tr("Предупредить за, ми")
-                    : tr("Предупредить за, км")
-                }
-                name="warning_km"
-                type="number"
-                value={record?.warning_km ?? 1000}
-              />
-              <Field
-                label={tr("Повтор каждые, дней")}
-                name="repeat_days"
-                type="number"
-                value={record?.repeat_days || 0}
-              />
-              <Field
-                label={
-                  dUnit === "mi"
-                    ? tr("Повтор каждые, ми")
-                    : tr("Повтор каждые, км")
-                }
-                name="repeat_km"
-                type="number"
-                value={record?.repeat_km || 0}
-              />
-            </div>
+            {reminderRenewalType ? (
+              <>
+                <div className="field-grid">
+                  <Field
+                    label={tr("К дате")}
+                    name="due_date"
+                    type="date"
+                    value={record?.due_date ?? reminderDraft?.due_date}
+                    readOnly
+                  />
+                  <Field
+                    label={tr("Предупредить за, дней")}
+                    name="warning_days"
+                  >
+                    <select
+                      name="warning_days"
+                      defaultValue={record?.renewal_schedule?.lead_days ?? 30}
+                    >
+                      {[7, 14, 30].map((days) => (
+                        <option key={days} value={days}>
+                          {days}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                </div>
+                <p className="field-help">
+                  {tr("Срок обновится, когда появится новое продление.")}
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="field-grid">
+                  <Field
+                    label={tr("К дате")}
+                    name="due_date"
+                    type="date"
+                    value={record?.due_date ?? reminderDraft?.due_date}
+                  />
+                  <Field
+                    label={
+                      dUnit === "mi"
+                        ? tr("На пробеге, ми")
+                        : tr("На пробеге, км")
+                    }
+                    name="due_odometer"
+                    type="number"
+                    step="1"
+                    value={record?.due_odometer}
+                  />
+                </div>
+                <p className="field-help">
+                  {tr(
+                    "Если заданы оба условия, напомним при наступлении любого.",
+                  )}
+                </p>
+                <div className="field-grid">
+                  <Field
+                    label={tr("Предупредить за, дней")}
+                    name="warning_days"
+                    type="number"
+                    value={record?.warning_days ?? 30}
+                  />
+                  <Field
+                    label={
+                      dUnit === "mi"
+                        ? tr("Предупредить за, ми")
+                        : tr("Предупредить за, км")
+                    }
+                    name="warning_km"
+                    type="number"
+                    value={record?.warning_km ?? 1000}
+                  />
+                  <Field
+                    label={tr("Повтор каждые, дней")}
+                    name="repeat_days"
+                    type="number"
+                    value={record?.repeat_days || 0}
+                  />
+                  <Field
+                    label={
+                      dUnit === "mi"
+                        ? tr("Повтор каждые, ми")
+                        : tr("Повтор каждые, км")
+                    }
+                    name="repeat_km"
+                    type="number"
+                    value={record?.repeat_km || 0}
+                  />
+                </div>
+              </>
+            )}
             <label className="check-field">
               <input
                 type="checkbox"
@@ -964,6 +1035,25 @@ export function RecordForm({
                   : tr("Что важно сохранить?")
               }
             />
+            {type === "maintenance" && (
+              <>
+                {serviceVisitDraft?.concernIds.length ? (
+                  <p className="field-help">
+                    {tr(
+                      "После сохранения будут закрыты выбранные задачи для СТО.",
+                    )}
+                  </p>
+                ) : null}
+                <label>
+                  {tr("Что проверить после визита")}
+                  <textarea
+                    name="service_visit_follow_up"
+                    maxLength={1500}
+                    defaultValue={record?.service_visit?.follow_up ?? ""}
+                  />
+                </label>
+              </>
+            )}
             {(type === "maintenance" || type === "expense") && (
               <details open={type === "maintenance" || !!items.length}>
                 <summary>
@@ -1153,6 +1243,7 @@ export function RecordForm({
                       .filter(
                         (r) =>
                           r.vehicle_id === vehicleId &&
+                          !r.renewal_schedule &&
                           r.enabled &&
                           r.can_edit !== false,
                       )

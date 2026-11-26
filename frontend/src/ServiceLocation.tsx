@@ -30,7 +30,7 @@ export function ServiceLocation({ entry }: { entry: Entry }) {
         <span className="eyebrow">{tr("МЕСТО В ИСТОРИИ")}</span>
         <MapPin size={20} />
       </div>
-      <h3>{entry.vendor || tr("Место обслуживания")}</h3>
+      <h3>{entry.vendor || entry.station || tr("Место обслуживания")}</h3>
       <p>{entry.service_address || tr("Точка указана вручную")}</p>
       {hasPoint && (
         <small>

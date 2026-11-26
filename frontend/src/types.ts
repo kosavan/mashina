@@ -26,6 +26,13 @@ export interface Entry extends RecordBase {
   odometer: number | null;
   items: Item[];
   renewal?: RenewalData;
+  service_concern?: boolean;
+  service_visit?: ServiceVisit;
+}
+export interface ServiceVisit {
+  concern_ids: string[];
+  concerns?: { id: string; description: string }[];
+  follow_up: string;
 }
 export type RenewalType = "registration" | "insurance";
 export type InspectionStatus = "pending" | "passed" | "failed";
@@ -33,6 +40,10 @@ export interface RenewalData {
   type: RenewalType;
   expires_on: string;
   inspection_status?: InspectionStatus;
+}
+export interface RenewalSchedule {
+  type: RenewalType;
+  lead_days: 7 | 14 | 30;
 }
 export interface Item {
   name: string;
@@ -53,6 +64,11 @@ export interface Reminder extends RecordBase {
   remaining_days?: number;
   estimated_cost_minor?: number | null;
   cost_currency?: string;
+  renewal_schedule?: RenewalSchedule;
+  renewal_cycle?: string;
+  renewal_active?: boolean;
+  renewal_completed_at?: string;
+  renewal_completed_for?: string;
 }
 export interface Attachment {
   id: string;

@@ -1,8 +1,10 @@
 import { createUuid } from "./uuid";
 import type { Cached, Mutation, Session, State } from "./types";
+import type { ReceiptDraft } from "./receiptDraft";
 import { currentKm, today } from "./utils";
 import { pendingMoney } from "./calculations";
 import { projectReminder, reminderStatus } from "./reminders";
+import { projectRenewalReminder } from "./renewals";
 import { permissionError, scopeKey } from "./permissions";
 import { api, APIError } from "./api";
 
@@ -32,6 +34,40 @@ async function read<T>(
 }
 export async function cached(): Promise<Cached | undefined> {
   return read("cache", "current");
+}
+export async function receiptDrafts(owner: string): Promise<ReceiptDraft[]> {
+  return (await read<ReceiptDraft[]>("cache", `receipt-drafts:${owner}`)) || [];
+}
+export async function updateReceiptDrafts(
+  owner: string,
+  update: (current: ReceiptDraft[]) => ReceiptDraft[],
+) {
+  const database = await db();
+  return new Promise<ReceiptDraft[]>((resolve, reject) => {
+    const tx = database.transaction("cache", "readwrite");
+    const cache = tx.objectStore("cache");
+    const key = `receipt-drafts:${owner}`;
+    const request = cache.get(key);
+    let drafts: ReceiptDraft[];
+    let exception: unknown;
+    request.onsuccess = () => {
+      try {
+        drafts = update(request.result || []);
+        cache.put(drafts, key);
+      } catch (error) {
+        exception = error;
+        tx.abort();
+      }
+    };
+    tx.oncomplete = () => resolve(drafts);
+    tx.onabort = () =>
+      reject(
+        exception ||
+          new Error(
+            "Не удалось сохранить на устройстве. Проверьте свободное место.",
+          ),
+      );
+  });
 }
 export async function queueFor(owner: string): Promise<Mutation[]> {
   const database = await db();
@@ -206,6 +242,7 @@ function project(state: State, operation: Mutation): State {
     v.current_odometer = currentKm(v, result.events);
   for (const reminder of result.reminders) {
     const vehicle = result.vehicles.find((v) => v.id === reminder.vehicle_id);
+    Object.assign(reminder, projectRenewalReminder(reminder, result.events));
     Object.assign(
       reminder,
       reminderStatus(reminder, vehicle?.current_odometer || 0, today()),

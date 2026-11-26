@@ -31,6 +31,7 @@ from backend.domain import (
     iso,
     integer,
 )
+from backend.renewal_schedule import latest_renewal, project_renewal, renewal_cycle, validate_schedule
 
 TABLES = {
     "vehicle": "vehicles",
@@ -214,7 +215,12 @@ class Store:
                         or role == "owner"
                         or (table == "events" and row["created_by"] == owner)
                     )
-                    result[table].append({**row_data(row), "can_edit": can_edit})
+                    data = {**row_data(row), "can_edit": can_edit}
+                    if table == "reminders" and data.get("renewal_schedule"):
+                        data = project_renewal(
+                            data, latest_renewal(c, data["vehicle_id"], data["renewal_schedule"]["type"])
+                        )
+                    result[table].append(data)
             result["attachments"] = []
             for car in cars:
                 role = roles[car["id"]]
@@ -408,6 +414,12 @@ class Store:
                         ) or default_curr
                 if entity == "vehicle":
                     data = normalize_vehicle(data)
+                    if "garage_details" in (payload.get("data") or {}):
+                        from backend.garage_details import normalize_garage_details
+
+                        data["garage_details"] = normalize_garage_details(
+                            c, record_id, data["garage_details"], (before or {}).get("garage_details") or {}
+                        )
                     if data.get("photo_id"):
                         image = self.owned(c, "attachments", data["photo_id"], resource_owner)
                         if not json.loads(image["data"]).get("media_type", "").startswith("image/"):
@@ -418,7 +430,10 @@ class Store:
                             "UPDATE attachments SET visibility='shared' WHERE id=?", (image["id"],)
                         )
                 elif entity == "event":
+                    from backend.service_visits import normalize_service_visit
+
                     data = normalize_event(data)
+                    normalize_service_visit(c, record_id, owner, data, before, deleted)
                     if (
                         data.get("odometer") is not None
                         and not data.get("odometer_confirmed")
@@ -446,6 +461,21 @@ class Store:
                         )
                     data["status_history"] = history
                 elif entity == "reminder":
+                    submitted_cycle = data.pop("renewal_expected_cycle", None)
+                    for field in ("renewal_active", "renewal_cycle", "renewal_completed_at"):
+                        data.pop(field, None)
+                    data.pop("renewal_completed_for", None)
+                    if before and before.get("renewal_completed_for"):
+                        data["renewal_completed_for"] = before["renewal_completed_for"]
+                    renewal_event = validate_schedule(c, vehicle_id, record_id, data, before, action)
+                    if data.get("renewal_schedule"):
+                        if action == "complete":
+                            cycle = renewal_cycle(renewal_event)
+                            if not cycle or submitted_cycle != cycle:
+                                raise Conflict("Срок продления изменился. Откройте напоминание заново.")
+                            data["renewal_completed_for"] = cycle
+                        else:
+                            data["completed_at"] = (before or {}).get("completed_at", "")
                     data = normalize_reminder(data)
                 elif entity in {"tire_set", "budget", "recurring_cost"}:
                     from backend.ownership import normalize_ownership
@@ -507,6 +537,8 @@ class Store:
                         dumps(data),
                     ),
                 )
+                if entity == "reminder" and data.get("renewal_schedule"):
+                    data = project_renewal(data, renewal_event)
                 response = {"record": {**data, "can_edit": True}}
             c.exec_driver_sql(
                 "INSERT INTO receipts VALUES(?,?,?,?)",

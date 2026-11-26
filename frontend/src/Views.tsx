@@ -1,6 +1,7 @@
 import { intlLocale } from "./i18n";
 import { categoryLabel } from "./utils";
 import { LanguagePicker } from "./LanguagePicker";
+import { BackupScheduleSettings } from "./BackupSchedule";
 import { getLocale } from "./i18n";
 import { tr } from "./i18n";
 import { useState, lazy, Suspense } from "react";
@@ -11,6 +12,9 @@ const Sharing = lazy(() => import("./Sharing"));
 const SaleReport = lazy(() => import("./SaleReport"));
 const Notifications = lazy(() => import("./Notifications"));
 const MachineAccess = lazy(() => import("./MachineAccess"));
+const ServiceVisits = lazy(() => import("./ServiceVisits"));
+const VinLookup = lazy(() => import("./VinLookup"));
+const GarageDetails = lazy(() => import("./GarageDetails"));
 import {
   ArrowUpRight,
   ArrowRight,
@@ -994,6 +998,7 @@ export function VehiclePage() {
               <Suspense fallback={null}>
                 <Sharing vehicleId={v.id} />
                 <SaleReport vehicleId={v.id} />
+                <VinLookup key={v.vin} car={v} />
               </Suspense>
             </div>
           )
@@ -1066,6 +1071,9 @@ export function VehiclePage() {
         }
       >
         <BodyDamage key={v.id} vehicleId={v.id} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <GarageDetails key={v.id} car={v} events={events} />
       </Suspense>
       <div className="section-heading">
         <h3>{tr("Последние события")}</h3>
@@ -1430,6 +1438,11 @@ function MaintenanceHistory() {
             <ReminderCard key={r.id} reminder={r} />
           ))}
       </div>
+      <Suspense
+        fallback={<p className="muted">{tr("Открываем обслуживание…")}</p>}
+      >
+        <ServiceVisits key={selected} />
+      </Suspense>
       <div className="section-heading">
         <h3>{tr("История работ")}</h3>
         <button
@@ -1449,6 +1462,7 @@ function MaintenanceHistory() {
 function ReminderCard({ reminder: r }: { reminder: Reminder }) {
   const { state, save, open, notify } = useApp();
   const [complete, setComplete] = useState(false);
+  const [completionCycle, setCompletionCycle] = useState("");
   const [busy, setBusy] = useState(false);
   const dUnit = distanceUnit(state);
   const car = state.vehicles.find((v) => v.id === r.vehicle_id);
@@ -1527,8 +1541,11 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setComplete(true)}
-            disabled={r.status === "completed"}
+            onClick={() => {
+              setCompletionCycle(r.renewal_cycle ?? "");
+              setComplete(true);
+            }}
+            disabled={r.status === "completed" || r.renewal_active === false}
           >
             <Check size={15} />
             {tr("Выполнено")}
@@ -1564,6 +1581,8 @@ function ReminderCard({ reminder: r }: { reminder: Reminder }) {
             setBusy(true);
             try {
               const values = Object.fromEntries(new FormData(e.currentTarget));
+              if (r.renewal_schedule)
+                values.renewal_expected_cycle = completionCycle;
               await save("reminder", values, r, "complete");
               notify(tr("Обслуживание отмечено. Интервалы обновлены."));
               setComplete(false);
@@ -1611,7 +1630,10 @@ export function Reminders() {
   const { state, open } = useApp();
   const [filter, setFilter] = useState("active");
   const rows = state.reminders.filter(
-    (r) => !r.deleted && (filter === "all" || (r.enabled && !r.completed_at)),
+    (r) =>
+      !r.deleted &&
+      (filter === "all" ||
+        (r.enabled && !r.completed_at && r.renewal_active !== false)),
   );
   return (
     <>
@@ -2122,6 +2144,7 @@ export function SettingsPage() {
               <Download size={17} />
               {tr("Скачать полный архив")}
             </Button>
+            {session.is_admin && !session.demo && <BackupScheduleSettings />}
             <label className={`restore-file ${session.demo ? "disabled" : ""}`}>
               <Upload size={16} />
               {tr("Восстановить из архива")}

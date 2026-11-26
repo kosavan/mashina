@@ -1,6 +1,7 @@
 """CI-only synthetic restore drill inside the read-only non-root production image."""
 
 from pathlib import Path
+from datetime import datetime, timezone
 import hashlib
 import io
 import json
@@ -9,6 +10,7 @@ import uuid
 
 from backend.storage import Store
 from backend.backup import save_backup, restore_backup
+from backend.scheduled_backup import BackupSchedule, ScheduledBackups
 
 
 def main():
@@ -87,6 +89,14 @@ def main():
         restore_backup(store, archive)
         assert store.state(owner)["vehicles"][0]["id"] == car["id"]
         assert (store.uploads / filename).read_bytes() == picture.getvalue()
+        schedule = ScheduledBackups(store, root=Path(work) / "scheduled")
+        schedule.configure(BackupSchedule(enabled=True, hour_utc=0, keep=1))
+        tick = datetime(2026, 1, 2, tzinfo=timezone.utc)
+        schedule.tick(tick)
+        assert schedule.read()["last_verified"]["date"] == tick.date().isoformat()
+        scheduled_archive = Path(work) / "scheduled" / "daily" / f"mashina-auto-{tick.date()}.zip"
+        restore_backup(store, scheduled_archive)
+        assert (store.uploads / filename).read_bytes() == picture.getvalue()
         store.close()
         reopened = Store(Path(work) / "garage")
         assert reopened.state(owner)["vehicles"][0]["name"] == "CI preserved"
@@ -100,7 +110,7 @@ def main():
         rebuilt, _ = card_preview(reopened, filename, hashlib.sha256(picture.getvalue()).hexdigest())
         assert rebuilt.read_bytes() == preview_bytes
         reopened.close()
-    print("Read-only non-root production container: backup, restore and restart passed.")
+    print("Read-only non-root production container: manual and scheduled backup, restore and restart passed.")
 
 
 if __name__ == "__main__":

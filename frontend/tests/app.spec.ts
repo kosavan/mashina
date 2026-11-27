@@ -26,7 +26,10 @@ test("demo, analytics, documents and isolated reset", async ({ page }) => {
   });
   await page
     .locator(".vehicle-grid")
-    .screenshot({ path: "../.cache/screenshots/garage-cards.png", style: ".desktop-fab { visibility: hidden; }" });
+    .screenshot({
+      path: "../.cache/screenshots/garage-cards.png",
+      style: ".desktop-fab { visibility: hidden; }",
+    });
   await page
     .locator(".sidebar")
     .getByRole("button", { name: "Аналитика", exact: true })
@@ -136,6 +139,18 @@ test("360px mobile quick expense, edit, delete undo and no horizontal scroll", a
   await expect(
     page.getByText("Мобильная проверка", { exact: true }),
   ).toHaveCount(0);
+  await page
+    .getByRole("button", { name: "Добавить запись", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Расход Любая покупка для автомобиля" })
+    .click();
+  await page.getByLabel("Сумма, ₽", { exact: true }).fill("99");
+  await page.getByLabel("Описание", { exact: true }).fill("Следующий расход");
+  await page.getByRole("button", { name: "Сохранить", exact: true }).click();
+  await expect(
+    page.getByText("Следующий расход", { exact: true }).first(),
+  ).toBeVisible();
   await page
     .locator(".toast")
     .getByRole("button", { name: "Отменить", exact: true })
@@ -306,10 +321,13 @@ test("every primary screen fits 360px and light theme is usable", async ({
     "Мой гараж",
   ]) {
     await page
+      .getByRole("button", { name: "Открыть меню", exact: true })
+      .click();
+    await page
       .locator(".sidebar")
       .getByRole("button", { name, exact: true })
-      .evaluate((button: HTMLButtonElement) => button.click());
-    await page.waitForTimeout(100);
+      .click();
+    await expect(page.locator(".breadcrumb strong")).toHaveText(name);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -317,10 +335,13 @@ test("every primary screen fits 360px and light theme is usable", async ({
       name,
     ).toBe(true);
   }
-  await page
-    .getByRole("button", { name: "Сменить тему" })
-    .evaluate((button: HTMLButtonElement) => button.click());
+  await page.getByRole("button", { name: "Открыть меню", exact: true }).click();
+  await page.getByRole("button", { name: "Сменить тему" }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.keyboard.press("Escape");
+  await expect(
+    page.getByRole("dialog", { name: "Главная навигация" }),
+  ).toHaveCount(0);
   await page.screenshot({
     path: "../.cache/screenshots/garage-light-mobile.png",
     fullPage: true,
@@ -450,10 +471,11 @@ test("ownership tools: confirmed tire history, budget and reviewed CSV repeat", 
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await demo(page);
+  await page.getByRole("button", { name: "Открыть меню", exact: true }).click();
   await page
-    .locator(".sidebar")
+    .getByRole("dialog", { name: "Главная навигация" })
     .getByRole("button", { name: "Обслуживание", exact: true })
-    .evaluate((button: HTMLButtonElement) => button.click());
+    .click();
   await page.getByRole("tab", { name: "Шины", exact: true }).click();
   await expect(
     page.getByRole("heading", { name: "Комплекты шин", exact: true }),
@@ -642,9 +664,7 @@ test("global currency and unit settings support UK miles with litres and vehicle
     .getByRole("button", { name: "Добавить запись", exact: true })
     .first()
     .click();
-  await page
-    .getByRole("button", { name: /^Заправка / })
-    .click();
+  await page.getByRole("button", { name: /^Заправка / }).click();
   const rDialog = page.getByRole("dialog");
   await expect(rDialog.getByLabel("Валюта", { exact: true })).toHaveValue(
     "GBP",
@@ -662,8 +682,5 @@ test("global currency and unit settings support UK miles with litres and vehicle
   await expect(
     page.getByLabel("Валюта аналитики", { exact: true }),
   ).toHaveValue("GBP");
-  await expect(
-    page.getByText("Стоимость мили", { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByText("Стоимость мили", { exact: true })).toBeVisible();
 });
-

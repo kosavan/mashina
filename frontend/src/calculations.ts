@@ -11,10 +11,60 @@ function ratio(value: unknown): Ratio {
     denominator,
   ];
 }
-function minor([n, d]: Ratio): bigint {
+function roundRatio([n, d]: Ratio, scale: bigint): bigint {
   const sign = n < 0 ? -1n : 1n;
-  const positive = n * sign * 100n;
+  const positive = n * sign * scale;
   return sign * ((positive * 2n + d) / (d * 2n));
+}
+const minor = (value: Ratio) => roundRatio(value, 100n);
+
+export type FuelValues = Record<"liters" | "price" | "amount", string>;
+
+export function fuelPreview({ liters, price, amount }: FuelValues): {
+  field: keyof FuelValues;
+  value: number;
+} | null {
+  if ([liters, price, amount].filter(Boolean).length !== 2) return null;
+  try {
+    const [volume, volumeDivisor] = ratio(liters || "0");
+    const [unitPrice, priceDivisor] = ratio(price || "0");
+    const [total, totalDivisor] = ratio(amount || "0");
+    if (
+      (liters && volume <= 0n) ||
+      (price && unitPrice <= 0n) ||
+      (amount && total <= 0n)
+    )
+      return null;
+    if (!amount) {
+      const totalMinor = minor([
+        volume * unitPrice,
+        volumeDivisor * priceDivisor,
+      ]);
+      return totalMinor <= 1_000_000_000_000n
+        ? { field: "amount", value: Number(totalMinor) }
+        : null;
+    }
+    if (!liters)
+      return {
+        field: "liters",
+        value:
+          Number(
+            roundRatio(
+              [total * priceDivisor, totalDivisor * unitPrice],
+              1_000n,
+            ),
+          ) / 1_000,
+      };
+    return {
+      field: "price",
+      value:
+        Number(
+          roundRatio([total * volumeDivisor, totalDivisor * volume], 10_000n),
+        ) / 10_000,
+    };
+  } catch {
+    return null;
+  }
 }
 export function estimatedCost(value: unknown): number | null {
   if (value == null || value === "") return null;

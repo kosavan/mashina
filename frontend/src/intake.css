@@ -16,8 +16,144 @@
   margin-block-start: 10px;
 }
 
-.receipt-inbox .file-picker {
-  margin-bottom: 12px;
+.ownership-tab-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-block-end: 20px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.ownership-tab-list > button {
+  display: grid;
+  flex: 1 1 max-content;
+  place-items: center;
+  min-block-size: 44px;
+  min-inline-size: 0;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.ownership-tab-list > button:hover {
+  background: var(--panel-2);
+}
+
+.ownership-tab-list > button[data-state="active"] {
+  border-color: color-mix(in srgb, var(--accent), var(--border) 35%);
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.ownership-tab-list > button:focus-visible,
+.intake-picker:focus-within {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
+}
+
+.ownership-tab-panel > .page-heading {
+  margin-block-end: 16px;
+}
+
+.ownership-tab-panel > .page-heading h2 {
+  margin-block-start: 8px;
+  font-size: clamp(23px, 3vw, 30px);
+}
+
+.ownership-vehicle-filter {
+  margin-block-end: 18px;
+}
+
+.intake-picker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-block-size: 44px;
+  max-inline-size: 100%;
+  margin-block-end: 12px;
+  padding: 9px 14px;
+  border-radius: 11px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 13px;
+  font-weight: 750;
+  text-align: center;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.intake-picker:hover {
+  filter: brightness(0.94);
+}
+
+.intake-picker:has(input:disabled) {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.intake-picker svg {
+  flex: none;
+}
+
+.intake-picker input[type="file"] {
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.csv-format {
+  margin-block: 2px 16px;
+  border-block: 1px solid var(--border);
+}
+
+.csv-format > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-block-size: 44px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.csv-format > summary::-webkit-details-marker {
+  display: none;
+}
+
+.csv-format[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+.csv-format > div {
+  padding-block: 4px 12px;
+}
+
+@media (max-width: 600px) {
+  .ownership-tab-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .intake-picker {
+    display: flex;
+  }
 }
 
 .receipt-list {

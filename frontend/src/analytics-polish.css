@@ -1,0 +1,124 @@
+.analytics-filters {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.625rem;
+  margin-bottom: 0.875rem;
+}
+
+.analytics-filters > select {
+  width: 100%;
+  max-width: none;
+  min-height: 44px;
+  padding: 0.5rem 0.75rem;
+}
+
+.analytics-filters .segmented button {
+  min-height: 34px;
+  min-width: 0;
+}
+
+.analytics-more {
+  min-width: 0;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 0.7rem;
+}
+
+.analytics-more > summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  padding: 0.3rem 0.7rem;
+  border-radius: inherit;
+  color: var(--text);
+  cursor: pointer;
+  list-style: none;
+}
+
+.analytics-more > summary::-webkit-details-marker {
+  display: none;
+}
+
+.analytics-more > summary svg {
+  flex: none;
+}
+
+.analytics-more[open] > summary svg:last-child {
+  rotate: 180deg;
+}
+
+.analytics-more > summary > span:first-of-type {
+  flex: 1;
+}
+
+.analytics-filter-currency {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.analytics-more-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  padding: 0.7rem;
+  border-top: 1px solid var(--border);
+}
+
+.analytics-more-grid label {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.analytics-more-grid select {
+  min-height: 44px;
+  width: 100%;
+}
+
+@media (max-width: 850px) {
+  .analytics-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .analytics-filters > select {
+    grid-column: 1;
+  }
+
+  .analytics-filters .segmented {
+    justify-content: space-between;
+    grid-column: 2;
+  }
+
+  .analytics-more {
+    grid-column: 1 / -1;
+  }
+
+  .analytics-more-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .analytics-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-filters .segmented {
+    grid-column: 1;
+  }
+
+  .analytics-filters .segmented button {
+    flex: 1;
+    min-height: 38px;
+    padding-inline: 0.35rem;
+    white-space: normal;
+  }
+
+  .analytics-more-grid {
+    grid-template-columns: 1fr;
+  }
+}

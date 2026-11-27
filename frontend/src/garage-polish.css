@@ -1,0 +1,169 @@
+.vehicle-profile {
+  min-width: 0;
+}
+
+.vehicle-upcoming-link {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  margin-block: 0.65rem 0;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--panel-2);
+  color: var(--text);
+  text-align: start;
+}
+
+.vehicle-upcoming-link svg {
+  flex: none;
+  color: var(--muted);
+}
+
+.vehicle-upcoming-link span {
+  overflow-wrap: anywhere;
+}
+
+.vehicle-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 0 1.2rem;
+}
+
+.vehicle-jumps button {
+  min-height: 44px;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.65rem;
+  background: var(--panel);
+  color: var(--text);
+  text-align: start;
+}
+
+.vehicle-upcoming-link:hover,
+.vehicle-jumps button:hover {
+  border-color: var(--faint);
+  background: var(--panel-3);
+}
+
+.vehicle-section-target {
+  scroll-margin-block-start: 5.5rem;
+}
+
+.garage-heading + .garage-summary small {
+  white-space: normal;
+}
+
+.vehicle-grid .vehicle-next {
+  margin-top: 0.85rem;
+  padding-block: 0.7rem;
+}
+
+.vehicle-grid .vehicle-next small {
+  color: var(--text);
+}
+
+.vehicle-grid .vehicle-next.danger small {
+  color: var(--danger);
+}
+
+@media (max-width: 700px) {
+  .garage-heading .page-heading {
+    gap: 0.7rem;
+    margin-bottom: 0.3rem;
+  }
+
+  .garage-heading .page-heading .eyebrow,
+  .garage-heading .page-heading p {
+    display: none;
+  }
+
+  .garage-heading .page-heading h1 {
+    margin: 0;
+  }
+
+  .garage-heading .page-heading > .button {
+    min-height: 44px;
+    margin: 0;
+  }
+
+  .garage-heading + .garage-summary {
+    gap: 0.65rem 0.4rem;
+    padding-block: 0.85rem 0.9rem;
+  }
+
+  .garage-heading + .garage-summary small {
+    font-size: 10px;
+    margin-bottom: 0.15rem;
+  }
+
+  .garage-heading + .garage-summary strong {
+    white-space: normal;
+  }
+
+  .garage-summary .summary-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .garage-summary + .section-heading {
+    margin-block: 0.8rem;
+  }
+
+  .vehicle-grid .vehicle-cover {
+    height: clamp(150px, 44vw, 240px);
+  }
+
+  .vehicle-grid .vehicle-content {
+    padding: 1rem 1rem 0;
+  }
+
+  .vehicle-grid .vehicle-title h2 {
+    font-size: 1.35rem;
+  }
+
+  .vehicle-profile .back-link {
+    margin-bottom: 0.75rem;
+  }
+
+  .vehicle-profile > .page-heading {
+    margin-bottom: 1rem;
+  }
+
+  .vehicle-profile .vehicle-hero {
+    margin-bottom: 0.75rem;
+  }
+
+  .vehicle-profile .vehicle-hero > div {
+    min-height: 0;
+    height: clamp(145px, 45vw, 230px);
+  }
+
+  .vehicle-profile .vehicle-hero img {
+    height: 100%;
+  }
+
+  .vehicle-profile .vehicle-hero aside {
+    padding: 0.95rem 1rem;
+  }
+
+  .vehicle-profile .vehicle-hero aside > .eyebrow {
+    margin-top: 0.75rem;
+  }
+
+  .vehicle-profile .vehicle-hero aside > strong {
+    margin-block: 0.3rem;
+    font-size: 2.15rem;
+  }
+
+  .vehicle-profile .vehicle-hero dl {
+    margin-top: 0.6rem;
+  }
+
+  .vehicle-jumps {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { CircleAlert, CircleCheck, Clock3 } from "lucide-react";
 import { api } from "./api";
 import { Button } from "./components/ui/button";
 import { useApp } from "./context";
 import { intlLocale, tr } from "./i18n";
+import "./backup-schedule.css";
 
 interface BackupSchedule {
   enabled: boolean;
@@ -74,66 +76,83 @@ export function BackupScheduleSettings() {
     new Date(timestamp).toLocaleString(intlLocale());
 
   return (
-    <section>
+    <section className="backup-schedule">
       <h4>{tr("Резервные копии по расписанию")}</h4>
       {error && <p role="alert">{tr(error)}</p>}
       {!status && !error && <p>{tr("Загрузка…")}</p>}
       {status && (
-        <form className="record-form" onSubmit={submit}>
-          <label>
-            <input
-              type="checkbox"
-              name="enabled"
-              defaultChecked={status.schedule.enabled}
-            />
-            {tr("Создавать копию ежедневно")}
-          </label>
-          <label>
-            {tr("Папка внутри каталога резервных копий")}
-            <input
-              name="directory"
-              defaultValue={status.schedule.directory}
-              pattern="[a-zA-Z0-9_\x2D]{1,64}"
-              required
-            />
-          </label>
-          <label>
-            {tr("Час запуска (UTC)")}
-            <input
-              name="hour_utc"
-              type="number"
-              min={0}
-              max={23}
-              defaultValue={status.schedule.hour_utc}
-              required
-            />
-          </label>
-          <label>
-            {tr("Количество сохраняемых копий")}
-            <input
-              name="keep"
-              type="number"
-              min={1}
-              max={90}
-              defaultValue={status.schedule.keep}
-              required
-            />
-          </label>
-          <p>
-            {status.last_verified
-              ? tr("Последняя проверенная копия: {0}", [
-                  format(status.last_verified.finished_at),
-                ])
-              : tr("Проверенных автоматических копий пока нет")}
-          </p>
-          {status.last_run && !status.last_run.verified && (
-            <p role="status">
-              {tr("Последняя автоматическая копия не прошла проверку")}
-            </p>
-          )}
-          <Button type="submit" disabled={busy}>
-            {tr("Сохранить")}
-          </Button>
+        <form className="record-form backup-schedule-form" onSubmit={submit}>
+          <fieldset disabled={busy}>
+            <div className="backup-status">
+              <label className="backup-toggle">
+                <span>{tr("Создавать копию ежедневно")}</span>
+                <input
+                  type="checkbox"
+                  role="switch"
+                  name="enabled"
+                  defaultChecked={status.schedule.enabled}
+                />
+                <span className="backup-toggle-track" aria-hidden="true" />
+              </label>
+              <p className="backup-status-line" role="status">
+                {status.last_verified ? (
+                  <CircleCheck size={16} aria-hidden="true" />
+                ) : (
+                  <Clock3 size={16} aria-hidden="true" />
+                )}
+                {status.last_verified
+                  ? tr("Последняя проверенная копия: {0}", [
+                      format(status.last_verified.finished_at),
+                    ])
+                  : tr("Проверенных автоматических копий пока нет")}
+              </p>
+              {status.last_run && !status.last_run.verified && (
+                <p
+                  className="backup-status-line backup-status-failed"
+                  role="status"
+                >
+                  <CircleAlert size={16} aria-hidden="true" />
+                  {tr("Последняя автоматическая копия не прошла проверку")}
+                </p>
+              )}
+            </div>
+            <div className="backup-schedule-fields">
+              <label>
+                {tr("Час запуска (UTC)")}
+                <input
+                  name="hour_utc"
+                  type="number"
+                  min={0}
+                  max={23}
+                  defaultValue={status.schedule.hour_utc}
+                  required
+                />
+              </label>
+              <label>
+                {tr("Количество сохраняемых копий")}
+                <input
+                  name="keep"
+                  type="number"
+                  min={1}
+                  max={90}
+                  defaultValue={status.schedule.keep}
+                  required
+                />
+              </label>
+              <label className="backup-schedule-folder">
+                {tr("Папка внутри каталога резервных копий")}
+                <input
+                  name="directory"
+                  defaultValue={status.schedule.directory}
+                  pattern="[a-zA-Z0-9_\x2D]{1,64}"
+                  required
+                />
+              </label>
+            </div>
+            <Button type="submit" variant="outline">
+              {tr(busy ? "Сохраняем…" : "Сохранить")}
+            </Button>
+          </fieldset>
         </form>
       )}
     </section>

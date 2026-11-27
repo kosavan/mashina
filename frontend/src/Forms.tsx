@@ -18,7 +18,6 @@ import {
   Trash2,
   Upload,
   ChevronDown,
-  Fuel,
   Check,
   AlertTriangle,
 } from "lucide-react";
@@ -34,8 +33,10 @@ import type {
 import { Button } from "./components/ui/button";
 import { Sheet } from "./components/ui/dialog";
 import { OcrReview, type OcrFields } from "./OcrReview";
-import { FuelDetailsFields } from "./FuelDetailsFields";
+import { FuelAmountFields, FuelDetailsFields } from "./FuelDetailsFields";
+import type { FuelValues } from "./calculations";
 import { inspectionLabels, renewalLabels } from "./renewals";
+import "./form-polish.css";
 
 const maintenanceTemplates = [
   "Замена моторного масла",
@@ -135,10 +136,10 @@ export function RecordForm({
   const [files, setFiles] = useState<File[]>([]);
   const [items, setItems] = useState<Item[]>(record?.items || []);
   const [openedAt] = useState(() => new Date());
-  const [fuelValues, setFuelValues] = useState({
-    liters: record?.liters || "",
-    price: record?.price || "",
-    amount: record?.amount || "",
+  const [fuelValues, setFuelValues] = useState<FuelValues>({
+    liters: String(record?.liters ?? ""),
+    price: String(record?.price ?? ""),
+    amount: String(record?.amount ?? ""),
   });
   const form = useRef<HTMLFormElement>(null);
   const title = renewalKind
@@ -403,7 +404,9 @@ export function RecordForm({
     <Sheet open onClose={close} title={tr(title)} wide={type === "vehicle"}>
       <form
         ref={form}
-        className="record-form"
+        className={
+          type === "fuel" ? "record-form record-form--fuel" : "record-form"
+        }
         onSubmit={submit}
         onChange={() => setDirty(true)}
       >
@@ -790,6 +793,21 @@ export function RecordForm({
           </>
         ) : (
           <>
+            {type === "fuel" && (
+              <FuelAmountFields
+                values={fuelValues}
+                labels={{
+                  liters: fuelVolumeLabel,
+                  price: fuelPriceLabel,
+                  amount: amountLabel,
+                }}
+                currency={activeCurrency}
+                volume={vUnit}
+                onChange={(key, value) => {
+                  setFuelValues((previous) => ({ ...previous, [key]: value }));
+                }}
+              />
+            )}
             {["fuel", "expense", "maintenance", "odometer"].includes(type) && (
               <OcrReview kind={type} vehicleId={vehicleId} onApply={applyOcr} />
             )}
@@ -887,49 +905,6 @@ export function RecordForm({
                     </select>
                   </Field>
                 </div>
-                <div className="fuel-form-heading">
-                  <Fuel size={21} />
-                  <span>{tr("Любые два значения — третье рассчитаем")}</span>
-                </div>
-                <div className="field-grid three">
-                  {(
-                    [
-                      ["liters", fuelVolumeLabel],
-                      ["price", fuelPriceLabel],
-                      ["amount", amountLabel],
-                    ] as const
-                  ).map(([key, label]) => (
-                    <label key={key}>
-                      {tr(label)}
-                      <input
-                        type="number"
-                        min={
-                          key === "amount"
-                            ? "0.01"
-                            : key === "price"
-                              ? "0"
-                              : "0.001"
-                        }
-                        step={
-                          key === "price"
-                            ? "any"
-                            : key === "liters"
-                              ? "0.001"
-                              : "0.01"
-                        }
-                        inputMode="decimal"
-                        value={fuelValues[key]}
-                        placeholder={tr("Автоматически")}
-                        onChange={(e) =>
-                          setFuelValues((v) => ({
-                            ...v,
-                            [key]: e.target.value,
-                          }))
-                        }
-                      />
-                    </label>
-                  ))}
-                </div>
                 <FuelDetailsFields
                   key={vehicleId}
                   record={record}
@@ -958,14 +933,6 @@ export function RecordForm({
                     "Пропуск прерывает расчёт расхода до следующего полного бака.",
                   )}
                 </p>
-                <details>
-                  <summary>{tr("Записать по чеку или оплате")}</summary>
-                  <p className="field-help">
-                    {tr(
-                      "Чек АЗС: перенесите литры и сумму, цену рассчитаем. Скрин оплаты: перенесите сумму, добавьте литры с колонки или чека. Пробег и полный бак подтвердите сами. Фото можно прикрепить ниже; оно останется на вашем сервере. Автоматического распознавания пока нет.",
-                    )}
-                  </p>
-                </details>
               </>
             ) : type === "expense" || type === "maintenance" ? (
               <>

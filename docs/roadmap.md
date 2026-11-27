@@ -23,6 +23,12 @@ validation and future work are separate. Dates are not delivery promises.
 
 See the [release notes](../RELEASES.md#mashina-1160) for details. The compatible-parts catalogue remains under research.
 
+## Interface update in development
+
+The update covers responsive sign-in, accessible mobile navigation and
+maintenance tabs, faster access to vehicle sections, and clearer fuel entry,
+receipt intake, CSV import, analytics filters and backup settings.
+
 ## 1.15.0 vehicle ownership
 
 - Registration and insurance history shows payments, expiration dates and inspection results by vehicle. It supports private attachments and prefilled renewal reminders. Payments appear in spending totals. [Issue #45](https://github.com/kosavan/mashina/issues/45)

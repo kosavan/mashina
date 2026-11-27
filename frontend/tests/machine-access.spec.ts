@@ -44,10 +44,11 @@ test("scoped key: 360px copy once, manual fallback, offline and revoke", async (
   await expect(
     page.getByRole("heading", { name: "Мой гараж", exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Открыть меню", exact: true }).click();
   await page
-    .locator(".sidebar")
+    .getByRole("dialog", { name: "Главная навигация" })
     .getByRole("button", { name: "Настройки", exact: true })
-    .evaluate((el: HTMLButtonElement) => el.click());
+    .click();
   await page
     .getByRole("button", { name: "API и интеграции", exact: true })
     .click();

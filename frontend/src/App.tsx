@@ -3,11 +3,14 @@ import { tr } from "./i18n";
 import {
   useState,
   useEffect,
+  useLayoutEffect,
   useCallback,
   useRef,
   lazy,
   Suspense,
 } from "react";
+import type { MouseEvent } from "react";
+import * as Dialog from "@radix-ui/react-dialog";
 import { getLocale, isLocale, setLocale, useLocale } from "./i18n";
 import { localizeDemo } from "./demoLocale";
 import { LanguagePicker } from "./LanguagePicker";
@@ -73,6 +76,7 @@ import {
 import { RecordForm } from "./Forms";
 import { permissionError, scopeKey } from "./permissions";
 import { BrandMark } from "./BrandMark";
+import "./app-shell-polish.css";
 const Analytics = lazy(() => import("./Analytics"));
 const OwnershipTools = lazy(() => import("./OwnershipTools"));
 const Renewals = lazy(() => import("./VehicleRenewals"));
@@ -87,6 +91,28 @@ const navigation = [
   ["renewals", "Регистрация и страховка", ShieldCheck],
   ["reminders", "Напоминания", Bell],
 ] as const;
+
+const smallScreen = "(max-width: 760px)";
+const shortScreen = "(max-height: 600px)";
+
+function compactNavigation() {
+  return (
+    matchMedia(smallScreen).matches ||
+    (document.documentElement.dataset.standalone === "true" &&
+      matchMedia(shortScreen).matches)
+  );
+}
+
+function currentSection(page: Page): Page {
+  if (page === "vehicle") return "garage";
+  if (page === "fuel-analytics") return "analytics";
+  return page;
+}
+
+interface Toast {
+  message: string;
+  action?: () => void;
+}
 
 function Auth({ onSession }: { onSession: (session: Session) => void }) {
   const [setup, setSetup] = useState(false);
@@ -143,8 +169,7 @@ function Auth({ onSession }: { onSession: (session: Session) => void }) {
             {tr("ДЛЯ ТЕХ, КТО ЛЮБИТ СВОЮ МАШИНУ")}
           </span>
           <h1>
-            {tr("Больше, чем")}
-            <br />
+            {tr("Больше, чем")} <br />
             {tr("просто ")}
             <em>{tr("гараж.")}</em>
           </h1>
@@ -258,12 +283,17 @@ export default function App() {
   const client = useQueryClient();
   const [session, setSession] = useState<Session | null>(null);
   const [boot, setBoot] = useState(true);
-  const [page, setPage] = useState<Page>("garage");
+  const [page, updatePage] = useState<Page>("garage");
   const [selected, setSelected] = useState("");
   const [queue, setQueue] = useState<Mutation[]>([]);
   const [online, setOnline] = useState(navigator.onLine);
   const [syncing, setSyncing] = useState(false);
   const [menu, setMenu] = useState(false);
+  const [compact, setCompact] = useState(compactNavigation);
+  const menuOpener = useRef<HTMLButtonElement | null>(null);
+  const menuDestination = useRef<Page | null | undefined>(undefined);
+  const lastPage = useRef(page);
+  const garageScroll = useRef(0);
   const [theme, setTheme] = useState(
     localStorage.getItem("mashina-theme") || "dark",
   );
@@ -272,15 +302,58 @@ export default function App() {
     record?: RecordBase;
     options?: RecordFormOptions;
   } | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    action?: () => void;
-  } | null>(null);
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const toast = toasts[0];
+  const setPage = useCallback(
+    (next: Page) => {
+      if (page === "garage" && next === "vehicle") {
+        garageScroll.current = window.scrollY;
+      }
+      updatePage(next);
+    },
+    [page],
+  );
   const notify = useCallback(
     (message: string, action?: () => void) =>
-      setToast({ message: tr(message), action }),
+      setToasts((pending) => [
+        ...pending.filter((item) => item.action),
+        { message: tr(message), action },
+      ]),
     [],
   );
+  const dismissToast = useCallback(
+    (item: Toast) =>
+      setToasts((pending) => pending.filter((next) => next !== item)),
+    [],
+  );
+  const closeMenu = useCallback(
+    (next?: Page) => {
+      setMenu(false);
+      if (window.history.state?.mobileMenu === true) {
+        menuDestination.current = next ?? null;
+        window.history.back();
+      } else if (next) {
+        setPage(next);
+      }
+    },
+    [setPage],
+  );
+  function openMenu(event: MouseEvent<HTMLButtonElement>) {
+    if (!compact || menu) return;
+    menuOpener.current = event.currentTarget;
+    window.history.pushState({ page, selected, mobileMenu: true }, "");
+    setMenu(true);
+  }
+  useEffect(() => {
+    const media = [matchMedia(smallScreen), matchMedia(shortScreen)];
+    const update = () => setCompact(compactNavigation());
+    media.forEach((query) => query.addEventListener("change", update));
+    return () =>
+      media.forEach((query) => query.removeEventListener("change", update));
+  }, []);
+  useEffect(() => {
+    if (!compact && menu) closeMenu();
+  }, [closeMenu, compact, menu]);
   useEffect(() => {
     let active = true;
     api<Session>("/session")
@@ -309,9 +382,12 @@ export default function App() {
   }, [theme]);
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), toast.action ? 15000 : 6000);
+    const t = setTimeout(
+      () => dismissToast(toast),
+      toast.action ? 15000 : 6000,
+    );
     return () => clearTimeout(t);
-  }, [toast]);
+  }, [dismissToast, toast]);
   const query = useQuery({
     queryKey: ["state", session?.id],
     queryFn: () => loadState(session!),
@@ -507,12 +583,24 @@ export default function App() {
     await clearLocal();
     client.clear();
     setSession(null);
+    setToasts([]);
     setQueue([]);
     setSelected("");
     setPage("garage");
   }
   useEffect(() => {
     const onPopState = (event: PopStateEvent) => {
+      const destination = menuDestination.current;
+      if (menu || destination !== undefined) {
+        menuDestination.current = undefined;
+        setMenu(false);
+        if (destination) setPage(destination);
+        return;
+      }
+      if (event.state?.mobileMenu === true && compact) {
+        setMenu(true);
+        return;
+      }
       if (modal) {
         setModal(null);
         return;
@@ -524,14 +612,26 @@ export default function App() {
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [modal]);
-  useEffect(() => {
+  }, [compact, menu, modal, setPage]);
+  useLayoutEffect(() => {
     if (!session) return;
     const current = window.history.state;
     if (current?.page !== page || current?.selected !== selected) {
       window.history.pushState({ page, selected }, "");
     }
   }, [session, page, selected]);
+  useLayoutEffect(() => {
+    const previous = lastPage.current;
+    lastPage.current = page;
+    if (page === "vehicle") {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    } else if (page === "garage" && previous === "vehicle") {
+      const frame = requestAnimationFrame(() => {
+        window.scrollTo({ top: garageScroll.current, behavior: "instant" });
+      });
+      return () => cancelAnimationFrame(frame);
+    }
+  }, [page, selected]);
   useEffect(() => {
     if (session && selected)
       localStorage.setItem(`mashina-selected:${session.id}`, selected);
@@ -544,6 +644,7 @@ export default function App() {
     setSelected("");
     setSession(next);
     setPage("garage");
+    setToasts([]);
     notify(tr("Демогараж восстановлен"));
   }
   if (boot)
@@ -601,106 +702,131 @@ export default function App() {
     updateSession: setSession,
   };
   const failed = queue.filter((o) => o.error);
+  const activePage = currentSection(page);
+  const navigateFromSidebar = (next: Page) =>
+    menu ? closeMenu(next) : setPage(next);
+  const sidebar = (
+    <>
+      <a
+        className="wordmark"
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          navigateFromSidebar("garage");
+        }}
+      >
+        <span className="brand-mark">
+          <BrandMark />
+        </span>
+        MASHINA
+      </a>
+      {compact && (
+        <Dialog.Close
+          className="mobile-menu-close icon-button"
+          aria-label={tr("Закрыть меню")}
+        >
+          <X />
+        </Dialog.Close>
+      )}
+      <div className="sidebar-caption">{tr("ВАШ ЛИЧНЫЙ ГАРАЖ")}</div>
+      <nav aria-label={tr("Главная навигация")}>
+        {navigation.map(([id, label, Icon]) => (
+          <button
+            key={id}
+            className={`nav-item ${activePage === id ? "active" : ""}`}
+            aria-current={activePage === id ? "page" : undefined}
+            onClick={() => navigateFromSidebar(id)}
+          >
+            <Icon size={19} />
+            <span>{tr(label)}</span>
+            {id === "reminders" &&
+              state.reminders.some(
+                (r) => r.status === "soon" || r.status === "overdue",
+              ) && <i className="nav-dot" />}
+          </button>
+        ))}
+      </nav>
+      <div className="sidebar-bottom">
+        <div className="owner-note">
+          <ShieldCheck size={19} />
+          <div>
+            {tr("Полностью под контролем")}
+            <small>{tr("Данные на вашем сервере")}</small>
+          </div>
+        </div>
+        <button
+          className={`nav-item ${page === "settings" ? "active" : ""}`}
+          aria-current={page === "settings" ? "page" : undefined}
+          onClick={() => navigateFromSidebar("settings")}
+        >
+          <Settings size={19} />
+          {tr("Настройки")}
+        </button>
+        <div className="profile">
+          <span className="avatar">
+            {session.demo ? "D" : session.username[0].toUpperCase()}
+          </span>
+          <div>
+            {session.demo ? tr("Демо-гараж") : session.username}
+            <small>
+              {session.demo
+                ? tr("Изолированный деморежим")
+                : session.is_admin
+                  ? tr("Администратор")
+                  : tr("Личный аккаунт")}
+            </small>
+          </div>
+          <button
+            aria-label={tr("Сменить тему")}
+            className="icon-button"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
+            {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+        </div>
+      </div>
+    </>
+  );
   return (
     <AppContext.Provider value={model}>
       <div className="app-shell">
-        <aside className={`sidebar ${menu ? "sidebar-open" : ""}`}>
-          <a
-            className="wordmark"
-            href="#"
-            onClick={(e) => {
-              e.preventDefault();
-              setPage("garage");
-            }}
-          >
-            <span className="brand-mark">
-              <BrandMark />
-            </span>
-            MASHINA
-          </a>
-          <button
-            className="mobile-menu-close icon-button"
-            aria-label={tr("Закрыть меню")}
-            onClick={() => setMenu(false)}
-          >
-            <X />
-          </button>
-          <div className="sidebar-caption">{tr("ВАШ ЛИЧНЫЙ ГАРАЖ")}</div>
-          <nav aria-label={tr("Главная навигация")}>
-            {navigation.map(([id, label, Icon]) => (
-              <button
-                key={id}
-                className={`nav-item ${page === id || (id === "garage" && page === "vehicle") || (id === "analytics" && page === "fuel-analytics") ? "active" : ""}`}
-                onClick={() => {
-                  setPage(id);
-                  setMenu(false);
-                }}
-              >
-                <Icon size={19} />
-                <span>{tr(label)}</span>
-                {id === "reminders" &&
-                  state.reminders.some(
-                    (r) => r.status === "soon" || r.status === "overdue",
-                  ) && <i className="nav-dot" />}
-              </button>
-            ))}
-          </nav>
-          <div className="sidebar-bottom">
-            <div className="owner-note">
-              <ShieldCheck size={19} />
-              <div>
-                {tr("Полностью под контролем")}
-                <small>{tr("Данные на вашем сервере")}</small>
-              </div>
-            </div>
-            <button
-              className={`nav-item ${page === "settings" ? "active" : ""}`}
-              onClick={() => {
-                setPage("settings");
-                setMenu(false);
+        {!compact && <aside className="sidebar">{sidebar}</aside>}
+        <Dialog.Root
+          open={compact && menu}
+          onOpenChange={(open) => {
+            if (!open) closeMenu();
+          }}
+        >
+          <Dialog.Portal>
+            <Dialog.Overlay className="menu-backdrop app-drawer-overlay" />
+            <Dialog.Content
+              id="mashina-mobile-navigation"
+              className="sidebar sidebar-open app-mobile-drawer"
+              aria-describedby={undefined}
+              onCloseAutoFocus={(event) => {
+                if (menuOpener.current?.getClientRects().length) {
+                  event.preventDefault();
+                  menuOpener.current.focus({ preventScroll: true });
+                }
               }}
             >
-              <Settings size={19} />
-              {tr("Настройки")}
-            </button>
-            <div className="profile">
-              <span className="avatar">
-                {session.demo ? "D" : session.username[0].toUpperCase()}
-              </span>
-              <div>
-                {session.demo ? tr("Демо-гараж") : session.username}
-                <small>
-                  {session.demo
-                    ? tr("Изолированный деморежим")
-                    : session.is_admin
-                      ? tr("Администратор")
-                      : tr("Личный аккаунт")}
-                </small>
-              </div>
-              <button
-                aria-label={tr("Сменить тему")}
-                className="icon-button"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-            </div>
-          </div>
-        </aside>
-        {menu && (
-          <button
-            className="menu-backdrop"
-            aria-label={tr("Закрыть меню")}
-            onClick={() => setMenu(false)}
-          />
-        )}
+              <Dialog.Title className="sr-only">
+                {tr("Главная навигация")}
+              </Dialog.Title>
+              {sidebar}
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
         <div className="main-wrapper">
           <header className="topbar">
             <div className="breadcrumb">
               <button
                 className="mobile-menu icon-button"
                 aria-label={tr("Открыть меню")}
-                onClick={() => setMenu(true)}
+                aria-haspopup="dialog"
+                aria-expanded={menu}
+                aria-controls={menu ? "mashina-mobile-navigation" : undefined}
+                onClick={openMenu}
               >
                 <Menu size={21} />
               </button>
@@ -902,14 +1028,16 @@ export default function App() {
         </div>
         <nav className="bottom-nav" aria-label={tr("Мобильная навигация")}>
           <button
-            className={page === "garage" || page === "vehicle" ? "active" : ""}
+            className={activePage === "garage" ? "active" : ""}
+            aria-current={activePage === "garage" ? "page" : undefined}
             onClick={() => setPage("garage")}
           >
             <LayoutGrid size={21} />
             <span>{tr("Гараж")}</span>
           </button>
           <button
-            className={page === "timeline" ? "active" : ""}
+            className={activePage === "timeline" ? "active" : ""}
+            aria-current={activePage === "timeline" ? "page" : undefined}
             onClick={() => setPage("timeline")}
           >
             <Clock3 size={21} />
@@ -923,15 +1051,19 @@ export default function App() {
             <Plus size={27} />
           </button>
           <button
-            className={
-              page === "analytics" || page === "fuel-analytics" ? "active" : ""
-            }
+            className={activePage === "analytics" ? "active" : ""}
+            aria-current={activePage === "analytics" ? "page" : undefined}
             onClick={() => setPage("analytics")}
           >
             <ChartNoAxesCombined size={21} />
             <span>{tr("Аналитика")}</span>
           </button>
-          <button onClick={() => setMenu(true)}>
+          <button
+            aria-haspopup="dialog"
+            aria-expanded={menu}
+            aria-controls={menu ? "mashina-mobile-navigation" : undefined}
+            onClick={openMenu}
+          >
             <Menu size={21} />
             <span>{tr("Ещё")}</span>
           </button>
@@ -1000,14 +1132,14 @@ export default function App() {
           )
         )}
         {toast && (
-          <div className="toast" role="status">
-            <Check size={17} />
-            <span>{toast.message}</span>
+          <div className="toast">
+            <Check size={17} aria-hidden="true" />
+            <span role="status">{toast.message}</span>
             {toast.action && (
               <button
                 onClick={() => {
+                  dismissToast(toast);
                   toast.action?.();
-                  setToast(null);
                 }}
               >
                 {tr("Отменить")}
@@ -1015,7 +1147,7 @@ export default function App() {
             )}
             <button
               aria-label={tr("Закрыть уведомление")}
-              onClick={() => setToast(null)}
+              onClick={() => dismissToast(toast)}
             >
               <X size={15} />
             </button>

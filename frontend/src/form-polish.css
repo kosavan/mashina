@@ -1,0 +1,93 @@
+.record-form--fuel {
+  --fuel-form-gutter: 24px;
+  padding-inline: var(--fuel-form-gutter);
+  padding-block-end: 0;
+}
+
+.fuel-amount-fields {
+  min-inline-size: 0;
+  margin: 0;
+  padding: 12px 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel-2);
+}
+
+.fuel-amount-fields .fuel-form-heading {
+  max-inline-size: 100%;
+  padding-inline: 5px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.fuel-form-heading svg {
+  flex: 0 0 auto;
+}
+
+.fuel-amount-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.fuel-amount-grid label {
+  min-inline-size: 0;
+}
+
+.fuel-amount-grid input {
+  background: var(--panel);
+  font-variant-numeric: tabular-nums;
+}
+
+.fuel-unit-price {
+  grid-column: 1 / -1;
+}
+
+.fuel-calculated-value {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fuel-calculated-value:not(:empty) {
+  margin-block-start: 12px;
+  padding-block-start: 10px;
+  border-block-start: 1px solid var(--border);
+}
+
+.fuel-calculated-value strong {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.sheet:has(> .record-form--fuel) {
+  padding-block-end: 0;
+  scroll-padding-block: 75px 90px;
+}
+
+.record-form--fuel > .form-footer {
+  position: sticky;
+  inset-block-end: 0;
+  z-index: 1;
+  margin-inline: calc(-1 * var(--fuel-form-gutter));
+  padding: 12px var(--fuel-form-gutter) max(12px, env(safe-area-inset-bottom));
+  background: var(--panel);
+  box-shadow: 0 -8px 20px #0001;
+}
+
+.record-form--fuel > .form-footer > .button {
+  min-block-size: 44px;
+}
+
+@media (max-width: 760px) {
+  .record-form--fuel {
+    --fuel-form-gutter: 20px;
+  }
+}

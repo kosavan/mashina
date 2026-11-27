@@ -1,7 +1,8 @@
 import { createUuid } from "./uuid";
-import { tr } from "./i18n";
+import { getLocale, tr } from "./i18n";
 import { lazy, Suspense, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
+import * as Tabs from "@radix-ui/react-tabs";
 import {
   CircleDot,
   Plus,
@@ -10,6 +11,7 @@ import {
   Upload,
   Search,
   CalendarClock,
+  ChevronDown,
 } from "lucide-react";
 import { useApp } from "./context";
 import { api, cachedAPI } from "./offline";
@@ -32,6 +34,14 @@ import ReceiptInbox from "./ReceiptInbox";
 import "./intake.css";
 
 const BankImport = lazy(() => import("./BankImport"));
+const ownershipTabs = [
+  ["work", "Работы"],
+  ["tires", "Шины"],
+  ["parts", "Запчасти"],
+  ["budget", "Бюджет"],
+  ["receipts", "Чеки"],
+  ["import", "Импорт"],
+] as const;
 
 type Entity = "tire_set" | "budget" | "recurring_cost";
 type Interval = {
@@ -615,6 +625,7 @@ function CSVImport() {
   return (
     <>
       <PageHeading
+        level={2}
         eyebrow={tr("ВАША ИСТОРИЯ БЕЗ РУЧНОГО ВВОДА")}
         title={tr("Импорт из CSV")}
         description={tr(
@@ -622,26 +633,11 @@ function CSVImport() {
         )}
       />
       <section className="panel ownership-import">
-        <h3>{tr("Документированный формат")}</h3>
-        <p className="muted">
-          {tr(
-            "Сохраните таблицу в UTF-8. Для заправки нужны любые два значения: сумма, объём в литрах и цена за литр. Для заправки нужен пробег в километрах. Максимум 1 000 строк и 2 МБ.",
-          )}
-        </p>
-        <code className="csv-example">
-          external_id,occurred_at,kind,amount,description
-          <br />
-          {tr("my-001,2026-01-15,expense,1500,Мойка")}
-        </code>
-        <p className="field-help">
-          {tr(
-            "Типы: expense, fuel, maintenance, odometer, note. Дополнительно: category, odometer, currency, full, gap, fuel, station, vendor, tags. external_id помогает обнаружить повторный импорт; изменённая строка с тем же ID будет отклонена.",
-          )}
-        </p>
-        <label className="file-picker">
-          <Upload size={22} />
+        <label className="intake-picker">
+          <Upload size={17} aria-hidden="true" />
           <span>{tr("Выбрать CSV для проверки")}</span>
           <input
+            aria-label={tr("Выбрать CSV для проверки")}
             type="file"
             accept=".csv,text/csv"
             disabled={busy || !selected}
@@ -692,6 +688,29 @@ function CSVImport() {
             }}
           />
         </label>
+        <details className="csv-format">
+          <summary>
+            {tr("Документированный формат")}
+            <ChevronDown size={16} aria-hidden="true" />
+          </summary>
+          <div>
+            <p className="muted">
+              {tr(
+                "Сохраните таблицу в UTF-8. Для заправки нужны любые два значения: сумма, объём в литрах и цена за литр. Для заправки нужен пробег в километрах. Максимум 1 000 строк и 2 МБ.",
+              )}
+            </p>
+            <code className="csv-example">
+              external_id,occurred_at,kind,amount,description
+              <br />
+              {tr("my-001,2026-01-15,expense,1500,Мойка")}
+            </code>
+            <p className="field-help">
+              {tr(
+                "Типы: expense, fuel, maintenance, odometer, note. Дополнительно: category, odometer, currency, full, gap, fuel, station, vendor, tags. external_id помогает обнаружить повторный импорт; изменённая строка с тем же ID будет отклонена.",
+              )}
+            </p>
+          </div>
+        </details>
         {file && mapping && (
           <form
             onSubmit={async (event) => {
@@ -960,13 +979,19 @@ export default function OwnershipTools({
     notify,
     setPage,
     queue,
+    open,
   } = useApp();
-  const [tab, setTab] = useState(tiresOnly ? "tires" : "work");
-  const visibleTab =
-    state.vehicles.find((v) => v.id === selected)?.can_edit === false &&
-    ["budget", "import"].includes(tab)
-      ? "work"
-      : tab;
+  const [tab, setTab] = useState("work");
+  const activeCar = state.vehicles.find((v) => v.id === selected);
+  const availableTabs = ownershipTabs.filter(
+    ([key]) =>
+      activeCar?.can_edit !== false || (key !== "budget" && key !== "import"),
+  );
+  const visibleTab = tiresOnly
+    ? "tires"
+    : availableTabs.some(([key]) => key === tab)
+      ? tab
+      : "work";
   const [month, setMonth] = useState(today().slice(0, 7));
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState<{ entity: Entity; record?: RecordBase }>();
@@ -1036,7 +1061,6 @@ export default function OwnershipTools({
       };
     });
   const dUnit = distanceUnit(state);
-  const activeCar = state.vehicles.find((v) => v.id === selected);
   async function remove(entity: Mutation["entity"], row: RecordBase) {
     if (!confirm(tr("Удалить запись? Действие можно отменить."))) return;
     try {
@@ -1050,61 +1074,30 @@ export default function OwnershipTools({
       notify((err as Error).message);
     }
   }
-  return (
+  const vehiclePicker = (
+    <label className="filter-select">
+      {tr("Автомобиль")}
+      <select
+        aria-label={tr("Автомобиль инструментов")}
+        value={selected}
+        onChange={(event) => {
+          setSelected(event.target.value);
+          setModal(undefined);
+        }}
+      >
+        {state.vehicles.map((car) => (
+          <option key={car.id} value={car.id}>
+            {car.name}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+  const panel = (
     <>
-      <div className="ownership-navigation">
-        <div
-          className="tabs ownership-tabs"
-          role="tablist"
-          aria-label={tr("Инструменты обслуживания")}
-        >
-          {[
-            ["work", tr("Работы")],
-            ["tires", tr("Шины")],
-            ["parts", tr("Запчасти")],
-            ["budget", tr("Бюджет")],
-            ["receipts", tr("Чеки")],
-            ["import", tr("Импорт")],
-          ]
-            .filter(
-              ([key]) =>
-                (!tiresOnly || key === "tires") &&
-                (state.vehicles.find((v) => v.id === selected)?.can_edit !==
-                  false ||
-                  !["budget", "import"].includes(key)),
-            )
-            .map(([key, label]) => (
-              <button
-                role="tab"
-                aria-selected={visibleTab === key}
-                className={visibleTab === key ? "active" : ""}
-                key={key}
-                onClick={() => setTab(key)}
-              >
-                {tr(label)}
-              </button>
-            ))}
-        </div>
-        {visibleTab !== "work" && visibleTab !== "receipts" && (
-          <label className="filter-select">
-            {tr("Автомобиль")}
-            <select
-              aria-label={tr("Автомобиль инструментов")}
-              value={selected}
-              onChange={(e) => {
-                setSelected(e.target.value);
-                setModal(undefined);
-              }}
-            >
-              {state.vehicles.map((car) => (
-                <option key={car.id} value={car.id}>
-                  {car.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-      </div>
+      {!tiresOnly && visibleTab !== "work" && visibleTab !== "receipts" && (
+        <div className="ownership-vehicle-filter">{vehiclePicker}</div>
+      )}
       {visibleTab === "work" ? (
         children
       ) : visibleTab === "receipts" ? (
@@ -1118,6 +1111,7 @@ export default function OwnershipTools({
         />
       ) : visibleTab === "import" ? (
         <>
+          <CSVImport key={selected} />
           <Suspense
             fallback={
               <p role="status" className="muted">
@@ -1127,11 +1121,11 @@ export default function OwnershipTools({
           >
             <BankImport key={`bank-${selected}`} />
           </Suspense>
-          <CSVImport key={selected} />
         </>
       ) : visibleTab === "tires" ? (
         <>
           <PageHeading
+            level={tiresOnly ? 1 : 2}
             eyebrow={tr("СЕЗОНЫ МЕНЯЮТСЯ. ИСТОРИЯ ОСТАЁТСЯ.")}
             title={tr("Комплекты шин")}
             description={tr(
@@ -1150,6 +1144,9 @@ export default function OwnershipTools({
               </Button>
             }
           />
+          {tiresOnly && (
+            <div className="ownership-vehicle-filter">{vehiclePicker}</div>
+          )}
           {!tires.length ? (
             <Empty
               icon={CircleDot}
@@ -1238,6 +1235,7 @@ export default function OwnershipTools({
       ) : visibleTab === "parts" ? (
         <>
           <PageHeading
+            level={2}
             eyebrow={tr("ПОМНИТЬ КАЖДУЮ ДЕТАЛЬ")}
             title={tr("Установленные запчасти")}
             description={tr(
@@ -1298,6 +1296,7 @@ export default function OwnershipTools({
       ) : (
         <>
           <PageHeading
+            level={2}
             eyebrow={tr("ПЛАНИРУЙТЕ СПОКОЙНО")}
             title={tr("Бюджет и будущие расходы")}
             description={tr(
@@ -1525,6 +1524,56 @@ export default function OwnershipTools({
               ))}
             </section>
           </>
+        </>
+      )}
+    </>
+  );
+  return (
+    <>
+      {tiresOnly ? (
+        panel
+      ) : (
+        <>
+          <PageHeading
+            eyebrow={tr("ЗАБОТА, КОТОРАЯ ОКУПАЕТСЯ")}
+            title={tr("Обслуживание")}
+            description={tr(
+              "Работы, запчасти и их история. Машина в хороших руках.",
+            )}
+            action={
+              visibleTab === "work" && (
+                <Button onClick={() => open("maintenance")}>
+                  <Plus size={17} aria-hidden="true" />
+                  {tr("Записать обслуживание")}
+                </Button>
+              )
+            }
+          />
+          <Tabs.Root
+            value={visibleTab}
+            onValueChange={setTab}
+            dir={getLocale() === "ar" ? "rtl" : "ltr"}
+          >
+            <Tabs.List
+              className="ownership-tab-list"
+              aria-label={tr("Инструменты обслуживания")}
+            >
+              {availableTabs.map(([key, label]) => (
+                <Tabs.Trigger value={key} key={key}>
+                  {tr(label)}
+                </Tabs.Trigger>
+              ))}
+            </Tabs.List>
+            {availableTabs.map(([key]) => (
+              <Tabs.Content
+                className="ownership-tab-panel"
+                value={key}
+                key={key}
+              >
+                {key === visibleTab ? panel : null}
+              </Tabs.Content>
+            ))}
+          </Tabs.Root>
         </>
       )}
       {modal && (

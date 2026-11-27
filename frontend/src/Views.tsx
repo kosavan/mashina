@@ -1,6 +1,7 @@
 import { intlLocale } from "./i18n";
 import { categoryLabel } from "./utils";
 import { LanguagePicker } from "./LanguagePicker";
+import "./garage-polish.css";
 import { BackupScheduleSettings } from "./BackupSchedule";
 import { getLocale } from "./i18n";
 import { tr } from "./i18n";
@@ -87,17 +88,20 @@ export function PageHeading({
   title,
   description,
   action,
+  level = 1,
 }: {
   eyebrow: string;
   title: string;
   description: string;
   action?: React.ReactNode;
+  level?: 1 | 2;
 }) {
+  const Heading = level === 1 ? "h1" : "h2";
   return (
     <header className="page-heading">
       <div>
         <div className="eyebrow">{tr(eyebrow)}</div>
-        <h1>{title}</h1>
+        <Heading>{title}</Heading>
         <p>{description}</p>
       </div>
       {action}
@@ -257,17 +261,19 @@ export function Garage() {
   const max = Math.max(1, ...months.map((m) => m.value));
   return (
     <>
-      <PageHeading
-        eyebrow={tr("ВАШИ АВТОМОБИЛИ. ВАША ИСТОРИЯ.")}
-        title={tr("Мой гараж")}
-        description={tr("Всё важное о ваших автомобилях — в одном месте.")}
-        action={
-          <Button variant="outline" onClick={() => open("vehicle")}>
-            <Plus size={17} />
-            {tr("Добавить автомобиль")}
-          </Button>
-        }
-      />
+      <div className="garage-heading">
+        <PageHeading
+          eyebrow={tr("ВАШИ АВТОМОБИЛИ. ВАША ИСТОРИЯ.")}
+          title={tr("Мой гараж")}
+          description={tr("Всё важное о ваших автомобилях — в одном месте.")}
+          action={
+            <Button variant="outline" onClick={() => open("vehicle")}>
+              <Plus size={17} />
+              {tr("Добавить автомобиль")}
+            </Button>
+          }
+        />
+      </div>
       <section className="garage-summary">
         <div>
           <span className="summary-icon">
@@ -427,6 +433,26 @@ export function Garage() {
                       {v.engine || v.fuel || tr("Персональный автомобиль")}
                     </span>
                   </div>
+                  <div
+                    className={`vehicle-next ${next?.status === "overdue" ? "danger" : ""}`}
+                  >
+                    <span className="status-dot" />
+                    <span>
+                      {next ? next.title : tr("Всё под контролем")}
+                      {v.role === "driver" && <em> {tr(" · Водитель")}</em>}
+                    </span>
+                    <small>
+                      {next
+                        ? next.remaining_km != null
+                          ? tr(dUnit === "mi" ? "{0} ми" : "{0} км", [
+                              number(next.remaining_km),
+                            ])
+                          : next.due_date
+                            ? dateLabel(next.due_date)
+                            : tr("Запланировано")
+                        : tr("Нет ближайших работ")}
+                    </small>
+                  </div>
                   <div className="vehicle-numbers">
                     <div>
                       <small>{tr("Пробег")}</small>
@@ -494,26 +520,6 @@ export function Garage() {
                       </div>
                     </div>
                   )}
-                  <div
-                    className={`vehicle-next ${next?.status === "overdue" ? "danger" : ""}`}
-                  >
-                    <span className="status-dot" />
-                    <span>
-                      {next ? next.title : tr("Всё под контролем")}
-                      {v.role === "driver" && <em> {tr(" · Водитель")}</em>}
-                    </span>
-                    <small>
-                      {next
-                        ? next.remaining_km != null
-                          ? tr(dUnit === "mi" ? "{0} ми" : "{0} км", [
-                              number(next.remaining_km),
-                            ])
-                          : next.due_date
-                            ? dateLabel(next.due_date)
-                            : tr("Запланировано")
-                        : tr("Нет ближайших работ")}
-                    </small>
-                  </div>
                 </div>
               </button>
               {v.can_edit !== false && (
@@ -974,8 +980,21 @@ export function VehiclePage() {
     events.filter((e) => e.occurred_at.startsWith(today().slice(0, 4))),
     carCur,
   );
+  const reminders = state.reminders.filter(
+    (reminder) => reminder.vehicle_id === v.id && !reminder.deleted,
+  );
+  const upcoming = reminders
+    .filter((reminder) => reminder.enabled && !reminder.completed_at)
+    .sort(
+      (a, b) => (a.remaining_days ?? Infinity) - (b.remaining_days ?? Infinity),
+    )[0];
+  function jumpToVehicleSection(id: string) {
+    const section = document.getElementById(id);
+    section?.focus({ preventScroll: true });
+    section?.scrollIntoView({ block: "start" });
+  }
   return (
-    <>
+    <div className="vehicle-profile">
       <button className="back-link" onClick={() => setPage("garage")}>
         <ChevronLeft size={17} />
         {tr("Мой гараж")}
@@ -1023,6 +1042,17 @@ export function VehiclePage() {
             {tr("Обновить показание")}
             <ArrowUpRight size={16} />
           </button>
+          {upcoming && (
+            <button
+              type="button"
+              className="vehicle-upcoming-link"
+              onClick={() => jumpToVehicleSection("vehicle-reminders")}
+            >
+              <Bell size={17} aria-hidden="true" />
+              <span>{upcoming.title}</span>
+              <ArrowUpRight size={15} aria-hidden="true" />
+            </button>
+          )}
           <dl>
             {[
               ["VIN", v.vin],
@@ -1049,6 +1079,22 @@ export function VehiclePage() {
           </dl>
         </aside>
       </section>
+      <nav className="vehicle-jumps" aria-label={tr("Разделы автомобиля")}>
+        {[
+          ["vehicle-body", "Кузов и повреждения"],
+          ["vehicle-supplies", "Расходники и запас"],
+          ["vehicle-trips", "Поездки"],
+          ["vehicle-history", "История"],
+        ].map(([id, label]) => (
+          <button
+            type="button"
+            key={id}
+            onClick={() => jumpToVehicleSection(id)}
+          >
+            {tr(label)}
+          </button>
+        ))}
+      </nav>
       <section className="metrics-grid">
         <Metric
           label={tr("За всё время")}
@@ -1070,12 +1116,18 @@ export function VehiclePage() {
           </div>
         }
       >
-        <BodyDamage key={v.id} vehicleId={v.id} />
+        <div id="vehicle-body" className="vehicle-section-target" tabIndex={-1}>
+          <BodyDamage key={v.id} vehicleId={v.id} />
+        </div>
       </Suspense>
       <Suspense fallback={null}>
         <GarageDetails key={v.id} car={v} events={events} />
       </Suspense>
-      <div className="section-heading">
+      <div
+        className="section-heading vehicle-section-target"
+        id="vehicle-history"
+        tabIndex={-1}
+      >
         <h3>{tr("Последние события")}</h3>
         <Button size="sm" onClick={() => open("quick")}>
           <Plus size={16} />
@@ -1096,7 +1148,11 @@ export function VehiclePage() {
           />
         )}
       </div>
-      <div className="section-heading">
+      <div
+        className="section-heading vehicle-section-target"
+        id="vehicle-reminders"
+        tabIndex={-1}
+      >
         <h3>{tr("Ближайшие работы")}</h3>
         <button
           hidden={!state.vehicles.some((v) => v.can_edit !== false)}
@@ -1108,11 +1164,9 @@ export function VehiclePage() {
         </button>
       </div>
       <div className="reminder-grid">
-        {state.reminders
-          .filter((r) => r.vehicle_id === v.id && !r.deleted)
-          .map((r) => (
-            <ReminderCard key={r.id} reminder={r} />
-          ))}
+        {reminders.map((r) => (
+          <ReminderCard key={r.id} reminder={r} />
+        ))}
       </div>
       {v.can_edit !== false && (
         <div className="vehicle-archive">
@@ -1147,7 +1201,7 @@ export function VehiclePage() {
           </Button>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
@@ -1411,19 +1465,6 @@ function MaintenanceHistory() {
   const { open, state, selected } = useApp();
   return (
     <>
-      <PageHeading
-        eyebrow={tr("ЗАБОТА, КОТОРАЯ ОКУПАЕТСЯ")}
-        title={tr("Обслуживание")}
-        description={tr(
-          "Работы, запчасти и их история. Машина в хороших руках.",
-        )}
-        action={
-          <Button onClick={() => open("maintenance")}>
-            <Plus size={17} />
-            {tr("Записать обслуживание")}
-          </Button>
-        }
-      />
       <div className="reminder-grid">
         {state.reminders
           .filter(

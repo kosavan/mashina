@@ -38,10 +38,13 @@ import {
   Gauge,
   Wallet,
   Info,
+  SlidersHorizontal,
+  ChevronDown,
 } from "lucide-react";
 import { useApp } from "./context";
 import { cachedAPI } from "./offline";
 import { PageHeading, Metric } from "./Views";
+import "./analytics-polish.css";
 type Data = {
   total_minor: number;
   fuel_minor: number;
@@ -182,7 +185,7 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             </option>
           ))}
         </select>
-        <div className="segmented">
+        <div className="segmented" role="group" aria-label={tr("Период")}>
           {[
             ["month", tr("Месяц")],
             ["year", tr("Год")],
@@ -192,48 +195,70 @@ export default function Analytics({ fuel = false }: { fuel?: boolean }) {
             <button
               key={k}
               className={period === k ? "active" : ""}
+              aria-pressed={period === k}
               onClick={() => setPeriod(k)}
             >
               {v}
             </button>
           ))}
         </div>
-        <select
-          aria-label={tr("Категория аналитики")}
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">{tr("Все категории")}</option>
-          {[
-            ...categories,
-            ...state.categories.filter((c) => !c.deleted).map((c) => c.name),
-          ].map((c) => (
-            <option key={c} value={c}>
-              {categoryLabel(c)}
-            </option>
-          ))}
-        </select>
-        <select
-          aria-label={tr("Тип расходов")}
-          value={kind}
-          onChange={(e) => setKind(e.target.value)}
-        >
-          <option value="">{tr("Все расходы")}</option>
-          <option value="fuel">{tr("Топливо")}</option>
-          <option value="maintenance">{tr("Обслуживание")}</option>
-          <option value="expense">{tr("Прочие расходы")}</option>
-        </select>
-        <select
-          aria-label={tr("Валюта аналитики")}
-          value={currency}
-          onChange={(e) => setCurrency(e.target.value)}
-        >
-          {currencyOptions.map((c) => (
-            <option key={c} value={c}>
-              {categoryLabel(c)}
-            </option>
-          ))}
-        </select>
+        <details className="analytics-more">
+          <summary>
+            <SlidersHorizontal size={16} aria-hidden="true" />
+            <span>{tr("Дополнительные фильтры")}</span>
+            <span className="analytics-filter-currency">{currency}</span>
+            <ChevronDown size={15} aria-hidden="true" />
+          </summary>
+          <div className="analytics-more-grid">
+            <label>
+              {tr("Категория")}
+              <select
+                aria-label={tr("Категория аналитики")}
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+              >
+                <option value="">{tr("Все категории")}</option>
+                {[
+                  ...categories,
+                  ...state.categories
+                    .filter((c) => !c.deleted)
+                    .map((c) => c.name),
+                ].map((c) => (
+                  <option key={c} value={c}>
+                    {categoryLabel(c)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              {tr("Тип расходов")}
+              <select
+                aria-label={tr("Тип расходов")}
+                value={kind}
+                onChange={(e) => setKind(e.target.value)}
+              >
+                <option value="">{tr("Все расходы")}</option>
+                <option value="fuel">{tr("Топливо")}</option>
+                <option value="maintenance">{tr("Обслуживание")}</option>
+                <option value="expense">{tr("Прочие расходы")}</option>
+              </select>
+            </label>
+            <label>
+              {tr("Валюта")}
+              <select
+                aria-label={tr("Валюта аналитики")}
+                value={currency}
+                onChange={(e) => setCurrency(e.target.value)}
+              >
+                {currencyOptions.map((c) => (
+                  <option key={c} value={c}>
+                    {categoryLabel(c)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </details>
       </div>
       {period === "custom" && (
         <div className="filters compact">

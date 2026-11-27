@@ -59,11 +59,13 @@ test("maintenance estimate survives offline reload, forecasts once, and clears w
   ).toBeVisible();
   await page.evaluate(async () => navigator.serviceWorker.ready);
   const original = await (await page.request.get("/api/v1/state")).json();
-  const sidebar = (name: string) =>
-    page
-      .locator(".sidebar")
+  const sidebar = async (name: string) => {
+    await page.getByRole("button", { name: "Открыть меню", exact: true }).click();
+    await page
+      .getByRole("dialog", { name: "Главная навигация" })
       .getByRole("button", { name, exact: true })
-      .evaluate((button: HTMLButtonElement) => button.click());
+      .click();
+  };
   await sidebar("Напоминания");
   await context.setOffline(true);
   await page.getByRole("button", { name: "Новое напоминание" }).click();
@@ -177,11 +179,13 @@ test("offline confirmed completion advances the same reminder once without creat
   const before = await (await page.request.get("/api/v1/state")).json();
   const current = before.vehicles.find((v: any) => v.id === car.id);
   car.current_odometer = current.current_odometer;
-  const sidebar = () =>
-    page
-      .locator(".sidebar")
+  const sidebar = async () => {
+    await page.getByRole("button", { name: "Открыть меню", exact: true }).click();
+    await page
+      .getByRole("dialog", { name: "Главная навигация" })
       .getByRole("button", { name: "Напоминания", exact: true })
-      .evaluate((button: HTMLButtonElement) => button.click());
+      .click();
+  };
   await sidebar();
   await context.setOffline(true);
   const card = page

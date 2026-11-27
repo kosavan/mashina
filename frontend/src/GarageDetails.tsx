@@ -159,7 +159,11 @@ export default function GarageDetails({
 
   return (
     <>
-      <section className="panel settings-panel">
+      <section
+        className="panel settings-panel vehicle-section-target"
+        id="vehicle-supplies"
+        tabIndex={-1}
+      >
         <div className="section-heading">
           <h3>{tr("Расходники и запас")}</h3>
           {canEdit && (
@@ -277,7 +281,11 @@ export default function GarageDetails({
           <p className="muted">{tr("Список покупок пуст")}</p>
         )}
       </section>
-      <section className="panel settings-panel">
+      <section
+        className="panel settings-panel vehicle-section-target"
+        id="vehicle-trips"
+        tabIndex={-1}
+      >
         <div className="section-heading">
           <h3>{tr("Поездки")}</h3>
           {canEdit && (

@@ -331,6 +331,7 @@ export default function ReceiptInbox() {
   return (
     <>
       <PageHeading
+        level={2}
         eyebrow={tr("ОБСЛУЖИВАНИЕ")}
         title={tr("Чеки на проверку")}
         description={tr(
@@ -338,8 +339,8 @@ export default function ReceiptInbox() {
         )}
       />
       <section className="panel receipt-inbox">
-        <label className="file-picker">
-          <Camera size={22} aria-hidden="true" />
+        <label className="intake-picker">
+          <Camera size={17} aria-hidden="true" />
           <span>{tr("Добавить фото чека")}</span>
           <input
             aria-label={tr("Добавить фото чека")}

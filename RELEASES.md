@@ -1,3 +1,14 @@
+# MASHINA 1.17.0
+
+- **Sign-in and navigation.** Sign-in fits screens from 360 px. Mobile navigation has clearer labels and contrast, supports the keyboard, and restores the garage scroll position when returning from a car profile.
+- **Garage and vehicle profile.** See the nearest service reminder earlier and jump to body damage, supplies, trips or history from the vehicle profile.
+- **Maintenance, receipts and import.** Switch sections with the arrow keys and find the receipt and CSV pickers above reference material.
+- **Fuel, analytics and backups.** Enter volume and total or let MASHINA calculate the missing fuel amount. Keep the save action visible while entering details. Open advanced analytics filters as needed and check scheduled backup status before editing the schedule.
+
+Schema remains 007. Synchronize pending entries and retain a verified backup with the previous runtime. [Update and rollback](docs/updating.md#release-1170) · [Обновление и откат](docs/updating.ru.md#релиз-1170)
+
+---
+
 # MASHINA 1.16.0
 
 - **Renewals and calendar.** Set reminders for registration and insurance 7, 14 or 30 days ahead. Linked reminders follow the latest renewal. Download a private `.ics` calendar event.

@@ -2,7 +2,7 @@
 
 English · [Russian](roadmap.ru.md) · [Update guide](updating.md)
 
-Last reviewed: **2026-11-26**. Shipped means implemented and tested; hardware
+Last reviewed: **2026-11-27**. Shipped means implemented and tested; hardware
 validation and future work are separate. Dates are not delivery promises.
 
 ## Project discovery
@@ -13,6 +13,14 @@ validation and future work are separate. Dates are not delivery promises.
 - The website includes a [running-cost example](https://kosavan.github.io/mashina/car-cost.html) and a [mobile fill-up demo](https://kosavan.github.io/mashina/#fill-up-demo) using fictional data.
 - MASHINA 1.13.0 was submitted to Self-Host Weekly and [ZimaOS App Store](https://github.com/IceWhaleTech/CasaOS-AppStore/pull/1177). Listings depend on review by each publisher. A Runtipi community-store package is being evaluated.
 
+## 1.17.0 responsive interface
+
+- Responsive sign-in, higher-contrast mobile navigation and keyboard support for maintenance tabs.
+- Earlier access to the next service reminder and shortcuts to vehicle sections.
+- Clearer fuel entry, receipt intake, CSV import, analytics filters and scheduled backup settings.
+
+See the [release notes](../RELEASES.md#mashina-1170) for details.
+
 ## 1.16.0 ownership workflows
 
 - Advance renewal reminders and a one-event calendar download.
@@ -22,12 +30,6 @@ validation and future work are separate. Dates are not delivery promises.
 - Administrator-controlled daily backups and opt-in NHTSA vPIC suggestions from a saved VIN.
 
 See the [release notes](../RELEASES.md#mashina-1160) for details. The compatible-parts catalogue remains under research.
-
-## Interface update in development
-
-The update covers responsive sign-in, accessible mobile navigation and
-maintenance tabs, faster access to vehicle sections, and clearer fuel entry,
-receipt intake, CSV import, analytics filters and backup settings.
 
 ## 1.15.0 vehicle ownership
 

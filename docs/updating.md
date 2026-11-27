@@ -31,6 +31,15 @@ below. [Mobile installation and signing](mobile-clients.md)
 For Android servers using a private CA, check that the owner's CA appears in
 the phone's trusted user certificates and verify HTTPS after updating.
 
+## Release 1.17.0
+
+Use `v1.17.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
+and keep a verified full backup with the previous Docker image or standalone
+package. Check version `1.17.0` and schema `007` at `/api/v1/health`. Open
+the existing garage online and check an attachment, the maintenance tabs and
+the sync status. For rollback, pair the previous runtime with its matching
+pre-update archive.
+
 ## Release 1.16.0
 
 Use `v1.16.0` as `TARGET_TAG`. Schema remains 007. Synchronize pending entries
